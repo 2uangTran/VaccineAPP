@@ -1,22 +1,29 @@
-import React, { useState } from 'react';
-import { SafeAreaView, View, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { Appbar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState} from 'react';
+import {
+  SafeAreaView,
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import {Appbar} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import { useMyContextController, logout } from '../../src/context'; 
+import {useMyContextController, logout} from '../../src/context';
 import COLORS from '../../constants';
 import ListVaccin from './menumain/ListVaccin';
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
   const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
- 
+
   useState(() => {
     return ref.onSnapshot(querySnapshot => {
       if (loading) {
@@ -33,7 +40,7 @@ const Main = () => {
     const currentTime = new Date().getHours();
     const greeting = getGreeting(currentTime);
     const userName = userLogin ? userLogin.fullName : 'Guest';
-  
+
     return (
       <>
         <Text style={styles.greeting}>{greeting}</Text>
@@ -41,8 +48,8 @@ const Main = () => {
       </>
     );
   };
-  
-  const getGreeting = (currentTime) => {
+
+  const getGreeting = currentTime => {
     if (currentTime >= 0 && currentTime < 12) {
       return `Chào buổi sáng,`;
     } else if (currentTime >= 12 && currentTime < 14) {
@@ -54,7 +61,7 @@ const Main = () => {
     }
   };
 
-  const splitDescription = (description) => {
+  const splitDescription = description => {
     let words = description.split(' ');
     let result = [];
 
@@ -74,12 +81,18 @@ const Main = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
         <Appbar.Header style={styles.appbar}>
-          <Appbar.Action 
-            icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
-            onPress={() => {}} 
+          <Appbar.Action
+            icon={() => (
+              <MaterialCommunityIcons
+                name="bell-outline"
+                size={24}
+                color="white"
+              />
+            )}
+            onPress={() => {}}
           />
           <View style={styles.greetingContainer}>
             {getCurrentTimeMessage()}
@@ -91,76 +104,66 @@ const Main = () => {
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity style={styles.squareButton}>
-                <FontAwesome6
-                  name="syringe"
-                  size={24}
-                  color="white"
-                />
+                <FontAwesome6 name="syringe" size={24} color="white" />
               </TouchableOpacity>
-              {splitDescription("Đặt mua vắc xin").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Đặt mua vắc xin').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('ListVaccin')}>
-                <AntDesign
-                  name="appstore-o"
-                  size={24}
-                  color="white"
-                />
+              <TouchableOpacity
+                style={styles.squareButton}
+                onPress={() => navigation.navigate('ListVaccin')}>
+                <AntDesign name="appstore-o" size={24} color="white" />
               </TouchableOpacity>
-              {splitDescription("Danh mục vắc xin").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
-              ))}
-            </View>
-            <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}>
-                <FontAwesome6
-                  name="book-bookmark"
-                  size={24}
-                  color="white"
-                />
-              </TouchableOpacity>
-              {splitDescription("Lịch sử tiêm chủng").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Danh mục vắc xin').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity style={styles.squareButton}>
-                <FontAwesome6
-                  name="book-medical"
-                  size={24}
-                  color="white"
-                />
+                <FontAwesome6 name="book-bookmark" size={24} color="white" />
               </TouchableOpacity>
-              {splitDescription("Lịch sử đặt vắc xin").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Lịch sử tiêm chủng').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity style={styles.squareButton}>
+                <FontAwesome6 name="book-medical" size={24} color="white" />
+              </TouchableOpacity>
+              {splitDescription('Lịch sử đặt vắc xin').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
           </View>
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity style={styles.squareButton}>
-                <AntDesign
-                  name="gift"
-                  size={24}
-                  color="white"
-                />
+                <AntDesign name="gift" size={24} color="white" />
               </TouchableOpacity>
-              {splitDescription("Ưu đãi của tôi").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Ưu đãi của tôi').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity style={styles.squareButton}>
-                <MaterialCommunityIcons
-                  name="clock"
-                  size={24}
-                  color="white"
-                />
+                <MaterialCommunityIcons name="clock" size={24} color="white" />
               </TouchableOpacity>
-              {splitDescription("Nhật ký tiêm chủng").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Nhật ký tiêm chủng').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
             <View style={styles.buttonWrapper}>
@@ -171,52 +174,55 @@ const Main = () => {
                   color="white"
                 />
               </TouchableOpacity>
-              {splitDescription("Vắc xin cho bạn").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Vắc xin cho bạn').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity style={styles.squareButton}>
-                <FontAwesome6
-                  name="newspaper"
-                  size={24}
-                  color="white"
-                />
+                <FontAwesome6 name="newspaper" size={24} color="white" />
               </TouchableOpacity>
-              {splitDescription("Tin tức vắc xin").map((part, index) => (
-                <Text key={index} style={styles.buttonText}>{part}</Text>
+              {splitDescription('Tin tức vắc xin').map((part, index) => (
+                <Text key={index} style={styles.buttonText}>
+                  {part}
+                </Text>
               ))}
             </View>
           </View>
         </View>
-        <View >
+        <View>
           <Text style={styles.news}>Tin tức và Kiến thức</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.buttonScroll}>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Vắc xin người lớn</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Vắc xin trẻ em</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Bệnh truyền nhiễm</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Lịch tiêm chủng</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Thông tin ưu đãi</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Cẩm nang tiêm chủng</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Thông tin khai trương</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.whiteButton}>
-            <Text style={styles.whiteButtonText}>Tin tức và kiến thức</Text>
-          </TouchableOpacity>
-        </ScrollView>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.buttonScroll}>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Vắc xin người lớn</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Vắc xin trẻ em</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Bệnh truyền nhiễm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Lịch tiêm chủng</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Thông tin ưu đãi</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Cẩm nang tiêm chủng</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Thông tin khai trương</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.whiteButton}>
+              <Text style={styles.whiteButtonText}>Tin tức và kiến thức</Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
       </View>
     </SafeAreaView>
@@ -229,7 +235,7 @@ const styles = StyleSheet.create({
   },
   appbar: {
     backgroundColor: COLORS.blue,
-    height: '24%', 
+    height: '24%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -238,9 +244,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    height:150,
-    marginTop:30,
-    marginStart:-10,
+    height: 150,
+    marginTop: 30,
+    marginStart: -10,
   },
   spacer: {
     width: 24,
