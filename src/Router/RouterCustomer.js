@@ -21,6 +21,7 @@ import UpdateInfo from '../customer/menuperson/UpdateInfo';
 import {IconButton} from 'react-native-paper';
 import AddNewVaccine from '../customer/menumain/AddNewVaccine';
 import {useNavigation} from '@react-navigation/native';
+import CustomHeaderRight from './CustomHeaderRight';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -132,27 +133,12 @@ const RouterCustomer = () => {
             title: 'Hồ sơ cá nhân',
           }}
         />
-        <Stack.Screen
+         <Stack.Screen
           name="ListVaccin"
           component={ListVaccin}
           options={{
             title: 'Danh mục vắc xin',
-            headerRight: () => (
-              <IconButton
-                icon="plus-circle"
-                iconColor={COLORS.white}
-                onPress={() => navigation.navigate('AddNewVaccine')}
-                style={{marginRight: 10}}></IconButton>
-              //   <TouchableOpacity
-              //     onPress={() => alert('Icon button pressed!')}
-              //     style={{marginRight: 10}}>
-              //     <MaterialCommunityIcons
-              //       name="shopping-outline"
-              //       size={24}
-              //       color="white"
-              //     />
-              //   </TouchableOpacity>
-            ),
+            headerRight: () => <CustomHeaderRight />, 
           }}
         />
         <Stack.Screen

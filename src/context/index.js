@@ -1,3 +1,4 @@
+// context.js
 import { createContext, useContext, useMemo, useReducer } from "react";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
@@ -12,6 +13,9 @@ function reducer(state, action) {
     case "USER_LOGIN": {
       return { ...state, userLogin: action.value };
     }
+    case "SET_USER_ROLE": {
+      return { ...state, userRole: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -21,6 +25,7 @@ function reducer(state, action) {
 function MyContextControllerProvider({ children }) {
   const initialState = {
     userLogin: null,
+    userRole: null,
   };
   const [controller, dispatch] = useReducer(reducer, initialState);
   const value = useMemo(() => [controller, dispatch], [controller, dispatch]);
@@ -38,7 +43,7 @@ function useMyContextController() {
 }
 
 const USERS = firestore().collection("USERS");
-const SERVICES = firestore().collection("SERVICES");
+const vaccines = firestore().collection("vaccines");
 
 const login = (dispatch, email, password) => {
   auth()
@@ -58,7 +63,14 @@ const logout = (dispatch, navigation) => {
   navigation.navigate("Login");
 };
 
-const register = async (fullName, email, password, phone, dateOfBirth, gender) => {
+const register = async (
+  fullName,
+  email,
+  password,
+  phone,
+  dateOfBirth,
+  gender
+) => {
   try {
     const userCredential = await auth().createUserWithEmailAndPassword(
       email,

@@ -1,27 +1,28 @@
-import React, {useState, useEffect} from 'react';
-import {View} from 'react-native';
+// Login.js
+import React, { useState, useEffect } from "react";
+import { View } from "react-native";
 import {
   Button,
   Text,
   IconButton,
   TextInput,
   HelperText,
-} from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useMyContextController, login} from '../../src/context';
-import COLORS from '../../constants';
+} from "react-native-paper";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { useMyContextController, login } from "../../src/context";
+import COLORS from "../../constants";
 
-const Login = ({navigation}) => {
-  const [email, setEmail] = useState('hoang123@gmail.com');
-  const [password, setPassword] = useState('123456');
+const Login = ({ navigation }) => {
+  const [email, setEmail] = useState("hoang123@gmail.com");
+  const [password, setPassword] = useState("123456");
   const [showPassword, setShowPassword] = useState(false);
   const [controller, dispatch] = useMyContextController();
-  const {userLogin} = controller;
+  const { userLogin } = controller;
   const hasErrorPassword = () => password.length < 6;
-  const hasErrorEmail = () => !email.includes('@');
+  const hasErrorEmail = () => !email.includes("@");
   useEffect(() => {
     if (userLogin) {
-      navigation.navigate('Home');
+      navigation.navigate("Home");
     }
   }, [userLogin]);
 
@@ -29,24 +30,25 @@ const Login = ({navigation}) => {
     login(dispatch, email, password);
   };
   const navigateToRegister = () => {
-    navigation.navigate('Register');
+    navigation.navigate("Register");
   };
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text
         style={{
           fontSize: 40,
-          fontWeight: 'bold',
+          fontWeight: "bold",
           color: COLORS.pink,
           marginBottom: 30,
-        }}>
+        }}
+      >
         Login
       </Text>
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        style={{marginVertical: 10, width: 390}}
+        style={{ marginVertical: 10, width: 390 }}
         mode="outlined"
       />
       <HelperText type="error" visible={hasErrorEmail()}>
@@ -57,7 +59,7 @@ const Login = ({navigation}) => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry={!showPassword}
-        style={{marginVertical: 10, width: 390}}
+        style={{ marginVertical: 10, width: 390 }}
         right={
           <MaterialCommunityIcons
             name="eye"
@@ -73,14 +75,16 @@ const Login = ({navigation}) => {
         mode="contained"
         onPress={onSubmit}
         disabled={hasErrorEmail() || hasErrorPassword()}
-        style={{marginVertical: 10, padding: 5}}
-        labelStyle={{fontSize: 20}}>
+        style={{ marginVertical: 10, padding: 5 }}
+        labelStyle={{ fontSize: 20 }}
+      >
         Login
       </Button>
-      <Text style={{marginTop: 10}}>Bạn chưa có tài khoản ? </Text>
+      <Text style={{ marginTop: 10 }}>Bạn chưa có tài khoản ? </Text>
       <Button onPress={navigateToRegister}>Đăng ký ngay</Button>
     </View>
   );
 };
 
 export default Login;
+

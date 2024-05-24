@@ -1,25 +1,21 @@
-import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {List, Menu} from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
+import { Appbar, Button, Menu } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../../constants';
-import {useNavigation} from '@react-navigation/native';
-import {useMyContextController} from '../../context/index'; // Adjusted the import path
+import { useMyContextController } from '../../context';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const Vaccine = ({id, title, price, imageUrl, description}) => {
+
+const Vaccines = ({ id, title, price, imageUrl, description }) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
   const [controller] = useMyContextController();
-  const {userLogin} = controller;
+  const { userLogin } = controller;
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
-
-  const truncateTitle = title => {
-    const maxLength = 90;
-    return title.length > maxLength
-      ? `${title.substring(0, maxLength)}...`
-      : title;
-  };
 
   const formatPrice = price => {
     return new Intl.NumberFormat('vi-VN', {
@@ -28,25 +24,45 @@ const Vaccine = ({id, title, price, imageUrl, description}) => {
     }).format(price);
   };
 
-  const isAdmin = userLogin?.role === 'admin'; // Check if userLogin exists and its role is admin
-  const isCustomer = userLogin?.role === 'customer'; // Check if userLogin exists and its role is customer
+  const isAdmin = userLogin?.role === 'admin';
 
   return (
-    <TouchableOpacity onPress={openMenu}>
+    <TouchableOpacity onPress={openMenu} style={styles.touchable}>
       <View style={styles.container}>
-        <View style={styles.left}>
-          <List.Item title={truncateTitle(title)} titleStyle={styles.title} />
-        </View>
-        {price !== undefined && price !== null && (
-          <View style={styles.right}>
-            <Text style={styles.price}>{formatPrice(price)}</Text>
+        <View style={styles.rowContainer}>
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>{title}</Text>
           </View>
-        )}
+        </View>
+        <Text style={styles.description}>
+        <Text style={styles.boldText}>Phòng bệnh: </Text>
+          {description}
+        </Text>
+        <Text style={styles.price}>{formatPrice(price)}</Text>
+
+        <View style={styles.buttonContainer}>
+        <Button
+          style={styles.button}>
+          <AntDesign 
+            name="shoppingcart"
+            size={20}
+            color={COLORS.white}
+            style={{marginRight: 10}}
+          />
+          <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
+        </Button>
+        <Button
+          style={styles.buttonbuy}>
+          <Text style={styles.buttonLabelbuy}>Mua ngay</Text>
+        </Button>
+        </View>
         {userLogin && (
           <Menu
             visible={visible}
             onDismiss={closeMenu}
-            anchor={<Text style={styles.menuAnchor}>...</Text>}>
+            anchor={<Text style={styles.menuAnchor}>...</Text>}
+          >
             {isAdmin ? (
               <>
                 <Menu.Item
@@ -56,7 +72,7 @@ const Vaccine = ({id, title, price, imageUrl, description}) => {
                       title,
                       price,
                       imageUrl,
-                      description, // Passing description as well
+                      description,
                     });
                     closeMenu();
                   }}
@@ -69,7 +85,7 @@ const Vaccine = ({id, title, price, imageUrl, description}) => {
                       title,
                       price,
                       imageUrl,
-                      description, // Passing description as well
+                      description,
                     });
                     closeMenu();
                   }}
@@ -98,39 +114,114 @@ const Vaccine = ({id, title, price, imageUrl, description}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 15,
-    marginHorizontal: 16,
-    marginTop: 10,
+    flex: 1,
+    backgroundColor: COLORS.white,
   },
-  left: {
+  appbar: {
+    backgroundColor: COLORS.blue,
+    justifyContent: 'center',
+  },
+  searchContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.navy,
+    borderColor: COLORS.white,
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    color: COLORS.white,
+  },
+  list: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  touchable: {
+    width: '100%',
+    marginBottom: 10, 
+  },
+  container: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    padding: 10,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 10, 
+  },
+  titleContainer: {
     flex: 1,
   },
-  right: {
-    marginLeft: 16,
-  },
   title: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 23,
+    marginTop:-47,
+    color:COLORS.black,
+  },
+  description: {
+    fontSize: 17,
+    marginTop: 5, 
   },
   price: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: 'red',
+    textAlign: 'left',
+    color:COLORS.blue,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    borderRadius: 5,
+    backgroundColor: COLORS.blue,  
+    borderWidth: 1,
+    borderColor: COLORS.blue,  
+    marginHorizontal:5,
+  },
+  buttonContent: {
+    backgroundColor: 'transparent', 
+  },
+  buttonLabel: {
+    color: COLORS.white,  
   },
   menuAnchor: {
-    fontSize: 16,
-    color: COLORS.grey,
-    paddingRight: 10,
+    fontSize: 24,
+    fontWeight: 'bold',
+    padding: 5,
+  },
+  buttonbuy:{
+    flex: 1,
+    borderRadius: 5,
+    backgroundColor: COLORS.white,  
+    borderWidth: 1,
+    borderColor: COLORS.blue,  
+    marginHorizontal:5,
+  },
+  buttonLabelbuy:{
+    color: COLORS.blue,  
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color:COLORS.black,
   },
 });
 
-export default Vaccine;
+
+export default Vaccines;
