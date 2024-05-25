@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
-import { Appbar, Button, Menu } from 'react-native-paper';
+import { Button, Menu } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../../constants';
 import { useMyContextController } from '../../context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-
 
 const Vaccines = ({ id, title, price, imageUrl, description }) => {
   const [visible, setVisible] = useState(false);
@@ -24,11 +22,20 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
     }).format(price);
   };
 
+
+  const handleAddToCart = () => {
+    // Viết logic xử lý khi thêm vào giỏ hàng ở đây
+  };
+
+  const handleBuyNow = () => {
+    // Viết logic xử lý khi mua ngay ở đây
+  };
+
   const isAdmin = userLogin?.role === 'admin';
 
   return (
-    <TouchableOpacity onPress={openMenu} style={styles.touchable}>
-      <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.cardContainer}>
         <View style={styles.rowContainer}>
           <Image source={{ uri: imageUrl }} style={styles.image} />
           <View style={styles.titleContainer}>
@@ -36,33 +43,34 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
           </View>
         </View>
         <Text style={styles.description}>
-        <Text style={styles.boldText}>Phòng bệnh: </Text>
+          <Text style={styles.boldText}>Phòng bệnh: </Text>
           {description}
         </Text>
         <Text style={styles.price}>{formatPrice(price)}</Text>
 
         <View style={styles.buttonContainer}>
-        <Button
-          style={styles.button}>
-          <AntDesign 
-            name="shoppingcart"
-            size={20}
-            color={COLORS.white}
-            style={{marginRight: 10}}
-          />
-          <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
-        </Button>
-        <Button
-          style={styles.buttonbuy}>
-          <Text style={styles.buttonLabelbuy}>Mua ngay</Text>
-        </Button>
+          <Button style={styles.buttonadd} onPress={handleAddToCart}>
+            <AntDesign
+              name="shoppingcart"
+              size={20}
+              color={COLORS.white}
+              style={{ marginRight: 10 }}
+            />
+            <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
+          </Button>
+          <Button style={styles.buttonbuy} onPress={handleBuyNow}>
+            <Text style={styles.buttonLabelbuy}>Mua ngay</Text>
+          </Button>
         </View>
         {userLogin && (
           <Menu
             visible={visible}
             onDismiss={closeMenu}
-            anchor={<Text style={styles.menuAnchor}>...</Text>}
-          >
+            anchor={
+              <TouchableOpacity onPress={openMenu}>
+                <Text style={styles.menuAnchor}>...</Text>
+              </TouchableOpacity>
+            }>
             {isAdmin ? (
               <>
                 <Menu.Item
@@ -92,23 +100,11 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
                   title="Detail Vaccine"
                 />
               </>
-            ) : (
-              <Menu.Item
-                onPress={() => {
-                  navigation.navigate('ConfirmOrder', {
-                    vaccineName: title,
-                    vaccinePrice: price,
-                    imageUrl: imageUrl,
-                  });
-                  closeMenu();
-                }}
-                title="Confirm"
-              />
-            )}
+            ) : null}
           </Menu>
         )}
       </View>
-    </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
@@ -116,38 +112,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+    marginBottom: 10,
   },
-  appbar: {
-    backgroundColor: COLORS.blue,
-    justifyContent: 'center',
-  },
-  searchContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.navy,
-    borderColor: COLORS.white,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    color: COLORS.white,
-  },
-  list: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  touchable: {
-    width: '100%',
-    marginBottom: 10, 
-  },
-  container: {
+  cardContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
@@ -162,66 +129,62 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 10,
-    marginRight: 10, 
+    marginRight: 10,
   },
   titleContainer: {
     flex: 1,
   },
   title: {
     fontSize: 23,
-    marginTop:-47,
-    color:COLORS.black,
+    marginTop: -47,
+    color: COLORS.black,
   },
   description: {
     fontSize: 17,
-    marginTop: 5, 
+    marginTop: 5,
   },
   price: {
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'left',
-    color:COLORS.blue,
+    color: COLORS.blue,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  button: {
+  buttonadd: {
     flex: 1,
     borderRadius: 5,
-    backgroundColor: COLORS.blue,  
+    backgroundColor: COLORS.blue,
     borderWidth: 1,
-    borderColor: COLORS.blue,  
-    marginHorizontal:5,
+    borderColor: COLORS.blue,
+    marginHorizontal: 5,
   },
-  buttonContent: {
-    backgroundColor: 'transparent', 
+  buttonbuy: {
+    flex: 1,
+    borderRadius: 5,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.blue,
+    marginHorizontal: 5,
   },
   buttonLabel: {
-    color: COLORS.white,  
+    color: COLORS.white,
+  },
+  buttonLabelbuy: {
+    color: COLORS.blue,
   },
   menuAnchor: {
     fontSize: 24,
     fontWeight: 'bold',
     padding: 5,
   },
-  buttonbuy:{
-    flex: 1,
-    borderRadius: 5,
-    backgroundColor: COLORS.white,  
-    borderWidth: 1,
-    borderColor: COLORS.blue,  
-    marginHorizontal:5,
-  },
-  buttonLabelbuy:{
-    color: COLORS.blue,  
-  },
   boldText: {
     fontWeight: 'bold',
-    color:COLORS.black,
+    color: COLORS.black,
   },
 });
-
 
 export default Vaccines;

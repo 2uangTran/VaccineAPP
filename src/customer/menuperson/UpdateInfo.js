@@ -1,43 +1,142 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Image, TouchableOpacity, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { format } from 'date-fns';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import firestore from '@react-native-firebase/firestore';
+import { useMyContextController } from '../../context';
+import COLORS from '../../../constants';
 
-const UpdateInfo = ({
-  initialPhoneNumber = '',
-  initialFullName = '',
-  initialBirthDate = '',
-  initialGender = '',
-  initialNationality = '',
-  initialEthnicity = '',
-  initialProvince = '',
-  initialDistrict = '',
-  initialWard = '',
-  initialAddress = '',
-  initialEmail = '',
-  initialOccupation = '',
-}) => {
+const UpdateInfo = () => {
+  const [controller] = useMyContextController();
+  const user = controller.userLogin;
+  const [loading, setLoading] = useState(true);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+
+  useEffect(() => {
+    const fetchAreaData = async () => {
+      try {
+        const areaSnapshot = await firestore().collection('area').get();
+        const areaData = areaSnapshot.docs.map(doc => doc.id); 
+        console.log('Area Data:', areaData); 
+        setProvinces(areaData);
+      } catch (error) {
+        console.error('Error fetching area data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchAreaData();
+  }, []);
+
   const [formData, setFormData] = useState({
-    phoneNumber: initialPhoneNumber,
-    fullName: initialFullName,
-    birthDate: initialBirthDate,
-    gender: initialGender,
-    nationality: initialNationality,
-    ethnicity: initialEthnicity,
-    province: initialProvince,
-    district: initialDistrict,
-    ward: initialWard,
-    address: initialAddress,
-    email: initialEmail,
-    occupation: initialOccupation,
+    phoneNumber: '',
+    fullName: '',
+    birthDate: '',
+    gender: '',
+    nationality: '',
+    ethnicity: '',
+    province: '',
+    district: '',
+    ward: '',
+    address: '',
+    email: '',
+    occupation: '',
   });
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const handleInputChange = (key, value) => {
-    setFormData({ ...formData, [key]: value });
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        phoneNumber: user.phone || '',
+        fullName: user.fullName || '',
+        birthDate: user.dateOfBirth || '',
+        gender: user.gender || '',
+        nationality: user.nationality || '',
+        ethnicity: user.ethnicity || '',
+        province: user.province || '',
+        district: user.district || '',
+        ward: user.ward || '',
+        address: user.address || '',
+        email: user.email || '',
+        occupation: user.occupation || '',
+      });
+    }
+    fetchProvinces();
+  }, [user]);
+
+  const fetchProvinces = async () => {
+    try {
+      const areaSnapshot = await firestore().collection('area').get();
+      const provincesData = areaSnapshot.docs.map(doc => doc.id);
+      console.log('Provinces:', provincesData); 
+      setProvinces(provincesData);
+    } catch (error) {
+      console.error('Error fetching provinces:', error);
+    }
   };
+
+  const fetchDistricts = async (province) => {
+    try {
+      const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
+      if (!citySnapshot.empty) {
+        const districtData = citySnapshot.docs.map(doc => doc.data());
+        if (districtData && districtData.length > 0) {
+          const districtNames = districtData[0].districts;
+          console.log('Districts:', districtNames); 
+          setDistricts(districtNames);
+        } else {
+          console.log('No district data found');
+        }
+      } else {
+        console.log('No cities data found for the province:', province);
+      }
+      setWards([]);
+    } catch (error) {
+      console.error('Error fetching districts:', error);
+    }
+  };
+  
+  
+
+  const fetchWards = async (district) => {
+    try {
+      const areaSnapshot = await firestore().collection('area').doc(formData.province).collection('cities').doc(district).get();
+      if (areaSnapshot.exists) {
+        const wardsData = areaSnapshot.data().wards;
+        console.log('Wards:', wardsData); 
+        setWards(wardsData);
+      } else {
+        console.log('No wards data found');
+      }
+    } catch (error) {
+      console.error('Error fetching wards:', error);
+    }
+  };
+  
+
+  const handleInputChange = (key, value) => {
+    setFormData(prevFormData => {
+      const updatedFormData = { ...prevFormData, [key]: value };
+      if (key === 'province' && prevFormData.province !== value) { 
+        fetchDistricts(value);
+        updatedFormData.district = '';
+        updatedFormData.ward = '';
+        fetchWards(''); 
+      } else if (key === 'district') {
+        fetchWards(value);
+        updatedFormData.ward = '';
+      }
+      return updatedFormData;
+    });
+  };
+  
+  
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -52,23 +151,36 @@ const UpdateInfo = ({
     hideDatePicker();
   };
 
+  const handleUpdateImage = () => {
+    console.log('Update image clicked');
+  };
+
+  const handleSave = async () => {
+    try {
+      await firestore().collection('users').doc(user.uid).update(formData);
+      console.log('User data updated successfully');
+    } catch (error) {
+      console.error('Error updating user data:', error);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        {/* AppBar */}
-        <View style={styles.appBar}>
-          <Text style={styles.appBarText}>Hồ sơ cá nhân</Text>
-        </View>
 
-        {/* User Image */}
         <View style={styles.userImageContainer}>
-          <Image
-            source={{ uri: 'https://example.com/user-avatar.png' }} // Replace with your image URL
-            style={styles.userImage}
-          />
+          <View style={styles.userImageWrapper}>
+            <Image
+              source={{ uri: 'https://example.com/user-avatar.png' }}
+              style={styles.userImage}
+            />
+            <TouchableOpacity style={styles.editIconContainer} onPress={handleUpdateImage}>
+              <Icon name="pencil" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <Text style={styles.label}>Số điện thoại</Text>
@@ -88,12 +200,14 @@ const UpdateInfo = ({
         <Text style={styles.label}>Ngày sinh</Text>
         <View style={styles.dateContainer}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.dateInput]}
             value={formData.birthDate}
             onChangeText={(value) => handleInputChange('birthDate', value)}
-            editable={false} 
+            editable={false}
           />
-          <Button title="Chọn ngày" onPress={showDatePicker} />
+          <TouchableOpacity onPress={showDatePicker}>
+            <Icon name="calendar" size={24} color="#007bff" style={styles.iconbutton}/>
+          </TouchableOpacity>
         </View>
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
@@ -103,14 +217,16 @@ const UpdateInfo = ({
         />
 
         <Text style={styles.label}>Giới tính</Text>
-        <Picker
-          selectedValue={formData.gender}
-          style={styles.picker}
-          onValueChange={(value) => handleInputChange('gender', value)}
-        >
-          <Picker.Item label="Nam" value="Nam" />
-          <Picker.Item label="Nữ" value="Nữ" />
-        </Picker>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={formData.gender}
+            style={styles.picker}
+            onValueChange={(value) => handleInputChange('gender', value)}
+          >
+            <Picker.Item label="Nam" value="male" />
+            <Picker.Item label="Nữ" value="female" />
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Quốc tịch</Text>
         <TextInput
@@ -127,25 +243,56 @@ const UpdateInfo = ({
         />
 
         <Text style={styles.label}>Tỉnh / Thành phố</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.province}
-          onChangeText={(value) => handleInputChange('province', value)}
-        />
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={formData.province}
+            style={styles.picker}
+            onValueChange={(value) => handleInputChange('province', value)}
+          >
+            {provinces.length > 0 ? (
+              provinces.map((province) => (
+                <Picker.Item key={province} label={province} value={province} />
+              ))
+            ) : (
+              <Picker.Item label="Không có dữ liệu" value="" />
+            )}
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Quận / Huyện</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.district}
-          onChangeText={(value) => handleInputChange('district', value)}
-        />
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={formData.district}
+              style={styles.picker}
+              onValueChange={(value) => handleInputChange('district', value)}
+            >
+              {districts && districts.length > 0 ? (
+                districts.map((district) => (
+                  <Picker.Item key={district} label={district} value={district} />
+                ))
+              ) : (
+                <Picker.Item label="Không có dữ liệu" value="" />
+              )}
+            </Picker>
+          </View>
+
 
         <Text style={styles.label}>Phường / Xã</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.ward}
-          onChangeText={(value) => handleInputChange('ward', value)}
-        />
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={formData.ward}
+            style={styles.picker}
+            onValueChange={(value) => handleInputChange('ward', value)}
+          >
+            {wards.length > 0 ? (
+              wards.map((ward) => (
+                <Picker.Item key={ward} label={ward} value={ward} />
+              ))
+            ) : (
+              <Picker.Item label="Không có dữ liệu" value="" />
+            )}
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Địa chỉ</Text>
         <TextInput
@@ -168,69 +315,71 @@ const UpdateInfo = ({
           onChangeText={(value) => handleInputChange('occupation', value)}
         />
 
-        <View style={styles.submitButton}>
-          <Button title="Chỉnh sửa" onPress={() => { /* handle submit */ }} />
-        </View>
+        <Button title="Lưu" onPress={handleSave} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: 'white',
-    flexGrow: 1,
-  },
-  appBar: {
-    backgroundColor: '#007bff',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  appBarText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    paddingBottom: 50,
   },
   userImageContainer: {
     alignItems: 'center',
-    marginVertical: 20,
+    marginBottom: 20,
+  },
+  userImageWrapper: {
+    position: 'relative',
   },
   userImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
   },
+  editIconContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#007bff',
+    borderRadius: 15,
+    padding: 5,
+  },
   label: {
-    marginVertical: 8,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 12
+    padding: 10,
+    marginBottom: 15,
   },
-  dateContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 15,
   },
   picker: {
     height: 50,
     width: '100%',
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 12
   },
-  submitButton: {
-    marginTop: 20,
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+ 
+  },
+  dateInput: {
+    flex: 1,
+  },
+  iconbutton: {
+    padding: 10,
   },
 });
 
 export default UpdateInfo;
+
