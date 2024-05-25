@@ -1,28 +1,69 @@
-import React, {useState} from 'react';
-import {
-  SafeAreaView,
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import {Appbar} from 'react-native-paper';
-import {useNavigation} from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, View, StyleSheet, Text, TouchableOpacity, ScrollView, Modal, Button } from 'react-native';
+import { Appbar } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
+import { useMyContextController } from '../../src/context';
+import COLORS from '../../constants';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import {useMyContextController, logout} from '../../src/context';
-import COLORS from '../../constants';
-import ListVaccin from './menumain/ListVaccin';
+import UpdateInfo from '../customer/menuperson/UpdateInfo'; 
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
   const [controller, dispatch] = useMyContextController();
-  const {userLogin} = controller;
+  const { userLogin } = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
+  const [userInfoComplete, setUserInfoComplete] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const checkUserInfoComplete = (user) => {
+    if (
+      user.phoneNumber &&
+      user.fullName &&
+      user.birthDate &&
+      user.gender &&
+      user.nationality &&
+      user.province &&
+      user.district &&
+      user.ward &&
+      user.address &&
+      user.email &&
+      user.occupation
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (userLogin) {
+      const isUserInfoComplete = checkUserInfoComplete(userLogin);
+      setUserInfoComplete(isUserInfoComplete);
+      if (!isUserInfoComplete) {
+        setModalVisible(true);
+      }
+    }
+  }, [userLogin]);
+
+  useEffect(() => {
+    const unsubscribe = ref.onSnapshot(querySnapshot => {
+      if (loading) {
+        setLoading(false);
+      }
+    });
+    return unsubscribe; 
+  }, []); 
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+  };
+
+  const handleUpdateInfo = () => {
+    navigation.navigate('UpdateInfo');
+  };
 
   useState(() => {
     return ref.onSnapshot(querySnapshot => {
@@ -99,7 +140,23 @@ const Main = () => {
           </View>
           <View style={styles.spacer} />
         </Appbar.Header>
-
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={handleModalClose}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>Thông tin tài khoản của bạn chưa đầy đủ. Vui lòng cập nhật thông tin của bạn để tiếp tục.</Text>
+              <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={[styles.buttonmodal, styles.button]} onPress={handleUpdateInfo}>
+                  <Text style={styles.buttonTextmodal}>Update Info</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         <View style={styles.buttonContainer}>
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
@@ -240,6 +297,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: 300,
+  },
+  modalText: {
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    
+  },
+  buttonmodal: {
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    borderColor:COLORS.blue,
+    borderWidth: 1, 
+    padding:6,
+    alignItems: 'center',
+  },
+  buttonTextmodal:{
+    color:COLORS.blue,
+  },
   greetingContainer: {
     flex: 1,
     alignItems: 'center',
@@ -254,6 +345,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 17,
     color: COLORS.white,
+    
   },
   userName: {
     fontSize: 16,
@@ -311,5 +403,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
 
 export default Main;

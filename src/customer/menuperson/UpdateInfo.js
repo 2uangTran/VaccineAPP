@@ -5,6 +5,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { format } from 'date-fns';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import firestore from '@react-native-firebase/firestore';
+import auth from "@react-native-firebase/auth";
 import { useMyContextController } from '../../context';
 import COLORS from '../../../constants';
 
@@ -32,7 +33,8 @@ const UpdateInfo = () => {
   
     fetchAreaData();
   }, []);
-
+  
+  
   const [formData, setFormData] = useState({
     phoneNumber: '',
     fullName: '',
@@ -57,7 +59,7 @@ const UpdateInfo = () => {
         fullName: user.fullName || '',
         birthDate: user.dateOfBirth || '',
         gender: user.gender || '',
-        nationality: user.nationality || '',
+        nationality: user.nationality || 'Việt Nam',
         ethnicity: user.ethnicity || '',
         province: user.province || '',
         district: user.district || '',
@@ -85,25 +87,22 @@ const UpdateInfo = () => {
     try {
       const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
       if (!citySnapshot.empty) {
-        const districtData = citySnapshot.docs.map(doc => doc.data());
-        if (districtData && districtData.length > 0) {
-          const districtNames = districtData[0].districts;
-          console.log('Districts:', districtNames); 
-          setDistricts(districtNames);
-        } else {
-          console.log('No district data found');
-        }
+        const districtData = citySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        console.log('Districts:', districtData); 
+        setDistricts(districtData);
       } else {
         console.log('No cities data found for the province:', province);
+        setDistricts([]);
       }
-      setWards([]);
+      setWards([]); 
     } catch (error) {
       console.error('Error fetching districts:', error);
     }
   };
   
-  
-
   const fetchWards = async (district) => {
     try {
       const areaSnapshot = await firestore().collection('area').doc(formData.province).collection('cities').doc(district).get();
@@ -118,6 +117,20 @@ const UpdateInfo = () => {
       console.error('Error fetching wards:', error);
     }
   };
+  useEffect(() => {
+    if (formData.province) {
+      fetchDistricts(formData.province);
+    }
+  }, [formData.province]);
+  
+  useEffect(() => {
+    if (formData.district && districts.length > 0) {
+      fetchWards(formData.district);
+    }
+  }, [formData.district, districts]);
+  
+
+
   
 
   const handleInputChange = (key, value) => {
@@ -136,8 +149,6 @@ const UpdateInfo = () => {
     });
   };
   
-  
-
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -157,13 +168,14 @@ const UpdateInfo = () => {
 
   const handleSave = async () => {
     try {
-      await firestore().collection('users').doc(user.uid).update(formData);
+      const currentUserEmail = auth().currentUser.email;
+      await firestore().collection('USERS').doc(currentUserEmail).update(formData);
       console.log('User data updated successfully');
     } catch (error) {
       console.error('Error updating user data:', error);
     }
   };
-
+  
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -182,7 +194,6 @@ const UpdateInfo = () => {
             </TouchableOpacity>
           </View>
         </View>
-
         <Text style={styles.label}>Số điện thoại</Text>
         <TextInput
           style={styles.input}
@@ -229,18 +240,19 @@ const UpdateInfo = () => {
         </View>
 
         <Text style={styles.label}>Quốc tịch</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.nationality}
-          onChangeText={(value) => handleInputChange('nationality', value)}
-        />
+          <TextInput
+            style={styles.input}
+            value={formData.nationality}
+            onChangeText={(value) => handleInputChange('nationality', value)}
+          />
 
-        <Text style={styles.label}>Dân tộc</Text>
+
+        {/* <Text style={styles.label}>Dân tộc</Text>
         <TextInput
           style={styles.input}
           value={formData.ethnicity}
           onChangeText={(value) => handleInputChange('ethnicity', value)}
-        />
+        /> */}
 
         <Text style={styles.label}>Tỉnh / Thành phố</Text>
         <View style={styles.pickerWrapper}>
@@ -258,25 +270,22 @@ const UpdateInfo = () => {
             )}
           </Picker>
         </View>
-
-        <Text style={styles.label}>Quận / Huyện</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={formData.district}
-              style={styles.picker}
-              onValueChange={(value) => handleInputChange('district', value)}
-            >
-              {districts && districts.length > 0 ? (
-                districts.map((district) => (
-                  <Picker.Item key={district} label={district} value={district} />
-                ))
-              ) : (
-                <Picker.Item label="Không có dữ liệu" value="" />
-              )}
-            </Picker>
-          </View>
-
-
+        <Text style={styles.label}>Tỉnh / Thành phố</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={formData.district}
+            style={styles.picker}
+            onValueChange={(value) => handleInputChange('district', value)}
+          >
+            {districts && districts.length > 0 ? (
+              districts.map((district) => (
+                <Picker.Item key={district.id} label={district.id} value={district.id} />
+              ))
+            ) : (
+              <Picker.Item label="Không có dữ liệu" value="" />
+            )}
+          </Picker>
+        </View>
         <Text style={styles.label}>Phường / Xã</Text>
         <View style={styles.pickerWrapper}>
           <Picker
@@ -309,11 +318,19 @@ const UpdateInfo = () => {
         />
 
         <Text style={styles.label}>Nghề nghiệp</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.occupation}
-          onChangeText={(value) => handleInputChange('occupation', value)}
-        />
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={formData.occupation}
+            style={styles.picker}
+            onValueChange={(value) => handleInputChange('occupation', value)}
+          >
+            <Picker.Item label="Học sinh-sinh viên" value="Học sinh-sinh viên" />
+            <Picker.Item label="Giảng viên/Giáo viên" value="Giảng viên/Giáo viên" />
+            <Picker.Item label="Khác" value="Khác" />
+            
+          </Picker>
+        </View>
+
 
         <Button title="Lưu" onPress={handleSave} />
       </ScrollView>
@@ -329,10 +346,15 @@ const styles = StyleSheet.create({
   userImageContainer: {
     alignItems: 'center',
     marginBottom: 20,
+    
   },
   userImageWrapper: {
     position: 'relative',
+    borderWidth: 1,
+    borderColor: 'black', 
+    borderRadius: 50, 
   },
+  
   userImage: {
     width: 100,
     height: 100,
