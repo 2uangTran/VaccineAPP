@@ -1,16 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
-import { Button, Menu } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+// Vaccines.js
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import {Button, Menu} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 import COLORS from '../../../constants';
-import { useMyContextController } from '../../context';
+import {useMyContextController} from '../../context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const Vaccines = ({ id, title, price, imageUrl, description }) => {
+const Vaccines = ({id, title, price, imageUrl, description}) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
-  const [controller] = useMyContextController();
-  const { userLogin } = controller;
+  const [controller, dispatch] = useMyContextController();
+  const {userLogin} = controller;
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -22,9 +30,10 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
     }).format(price);
   };
 
-
-  const handleAddToCart = () => {
-    // Viết logic xử lý khi thêm vào giỏ hàng ở đây
+  const handleAddToCartWrapper = () => {
+    const item = {id, title, price, imageUrl, description};
+    dispatch({type: 'ADD_TO_CART', item}); // Thêm sản phẩm vào giỏ hàng
+    console.log('Product added to cart:', item);
   };
 
   const handleBuyNow = () => {
@@ -37,7 +46,7 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.cardContainer}>
         <View style={styles.rowContainer}>
-          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <Image source={{uri: imageUrl}} style={styles.image} />
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{title}</Text>
           </View>
@@ -49,12 +58,12 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
         <Text style={styles.price}>{formatPrice(price)}</Text>
 
         <View style={styles.buttonContainer}>
-          <Button style={styles.buttonadd} onPress={handleAddToCart}>
+          <Button style={styles.buttonadd} onPress={handleAddToCartWrapper}>
             <AntDesign
               name="shoppingcart"
               size={20}
               color={COLORS.white}
-              style={{ marginRight: 10 }}
+              style={{marginRight: 10}}
             />
             <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
           </Button>
@@ -84,7 +93,7 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
                     });
                     closeMenu();
                   }}
-                  title="Update Vaccine"
+                  title="Cập nhật Vaccine"
                 />
                 <Menu.Item
                   onPress={() => {
@@ -97,7 +106,7 @@ const Vaccines = ({ id, title, price, imageUrl, description }) => {
                     });
                     closeMenu();
                   }}
-                  title="Detail Vaccine"
+                  title="Chi tiết Vaccine"
                 />
               </>
             ) : null}

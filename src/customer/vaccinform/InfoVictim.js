@@ -1,8 +1,15 @@
 // components/VaccineForm.js
 
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { Icon } from 'react-native-elements';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
+import {Icon} from 'react-native-elements';
 
 const VaccineForm = () => {
   const [center, setCenter] = useState('');
@@ -11,12 +18,6 @@ const VaccineForm = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.headerContainer}>
-        <Icon name="arrow-back" size={24} />
-        <Text style={styles.header}>Thông tin người được tiêm</Text>
-        <Icon name="add" size={24} />
-      </View>
-      
       <Text style={styles.name}>ĐỖ HUY HOÀNG</Text>
 
       <View style={styles.formGroup}>
@@ -28,7 +29,7 @@ const VaccineForm = () => {
           onChangeText={setCenter}
         />
       </View>
-      
+
       <View style={styles.formGroup}>
         <Text style={styles.label}>Chọn ngày mong muốn tiêm</Text>
         <TextInput
@@ -38,7 +39,7 @@ const VaccineForm = () => {
           onChangeText={setDate}
         />
       </View>
-      
+
       <View style={styles.formGroup}>
         <Text style={styles.label}>Chọn vắc xin *</Text>
         <TextInput
@@ -48,7 +49,7 @@ const VaccineForm = () => {
           onChangeText={setVaccine}
         />
       </View>
-      
+
       <View style={styles.buttonGroup}>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Thêm từ giỏ</Text>
@@ -61,7 +62,7 @@ const VaccineForm = () => {
       <TouchableOpacity style={styles.confirmButton}>
         <Text style={styles.confirmButtonText}>Xác nhận</Text>
       </TouchableOpacity>
-      
+
       <Text style={styles.totalText}>Tổng cộng 0 VNĐ</Text>
     </ScrollView>
   );

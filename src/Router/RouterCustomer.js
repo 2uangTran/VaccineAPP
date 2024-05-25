@@ -22,6 +22,8 @@ import {IconButton} from 'react-native-paper';
 import AddNewVaccine from '../customer/menumain/AddNewVaccine';
 import {useNavigation} from '@react-navigation/native';
 import CustomHeaderRight from './CustomHeaderRight';
+import InfoVictim from '../customer/vaccinform/InfoVictim';
+import Cart from '../customer/menuperson/Cart';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -133,18 +135,34 @@ const RouterCustomer = () => {
             title: 'Hồ sơ cá nhân',
           }}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="ListVaccin"
           component={ListVaccin}
           options={{
             title: 'Danh mục vắc xin',
-            headerRight: () => <CustomHeaderRight />, 
+            headerRight: () => <CustomHeaderRight />,
           }}
         />
         <Stack.Screen
           name="AddNewVaccine"
           component={AddNewVaccine}
           options={{title: 'Thêm Vaccine'}}
+        />
+        <Stack.Screen
+          name="InfoVictim"
+          component={InfoVictim}
+          options={{
+            title: 'Thông tin người được tiêm',
+            headerRight: () => <CustomHeaderRight />,
+          }}
+        />
+        <Stack.Screen
+          name="Cart"
+          component={Cart}
+          options={{
+            title: 'Giỏ hàng',
+            headerRight: () => <CustomHeaderRight />,
+          }}
         />
       </Stack.Navigator>
     </MyContextControllerProvider>

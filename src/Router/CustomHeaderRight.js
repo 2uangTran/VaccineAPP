@@ -9,23 +9,21 @@ import {useMyContextController} from '../context';
 const CustomHeaderRight = () => {
   const navigation = useNavigation();
   const [controller] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const isAdmin = userLogin?.role === 'admin';
 
   const onPressHandler = () => {
-    if (userLogin && userLogin.role === 'admin') { 
+    if (userLogin && userLogin.role === 'admin') {
       navigation.navigate('AddNewVaccine');
     } else {
-      alert('Icon button pressed!');
+      navigation.navigate('Cart');
     }
   };
 
   return (
     <View>
       {isAdmin ? (
-        <TouchableOpacity
-          onPress={onPressHandler}
-          style={{marginRight: 10}}>
+        <TouchableOpacity onPress={onPressHandler} style={{marginRight: 10}}>
           <MaterialCommunityIcons
             name="plus-circle-outline"
             size={24}
@@ -33,9 +31,7 @@ const CustomHeaderRight = () => {
           />
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity
-          onPress={onPressHandler}
-          style={{marginRight: 10}}>
+        <TouchableOpacity onPress={onPressHandler} style={{marginRight: 10}}>
           <MaterialCommunityIcons
             name="shopping-outline"
             size={24}

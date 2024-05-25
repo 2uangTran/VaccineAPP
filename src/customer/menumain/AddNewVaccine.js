@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Image, Platform, StyleSheet } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { Picker } from '@react-native-picker/picker';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Image,
+  Platform,
+  StyleSheet,
+} from 'react-native';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {Picker} from '@react-native-picker/picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
@@ -17,8 +25,16 @@ const AddNewVaccine = () => {
   const [origin, setOrigin] = useState('');
   const ref = firestore().collection('vaccines');
   const [vaccines, setVaccines] = useState([]);
-  const origins = ['USA', 'China', 'India', 'Russia', 'UK','Bỉ'];
-  const usages = ['Miệng', 'Tiêm', 'Nhỏ giọt', 'Hít vào', 'Đường uống','Tiêm bắp','Tiêm trong da'];
+  const origins = ['USA', 'China', 'India', 'Russia', 'UK', 'Bỉ'];
+  const usages = [
+    'Miệng',
+    'Tiêm',
+    'Nhỏ giọt',
+    'Hít vào',
+    'Đường uống',
+    'Tiêm bắp',
+    'Tiêm trong da',
+  ];
 
   async function addVaccine() {
     if (vaccine.trim() === '') {
@@ -81,7 +97,7 @@ const AddNewVaccine = () => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
       querySnapshot.forEach(doc => {
-        const { title, price, imageUrl, description, origin, usage } = doc.data();
+        const {title, price, imageUrl, description, origin, usage} = doc.data();
         list.push({
           id: doc.id,
           title,
@@ -116,7 +132,9 @@ const AddNewVaccine = () => {
           value={vaccine}
           onChangeText={setVaccine}
         />
-        {vaccineError ? <Text style={styles.errorText}>{vaccineError}</Text> : null}
+        {vaccineError ? (
+          <Text style={styles.errorText}>{vaccineError}</Text>
+        ) : null}
       </View>
       <View style={styles.inputContainer}>
         <TextInput
@@ -169,7 +187,7 @@ const AddNewVaccine = () => {
       <View style={styles.inputContainer}>
         <Button title="Chọn ảnh" onPress={selectImage} />
         {imageUri ? (
-          <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />
+          <Image source={{uri: imageUri}} style={{width: 100, height: 100}} />
         ) : null}
       </View>
       <View style={styles.inputContainer}>
