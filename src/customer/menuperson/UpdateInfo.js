@@ -22,7 +22,7 @@ const UpdateInfo = () => {
       try {
         const areaSnapshot = await firestore().collection('area').get();
         const areaData = areaSnapshot.docs.map(doc => doc.id); 
-        console.log('Area Data:', areaData); 
+       
         setProvinces(areaData);
       } catch (error) {
         console.error('Error fetching area data:', error);
@@ -39,8 +39,7 @@ const UpdateInfo = () => {
     fullName: '',
     birthDate: '',
     gender: '',
-    nationality: 'Việt Nam', // Default parameter used here
-    ethnicity: '',
+    nationality: 'Việt Nam', 
     province: '',
     district: '',
     ward: '',

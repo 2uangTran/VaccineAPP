@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {Button, Menu} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
@@ -32,10 +33,23 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
   };
 
   const handleAddToCartWrapper = async () => {
-    const item = {id, title, price, imageUrl, description};
+    const item = { id, title, price, imageUrl, description };
 
     try {
-      // Thêm sản phẩm vào bảng Cart trên Firestore
+      const cartSnapshot = await firestore()
+        .collection('Cart')
+        .where('id', '==', id)
+        .get();
+
+      if (!cartSnapshot.empty) {
+      
+        Alert.alert(
+          'Thông báo',
+          'Bạn đã thêm vaccines này rồi. Vui lòng kiểm tra trong giỏ hàng.',
+        );
+        return; 
+      }
+
       await firestore().collection('Cart').add(item);
       console.log('Product added to cart:', item);
     } catch (error) {
@@ -65,60 +79,66 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
         <Text style={styles.price}>{formatPrice(price)}</Text>
 
         <View style={styles.buttonContainer}>
-          <Button style={styles.buttonadd} onPress={handleAddToCartWrapper}>
-            <AntDesign
-              name="shoppingcart"
-              size={20}
-              color={COLORS.white}
-              style={{marginRight: 10}}
-            />
-            <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
-          </Button>
-          <Button style={styles.buttonbuy} onPress={handleBuyNow}>
-            <Text style={styles.buttonLabelbuy}>Mua ngay</Text>
-          </Button>
+          {!isAdmin && (
+            <Button style={styles.buttonadd} onPress={handleAddToCartWrapper}>
+              <AntDesign
+                name="shoppingcart"
+                size={20}
+                color={COLORS.white}
+                style={{marginRight: 10}}
+              />
+              <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button style={styles.buttonbuy} onPress={handleBuyNow}>
+              <Text style={styles.buttonLabelbuy}>Mua ngay</Text>
+            </Button>
+          )}
         </View>
-        {userLogin && (
-          <Menu
-            visible={visible}
-            onDismiss={closeMenu}
-            anchor={
-              <TouchableOpacity onPress={openMenu}>
-                <Text style={styles.menuAnchor}>...</Text>
-              </TouchableOpacity>
-            }>
-            {isAdmin ? (
-              <>
-                <Menu.Item
-                  onPress={() => {
-                    navigation.navigate('UpdateVaccine', {
-                      id,
-                      title,
-                      price,
-                      imageUrl,
-                      description,
-                    });
-                    closeMenu();
-                  }}
-                  title="Cập nhật Vaccine"
-                />
-                <Menu.Item
-                  onPress={() => {
-                    navigation.navigate('VaccineDetail', {
-                      id,
-                      title,
-                      price,
-                      imageUrl,
-                      description,
-                    });
-                    closeMenu();
-                  }}
-                  title="Chi tiết Vaccine"
-                />
-              </>
-            ) : null}
-          </Menu>
-        )}
+
+        {userLogin && isAdmin && (
+        <Menu
+          visible={visible}
+          onDismiss={closeMenu}
+          anchor={
+            <TouchableOpacity onPress={openMenu}>
+              <Text style={styles.menuAnchor}>...</Text>
+            </TouchableOpacity>
+          }>
+          {isAdmin ? (
+            <>
+              <Menu.Item
+                onPress={() => {
+                  navigation.navigate('UpdateVaccine', {
+                    id,
+                    title,
+                    price,
+                    imageUrl,
+                    description,
+                  });
+                  closeMenu();
+                }}
+                title="Cập nhật Vaccine"
+              />
+              <Menu.Item
+                onPress={() => {
+                  navigation.navigate('VaccineDetail', {
+                    id,
+                    title,
+                    price,
+                    imageUrl,
+                    description,
+                  });
+                  closeMenu();
+                }}
+                title="Chi tiết Vaccine"
+              />
+            </>
+          ) : null}
+        </Menu>
+)}
+
       </View>
     </SafeAreaView>
   );

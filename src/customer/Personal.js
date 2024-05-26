@@ -13,7 +13,7 @@ const Personal = () => {
   const { userLogin } = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
-  const cleanedUri = userLogin.userImage ? userLogin.userImage.replace('file://file://', 'file://') : null; 
+
 
   useEffect(() => {
     return ref.onSnapshot(querySnapshot => {
@@ -26,34 +26,27 @@ const Personal = () => {
   if (loading) {
     return null;
   }
-
   const handleLogout = () => {
     logout(dispatch, navigation); 
   };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Appbar.Header style={styles.appbar}>
+      <Appbar.Header style={styles.appbar}>
           <View style={styles.userInfo}>
             <Appbar.Action 
               icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
               onPress={() => {}} 
               style={{justifyContent:'flex-start'}}
             />
-           {userLogin.userImage ? (
-              <Image 
-                source={{ uri: cleanedUri }}
-                style={styles.userImage} 
-              />
-            ) : (
+          
               <MaterialCommunityIcons
                 name="account-circle"
                 size={80}
                 color={COLORS.white}
                 style={{alignSelf:'center'}}
               />
-            )}
+           
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
               <Text style={styles.userDetails}>
@@ -128,13 +121,17 @@ const styles = StyleSheet.create({
     marginTop:120,
     flexDirection: 'column',
     justifyContent:'center',
+   
     flex: 1,
     height: 150, 
+    
   },
   userInfoText: {
+
     alignItems: 'center',
     marginStart:0,
     width:'100%',
+    
   },
   userName: {
     color: COLORS.white,
@@ -173,16 +170,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   contactItem: {
+ 
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
+   
   },
   contactItemText: {
     flex:1,
     fontSize: 16,
     color: COLORS.black,
+     
   },
   contactItemPhone: {
+    
     fontSize: 16,
     color: COLORS.blue,
   },
@@ -193,5 +194,6 @@ const styles = StyleSheet.create({
     alignSelf:'center',
   },
 });
+
 
 export default Personal;
