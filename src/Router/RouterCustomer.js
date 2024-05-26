@@ -107,7 +107,6 @@ const CustomerTabNavigator = () => {
 };
 
 const RouterCustomer = () => {
-  const navigation = useNavigation();
   return (
     <MyContextControllerProvider>
       <Stack.Navigator

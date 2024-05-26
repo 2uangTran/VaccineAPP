@@ -39,7 +39,7 @@ const UpdateInfo = () => {
     fullName: '',
     birthDate: '',
     gender: '',
-    nationality: '',
+    nationality: 'Việt Nam', // Default parameter used here
     ethnicity: '',
     province: '',
     district: '',
@@ -75,7 +75,7 @@ const UpdateInfo = () => {
     try {
       const areaSnapshot = await firestore().collection('area').get();
       const provincesData = areaSnapshot.docs.map(doc => doc.id);
-      console.log('Provinces:', provincesData); 
+     
       setProvinces(provincesData);
     } catch (error) {
       console.error('Error fetching provinces:', error);
@@ -90,7 +90,7 @@ const UpdateInfo = () => {
           id: doc.id,
           ...doc.data()
         }));
-        console.log('Districts:', districtData); 
+      
         setDistricts(districtData);
       } else {
         console.log('No cities data found for the province:', province);
@@ -107,7 +107,7 @@ const UpdateInfo = () => {
       const areaSnapshot = await firestore().collection('area').doc(formData.province).collection('cities').doc(district).get();
       if (areaSnapshot.exists) {
         const wardsData = areaSnapshot.data().wards;
-        console.log('Wards:', wardsData); 
+      
         setWards(wardsData);
       } else {
         console.log('No wards data found');
@@ -128,6 +128,16 @@ const UpdateInfo = () => {
       fetchWards(formData.district);
     }
   }, [formData.district, districts]);
+
+  useEffect(() => {
+ 
+    if (formData.ward === "" && wards.length > 0) {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        ward: wards[0]
+      }));
+    }
+  }, [wards]);
 
   const handleInputChange = (key, value) => {
     setFormData(prevFormData => {
@@ -204,7 +214,7 @@ const UpdateInfo = () => {
           onChangeText={(value) => handleInputChange('fullName', value)}
         />
 
-        <Text style={styles.label}>Ngày sinh</Text>
+<Text style={styles.label}>Ngày sinh</Text>
         <View style={styles.dateContainer}>
           <TextInput
             style={[styles.input, styles.dateInput]}
@@ -266,7 +276,7 @@ const UpdateInfo = () => {
             )}
           </Picker>
         </View>
-        <Text style={styles.label}>Tỉnh / Thành phố</Text>
+        <Text style={styles.label}>Quận / Huyện</Text>
         <View style={styles.pickerWrapper}>
           <Picker
             selectedValue={formData.district}
@@ -285,7 +295,7 @@ const UpdateInfo = () => {
         <Text style={styles.label}>Phường / Xã</Text>
         <View style={styles.pickerWrapper}>
           <Picker
-            selectedValue={formData.ward}
+            selectedValue={formData.ward !== "" ? formData.ward : (wards.length > 0 ? wards[0] : '')} 
             style={styles.picker}
             onValueChange={(value) => handleInputChange('ward', value)}
           >
@@ -298,7 +308,6 @@ const UpdateInfo = () => {
             )}
           </Picker>
         </View>
-
         <Text style={styles.label}>Địa chỉ</Text>
         <TextInput
           style={styles.input}
@@ -323,16 +332,15 @@ const UpdateInfo = () => {
             <Picker.Item label="Học sinh-sinh viên" value="Học sinh-sinh viên" />
             <Picker.Item label="Giảng viên/Giáo viên" value="Giảng viên/Giáo viên" />
             <Picker.Item label="Khác" value="Khác" />
-            
           </Picker>
         </View>
-
 
         <Button title="Lưu" onPress={handleSave} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -389,7 +397,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
- 
   },
   dateInput: {
     flex: 1,
