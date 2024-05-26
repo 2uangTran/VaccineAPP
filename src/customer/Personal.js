@@ -32,15 +32,18 @@ const Personal = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
         <Appbar.Header style={styles.appbar}>
-        <Appbar.Action 
+        
+          <View style={styles.userInfo}>
+          <Appbar.Action 
             icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
             onPress={() => {}} 
+            style={{justifyContent:'flex-start'}}
           />
-          <View style={styles.userInfo}>
             <MaterialCommunityIcons
               name="account-circle"
               size={80}
               color={COLORS.white}
+              style={{alignSelf:'center'}}
             />
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
@@ -117,15 +120,17 @@ const styles = StyleSheet.create({
     marginTop:120,
     flexDirection: 'column',
     justifyContent:'center',
-    alignItems: 'center',
+   
     flex: 1,
     height: 150, 
-    marginStart:-37,
+    
   },
   userInfoText: {
-    marginLeft: 10,
+
     alignItems: 'center',
     marginStart:0,
+    width:'100%',
+    
   },
   userName: {
     color: COLORS.white,
@@ -137,6 +142,8 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 14,
     textAlign: 'center',
+    justifyContent:'center',
+    width:'100%',
   },
   menuContainer: {
     flex: 1,
@@ -153,6 +160,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
     marginLeft: 15,
+    width:'100%',
   },
   contactHeader: {
     fontSize: 18,
@@ -161,15 +169,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   contactItem: {
+ 
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
+   
   },
   contactItemText: {
+    flex:1,
     fontSize: 16,
     color: COLORS.black,
+     
   },
   contactItemPhone: {
+    
     fontSize: 16,
     color: COLORS.blue,
   },
