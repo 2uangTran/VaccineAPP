@@ -15,9 +15,9 @@ import {deleteVaccines} from '../../context/index';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Cart = () => {
+  const [cartItems, setCartItems] = useState([]);
   // const {cartid} = route.params;
 
-  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -35,7 +35,7 @@ const Cart = () => {
 
     fetchCartItems();
   }, []);
-  const handleRemoveFromCart = iddoc => {
+  const handleRemoveFromCart = async iddoc => {
     Alert.alert(
       'Warning',
       'Are you sure you want to remove this service from your cart? This action cannot be undone.',
@@ -43,13 +43,13 @@ const Cart = () => {
         {
           text: 'Remove',
           onPress: async () => {
-           
             try {
               await deleteVaccines(iddoc);
               console.log(`Removing vaccine with id: ${iddoc}`);
               setCartItems(prevItems =>
                 prevItems.filter(item => item.iddoc !== iddoc),
               );
+             
             } catch (error) {
               console.error('Error removing item from cart:', error);
             }
@@ -64,6 +64,7 @@ const Cart = () => {
       {cancelable: false},
     );
   };
+  
   const renderItem = ({item}) => (
     <View style={styles.itemContainer}>
       <Image source={{uri: item.imageUrl}} style={styles.image} />

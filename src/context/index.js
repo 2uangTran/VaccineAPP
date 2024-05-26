@@ -25,11 +25,15 @@ function reducer(state, action) {
       );
       return {...state, cartItems: updatedCartItems};
     }
+    case 'SET_CART_COUNT': {
+      return {...state, cartCount: action.value};
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
   }
 }
+
 
 function MyContextControllerProvider({children}) {
   const initialState = {
@@ -114,6 +118,27 @@ const deleteVaccines = async id => {
   }
 };
 
+
+const getCartCount = async (dispatch) => {
+  try {
+    const cartSnapshot = await Cart.get();
+    const cartCount = cartSnapshot.size;
+    dispatch({type: 'SET_CART_COUNT', value: cartCount});
+  } catch (error) {
+    console.error('Error getting cart count:', error);
+  }
+};
+
+const listenToCartCount = (dispatch) => {
+  return Cart.onSnapshot(snapshot => {
+    const cartCount = snapshot.size;
+    dispatch({type: 'SET_CART_COUNT', value: cartCount});
+  }, error => {
+    console.error('Error listening to cart count:', error);
+  });
+};
+
+
 export {
   MyContextControllerProvider,
   useMyContextController,
@@ -121,4 +146,6 @@ export {
   logout,
   register,
   deleteVaccines,
+  getCartCount,
+  listenToCartCount,
 };
