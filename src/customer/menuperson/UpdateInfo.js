@@ -34,7 +34,6 @@ const UpdateInfo = () => {
     fetchAreaData();
   }, []);
   
-  
   const [formData, setFormData] = useState({
     phoneNumber: '',
     fullName: '',
@@ -117,6 +116,7 @@ const UpdateInfo = () => {
       console.error('Error fetching wards:', error);
     }
   };
+
   useEffect(() => {
     if (formData.province) {
       fetchDistricts(formData.province);
@@ -128,10 +128,6 @@ const UpdateInfo = () => {
       fetchWards(formData.district);
     }
   }, [formData.district, districts]);
-  
-
-
-  
 
   const handleInputChange = (key, value) => {
     setFormData(prevFormData => {

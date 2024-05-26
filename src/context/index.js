@@ -1,4 +1,3 @@
-// context.js
 import {createContext, useContext, useMemo, useReducer} from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../../constants';
@@ -13,6 +13,7 @@ const Personal = () => {
   const { userLogin } = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
+  const cleanedUri = userLogin.userImage.replace('file://file://', 'file://'); 
 
   useEffect(() => {
     return ref.onSnapshot(querySnapshot => {
@@ -31,27 +32,32 @@ const Personal = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Appbar.Header style={styles.appbar}>
-        
+      <Appbar.Header style={styles.appbar}>
           <View style={styles.userInfo}>
-          <Appbar.Action 
-            icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
-            onPress={() => {}} 
-            style={{justifyContent:'flex-start'}}
-          />
-            <MaterialCommunityIcons
-              name="account-circle"
-              size={80}
-              color={COLORS.white}
-              style={{alignSelf:'center'}}
+            <Appbar.Action 
+              icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
+              onPress={() => {}} 
+              style={{justifyContent:'flex-start'}}
             />
+           {userLogin.userImage ? (
+              <Image 
+                source={{ uri: cleanedUri }}
+                style={styles.userImage} 
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="account-circle"
+                size={80}
+                color={COLORS.white}
+                style={{alignSelf:'center'}}
+              />
+            )}
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
               <Text style={styles.userDetails}>
                 {userLogin ? userLogin.phone : 'N/A'} - {userLogin ? userLogin.gender : 'N/A'} - {userLogin ? userLogin.dateOfBirth : 'N/A'}
               </Text>
             </View>
-
           </View>
         </Appbar.Header>
         <ScrollView style={styles.menuContainer}>
@@ -185,6 +191,12 @@ const styles = StyleSheet.create({
     
     fontSize: 16,
     color: COLORS.blue,
+  },
+  userImage:{
+    width: 70,
+    height: 70,
+    borderRadius:50,
+    alignSelf:'center',
   },
 });
 
