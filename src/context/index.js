@@ -20,6 +20,12 @@ function reducer(state, action) {
       const updatedCartItems = [...(state.cartItems || []), action.item];
       return {...state, cartItems: updatedCartItems};
     }
+    case 'REMOVE_FROM_CART': {
+      const updatedCartItems = state.cartItems.filter(
+        item => item.id !== action.id,
+      );
+      return {...state, cartItems: updatedCartItems};
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -49,6 +55,7 @@ function useMyContextController() {
 
 const USERS = firestore().collection('USERS');
 const vaccines = firestore().collection('vaccines');
+const Cart = firestore().collection('Cart');
 
 const login = (dispatch, email, password) => {
   auth()
@@ -97,6 +104,16 @@ const register = async (
     throw error;
   }
 };
+const deleteVaccines = async id => {
+  try {
+    await Cart.doc(id).delete();
+    console.log('Vaccine deleted successfully');
+    Alert.alert('Success', 'Vaccine deleted successfully!');
+  } catch (error) {
+    console.error('Error deleting vaccine:', error);
+    Alert.alert('Error', error.message);
+  }
+};
 
 export {
   MyContextControllerProvider,
@@ -104,4 +121,5 @@ export {
   login,
   logout,
   register,
+  deleteVaccines,
 };
