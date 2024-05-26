@@ -43,7 +43,7 @@ const Cart = () => {
         {
           text: 'Remove',
           onPress: async () => {
-            // Gọi hàm xóa vaccine với id tương ứng
+           
             try {
               await deleteVaccines(iddoc);
               console.log(`Removing vaccine with id: ${iddoc}`);

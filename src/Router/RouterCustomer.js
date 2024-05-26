@@ -23,7 +23,7 @@ import AddNewVaccine from '../customer/menumain/AddNewVaccine';
 import {useNavigation} from '@react-navigation/native';
 import CustomHeaderRight from './CustomHeaderRight';
 import InfoVictim from '../customer/vaccinform/InfoVictim';
-import Cart from '../customer/menuperson/Cart';
+import Cart from '../customer/Cart/Cart';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
