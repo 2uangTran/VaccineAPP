@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, StyleSheet, Text, TouchableOpacity, ScrollView, Modal, Button } from 'react-native';
+import { SafeAreaView, View, StyleSheet, Text, TouchableOpacity, ScrollView, Modal, Button, Image } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
@@ -9,6 +9,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import UpdateInfo from '../customer/menuperson/UpdateInfo'; 
+
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
@@ -83,10 +84,10 @@ const Main = () => {
     const userName = userLogin ? userLogin.fullName : 'Guest';
 
     return (
-      <>
+      <View style={styles.greetingContainer}>
         <Text style={styles.greeting}>{greeting}</Text>
         <Text style={styles.userName}>{userName}</Text>
-      </>
+      </View>
     );
   };
 
@@ -135,11 +136,26 @@ const Main = () => {
             )}
             onPress={() => {}}
           />
-          <View style={styles.greetingContainer}>
+         
             {getCurrentTimeMessage()}
-          </View>
+          {/* <View style={styles.greetingContainer}>
+          </View> */}
           <View style={styles.spacer} />
         </Appbar.Header>
+
+        <View style={{position:'relative',height:200,backgroundColor:COLORS.white}}>
+        <View style={{height:100,backgroundColor:COLORS.blue}}/>
+          <View style={{position:'absolute', justifyContent: 'center',alignItems: 'center' , top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,}}>
+          <Image
+          source={{ uri: 'https://ik.imagekit.io/tvlk/blog/2021/09/du-lich-anh-2.jpg?tr=dpr-2,w-675' }}
+           style={{height:150,width:'80%'}} />
+          </View>
+          
+        </View>
+        
         <Modal
           animationType="slide"
           transparent={true}
@@ -289,10 +305,11 @@ const Main = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:COLORS.white,
   },
   appbar: {
     backgroundColor: COLORS.blue,
-    height: '24%',
+    
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -332,12 +349,9 @@ const styles = StyleSheet.create({
     color:COLORS.blue,
   },
   greetingContainer: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 150,
-    marginTop: 30,
-    marginStart: -10,
+    paddingTop:15,
   },
   spacer: {
     width: 24,
