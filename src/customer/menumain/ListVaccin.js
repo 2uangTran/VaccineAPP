@@ -1,27 +1,28 @@
-import { View, Text, SafeAreaView, StyleSheet, TextInput } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { Appbar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import {View, Text, SafeAreaView, StyleSheet, TextInput} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Appbar} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../../constants';
-import { useMyContextController } from '../../context';
+import {useMyContextController} from '../../context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { FlatList } from 'react-native-gesture-handler';
+import {FlatList} from 'react-native-gesture-handler';
 import Vaccines from './Vaccines';
 
 const ListVaccin = () => {
   const [loading, setLoading] = useState(true);
   const [vaccines, setVaccines] = useState([]);
   const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const ref = firestore().collection('vaccines');
   const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
+
       querySnapshot.forEach(doc => {
-        const { title, price, imageUrl, description } = doc.data();
+        const {title, price, imageUrl, description} = doc.data();
         list.push({
           id: doc.id,
           title,
@@ -41,28 +42,28 @@ const ListVaccin = () => {
   }, [loading]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
-      <Appbar.Header style={styles.appbar}>
-        <View style={styles.searchContainer}>
-          <MaterialCommunityIcons
-            name="magnify"
-            size={24}
-            color={COLORS.white}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm theo tên gói, tên vắc xin,..."
-            placeholderTextColor={COLORS.white}
-          />
-        </View>
-      </Appbar.Header>
+        <Appbar.Header style={styles.appbar}>
+          <View style={styles.searchContainer}>
+            <MaterialCommunityIcons
+              name="magnify"
+              size={24}
+              color={COLORS.white}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Tìm theo tên gói, tên vắc xin,..."
+              placeholderTextColor={COLORS.white}
+            />
+          </View>
+        </Appbar.Header>
         <FlatList
           data={vaccines}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <Vaccines {...item} />}
-          numColumns={1} 
+          renderItem={({item}) => <Vaccines {...item} />}
+          numColumns={1}
           contentContainerStyle={styles.list}
         />
       </View>
@@ -156,4 +157,3 @@ const styles = StyleSheet.create({
 });
 
 export default ListVaccin;
-

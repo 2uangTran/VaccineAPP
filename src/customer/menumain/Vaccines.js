@@ -11,8 +11,9 @@ import {
 import {Button, Menu} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import COLORS from '../../../constants';
-import {useMyContextController} from '../../context';
+import {useMyContextController, addToCart} from '../../context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import firestore from '@react-native-firebase/firestore';
 
 const Vaccines = ({id, title, price, imageUrl, description}) => {
   const [visible, setVisible] = useState(false);
@@ -30,10 +31,16 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
     }).format(price);
   };
 
-  const handleAddToCartWrapper = () => {
+  const handleAddToCartWrapper = async () => {
     const item = {id, title, price, imageUrl, description};
-    dispatch({type: 'ADD_TO_CART', item}); // Thêm sản phẩm vào giỏ hàng
-    console.log('Product added to cart:', item);
+
+    try {
+      // Thêm sản phẩm vào bảng Cart trên Firestore
+      await firestore().collection('Cart').add(item);
+      console.log('Product added to cart:', item);
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
   };
 
   const handleBuyNow = () => {
