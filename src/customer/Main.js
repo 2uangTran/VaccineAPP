@@ -4,7 +4,7 @@ import { Appbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import { useMyContextController } from '../../src/context';
-import COLORS from '../../constants';
+import COLORS from '../theme/constants';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -151,7 +151,7 @@ const Main = () => {
             right: 0,}}>
           <Image
           source={{ uri: 'https://ik.imagekit.io/tvlk/blog/2021/09/du-lich-anh-2.jpg?tr=dpr-2,w-675' }}
-           style={{height:150,width:'80%'}} />
+           style={{height:150,width:'80%',borderRadius:10}} />
           </View>
           
         </View>
@@ -268,9 +268,11 @@ const Main = () => {
         <View>
           <Text style={styles.news}>Tin tức và Kiến thức</Text>
           <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.buttonScroll}>
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ width: "347%" }}
+              style={styles.buttonScroll}
+            >
             <TouchableOpacity style={styles.whiteButton}>
               <Text style={styles.whiteButtonText}>Vắc xin người lớn</Text>
             </TouchableOpacity>
@@ -325,7 +327,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
-    width:'70%'
+    width:'80%'
   },
   modalText: {
     marginBottom: 20,
@@ -344,9 +346,12 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     padding:6,
     alignItems: 'center',
+    width:"33%"
   },
   buttonTextmodal:{
     color:COLORS.blue,
+    width:'100%',
+    paddingLeft:6
   },
   greetingContainer: {
     alignItems: 'center',
@@ -357,9 +362,12 @@ const styles = StyleSheet.create({
     width: 24,
   },
   greeting: {
-    fontSize: 17,
     color: COLORS.white,
-    
+    fontSize: 17,
+    textAlign: 'center',
+    justifyContent:'center',
+    width:'150%',
+  
   },
   userName: {
     fontSize: 16,
@@ -368,11 +376,14 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 10,
+    marginRight:20,
+    
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
+    paddingLeft:19,
   },
   buttonWrapper: {
     alignItems: 'center',
@@ -391,6 +402,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     textAlign: 'center',
+    width:'100%'
   },
   newsContainer: {
     marginTop: 20,
@@ -399,23 +411,27 @@ const styles = StyleSheet.create({
   news: {
     fontSize: 24,
     color: COLORS.black,
+    paddingLeft:10
   },
   buttonScroll: {
     marginTop: 10,
+    
   },
   whiteButton: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.black,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: '1%', 
+    paddingVertical: '1%', 
     borderRadius: 5,
     marginHorizontal: 5,
   },
+  
   whiteButtonText: {
     color: COLORS.black,
-    fontSize: 16,
+    fontSize: 17, 
   },
+  
 });
 
 

@@ -10,7 +10,7 @@ import {
 } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useMyContextController, login} from '../../src/context';
-import COLORS from '../../constants';
+import COLORS from '../theme/constants';
 
 const Login = ({navigation}) => {
   const [email, setEmail] = useState('hoang12@gmail.com');

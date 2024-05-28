@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {Appbar} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
-import COLORS from '../../../constants';
+import COLORS from '../../theme/constants';
 import {useMyContextController} from '../../context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {FlatList} from 'react-native-gesture-handler';
@@ -20,26 +20,37 @@ const ListVaccin = () => {
   useEffect(() => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
-
+  
       querySnapshot.forEach(doc => {
-        const {title, price, imageUrl, description} = doc.data();
+        const { title, price, imageUrl, description, date } = doc.data();
         list.push({
           id: doc.id,
           title,
           price,
           imageUrl,
           description,
+          date: date ? new Date(date) : null, 
         });
       });
+  
+   
+      list.sort((a, b) => {
+        if (!a.date && !b.date) return 0; 
+        if (!a.date) return 1; 
+        if (!b.date) return -1; 
+        return b.date - a.date; 
+      });
+  
       setVaccines(list);
-
+  
       if (loading) {
         setLoading(false);
       }
     });
-
+  
     return () => unsubscribe();
   }, [loading]);
+  
 
   return (
     <SafeAreaView style={{flex: 1}}>

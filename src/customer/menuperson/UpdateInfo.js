@@ -7,7 +7,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import firestore from '@react-native-firebase/firestore';
 import auth from "@react-native-firebase/auth";
 import { useMyContextController } from '../../context';
-import COLORS from '../../../constants';
+import { showMessage } from 'react-native-flash-message';
+import COLORS from '../../theme/constants';
+import {  useNavigation } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage';
+import LottieView from 'lottie-react-native';
+import loadingAnimation from '../../theme/Loading/loadingcricle.json';
 
 const UpdateInfo = () => {
   const [controller] = useMyContextController();
@@ -16,13 +22,53 @@ const UpdateInfo = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const navigation = useNavigation();
+  const [imageUri, setImageUri] = useState(null);
+  const [selectedImageUri, setSelectedImageUri] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+
+  const [formData, setFormData] = useState({
+    phoneNumber: '',
+    fullName: '',
+    birthDate: '',
+    gender: '',
+    nationality: 'Việt Nam',
+    province: '',
+    district: '',
+    ward: '',
+    address: '',
+    email: '',
+    occupation: 'Học sinh-sinh viên', 
+  });
+
+  const selectImage = () => {
+    launchImageLibrary({}, response => {
+      if (response.assets && response.assets.length > 0) {
+        setImageUri(response.assets[0].uri);
+      }
+    });
+  };
+
+  const uploadImage = async (imageUri) => {
+    try {
+      const imageRef = storage().ref('user_avatars').child(`${auth().currentUser.email}_avatar`);
+      await imageRef.putFile(imageUri);
+      const imageUrl = await imageRef.getDownloadURL();
+      return imageUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   useEffect(() => {
     const fetchAreaData = async () => {
       try {
         const areaSnapshot = await firestore().collection('area').get();
-        const areaData = areaSnapshot.docs.map(doc => doc.id); 
-       
+        const areaData = areaSnapshot.docs.map(doc => doc.id);
         setProvinces(areaData);
       } catch (error) {
         console.error('Error fetching area data:', error);
@@ -34,22 +80,6 @@ const UpdateInfo = () => {
     fetchAreaData();
   }, []);
   
-  const [formData, setFormData] = useState({
-    phoneNumber: '',
-    fullName: '',
-    birthDate: '',
-    gender: '',
-    nationality: 'Việt Nam', 
-    province: '',
-    district: '',
-    ward: '',
-    address: '',
-    email: '',
-    occupation: '',
-  });
-
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
   useEffect(() => {
     if (user) {
       setFormData({
@@ -64,17 +94,18 @@ const UpdateInfo = () => {
         ward: user.ward || '',
         address: user.address || '',
         email: user.email || '',
-        occupation: user.occupation || '',
+        occupation: user.occupation || 'Học sinh-sinh viên', 
       });
+      setImageUri(user.avatarUrl || '');
     }
     fetchProvinces();
   }, [user]);
+  
 
   const fetchProvinces = async () => {
     try {
       const areaSnapshot = await firestore().collection('area').get();
       const provincesData = areaSnapshot.docs.map(doc => doc.id);
-     
       setProvinces(provincesData);
     } catch (error) {
       console.error('Error fetching provinces:', error);
@@ -89,7 +120,6 @@ const UpdateInfo = () => {
           id: doc.id,
           ...doc.data()
         }));
-      
         setDistricts(districtData);
       } else {
         console.log('No cities data found for the province:', province);
@@ -106,7 +136,6 @@ const UpdateInfo = () => {
       const areaSnapshot = await firestore().collection('area').doc(formData.province).collection('cities').doc(district).get();
       if (areaSnapshot.exists) {
         const wardsData = areaSnapshot.data().wards;
-      
         setWards(wardsData);
       } else {
         console.log('No wards data found');
@@ -129,7 +158,6 @@ const UpdateInfo = () => {
   }, [formData.district, districts]);
 
   useEffect(() => {
- 
     if (formData.ward === "" && wards.length > 0) {
       setFormData(prevFormData => ({
         ...prevFormData,
@@ -166,20 +194,52 @@ const UpdateInfo = () => {
     setFormData({ ...formData, birthDate: format(date, 'dd/MM/yyyy') });
     hideDatePicker();
   };
-
-  const handleUpdateImage = () => {
-    console.log('Update image clicked');
-  };
-
+  
   const handleSave = async () => {
+    setIsSaving(true);
     try {
+      let imageUrl = imageUri; 
+    
+      if (selectedImageUri) { 
+        imageUrl = await uploadImage(selectedImageUri); 
+        if (!imageUrl) {
+          console.error('Failed to upload image.');
+          return;
+        }
+      } else { 
+      
+        if (imageUri) {
+          imageUrl = imageUri;
+        } else {
+          imageUrl = ''; 
+        }
+      }
+      
+    
       const currentUserEmail = auth().currentUser.email;
-      await firestore().collection('USERS').doc(currentUserEmail).update(formData);
+      const userData = { ...formData };
+      delete userData.imageUri;
+      if (imageUrl) {
+        userData.avatarUrl = imageUrl;
+        setImageUri(imageUrl); 
+      }
+      await firestore().collection('USERS').doc(currentUserEmail).update(userData);
       console.log('User data updated successfully');
+      showMessage({
+        message: 'Thông báo',
+        description: 'Cập nhật thông tin thành công',
+        type: 'success',
+      });
+      
+      navigation.navigate('Main');
     } catch (error) {
       console.error('Error updating user data:', error);
     }
+    finally {
+    setIsSaving(false); 
+  }
   };
+  
   
   return (
     <KeyboardAvoidingView
@@ -187,18 +247,18 @@ const UpdateInfo = () => {
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
-
         <View style={styles.userImageContainer}>
           <View style={styles.userImageWrapper}>
-            <Image
-              source={{ uri: 'https://example.com/user-avatar.png' }}
-              style={styles.userImage}
-            />
-            <TouchableOpacity style={styles.editIconContainer} onPress={handleUpdateImage}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.userImage} />
+            ) : (
+              <Image source={require('../../theme/image/images.png')} style={styles.userImage} />
+            )}
+            <TouchableOpacity style={styles.editIconContainer} onPress={selectImage}>
               <Icon name="pencil" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
-        </View>
+        </View>     
         <Text style={styles.label}>Số điện thoại</Text>
         <TextInput
           style={styles.input}
@@ -213,7 +273,7 @@ const UpdateInfo = () => {
           onChangeText={(value) => handleInputChange('fullName', value)}
         />
 
-<Text style={styles.label}>Ngày sinh</Text>
+        <Text style={styles.label}>Ngày sinh</Text>
         <View style={styles.dateContainer}>
           <TextInput
             style={[styles.input, styles.dateInput]}
@@ -222,7 +282,7 @@ const UpdateInfo = () => {
             editable={false}
           />
           <TouchableOpacity onPress={showDatePicker}>
-            <Icon name="calendar" size={24} color="#007bff" style={styles.iconbutton}/>
+            <Icon name="calendar" size={24} color="#007bff" style={styles.iconbutton} />
           </TouchableOpacity>
         </View>
         <DateTimePickerModal
@@ -245,19 +305,11 @@ const UpdateInfo = () => {
         </View>
 
         <Text style={styles.label}>Quốc tịch</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.nationality}
-            onChangeText={(value) => handleInputChange('nationality', value)}
-          />
-
-
-        {/* <Text style={styles.label}>Dân tộc</Text>
         <TextInput
           style={styles.input}
-          value={formData.ethnicity}
-          onChangeText={(value) => handleInputChange('ethnicity', value)}
-        /> */}
+          value={formData.nationality}
+          onChangeText={(value) => handleInputChange('nationality', value)}
+        />
 
         <Text style={styles.label}>Tỉnh / Thành phố</Text>
         <View style={styles.pickerWrapper}>
@@ -275,6 +327,7 @@ const UpdateInfo = () => {
             )}
           </Picker>
         </View>
+
         <Text style={styles.label}>Quận / Huyện</Text>
         <View style={styles.pickerWrapper}>
           <Picker
@@ -291,6 +344,7 @@ const UpdateInfo = () => {
             )}
           </Picker>
         </View>
+
         <Text style={styles.label}>Phường / Xã</Text>
         <View style={styles.pickerWrapper}>
           <Picker
@@ -307,6 +361,7 @@ const UpdateInfo = () => {
             )}
           </Picker>
         </View>
+
         <Text style={styles.label}>Địa chỉ</Text>
         <TextInput
           style={styles.input}
@@ -334,12 +389,21 @@ const UpdateInfo = () => {
           </Picker>
         </View>
 
-        <Button title="Lưu" onPress={handleSave} />
+        <Button title="Lưu" onPress={handleSave} disabled={loading || isSaving}/>
+        {isSaving && (
+          <View style={styles.loadingContainer}>
+            <LottieView
+              style={{ width: 200, height: 200,justifyContent:'center',alignItems:'center' }} 
+              source={loadingAnimation} 
+              autoPlay
+              loop
+            />
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -349,15 +413,13 @@ const styles = StyleSheet.create({
   userImageContainer: {
     alignItems: 'center',
     marginBottom: 20,
-    
   },
   userImageWrapper: {
     position: 'relative',
     borderWidth: 1,
-    borderColor: 'black', 
-    borderRadius: 50, 
+    borderColor: 'black',
+    borderRadius: 50,
   },
-  
   userImage: {
     width: 100,
     height: 100,
@@ -389,6 +451,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   picker: {
+   
     height: 50,
     width: '100%',
   },
@@ -403,7 +466,13 @@ const styles = StyleSheet.create({
   iconbutton: {
     padding: 10,
   },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject, 
+    backgroundColor: 'rgba(0, 0, 0, 0.1)', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+   
+  },
 });
 
 export default UpdateInfo;
-

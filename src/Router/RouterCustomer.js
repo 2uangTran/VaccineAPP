@@ -15,7 +15,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import ListVaccin from '../customer/menumain/ListVaccin';
-import COLORS from '../../constants';
+import COLORS from '../theme/constants';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import UpdateInfo from '../customer/menuperson/UpdateInfo';
 import {IconButton} from 'react-native-paper';
@@ -24,6 +24,10 @@ import {useNavigation} from '@react-navigation/native';
 import CustomHeaderRight from './CustomHeaderRight';
 import InfoVictim from '../customer/vaccinform/InfoVictim';
 import Cart from '../customer/Cart/Cart';
+import DetailVaccines from '../customer/menumain/Vaccines/DetailVaccines';
+import CustomHeaderRightUpdate from './CustomHeaderRightUpdate';
+import UpdateVaccines from '../customer/menumain/Vaccines/UpdateVaccines';
+import Info from '../customer/vaccinform/Info';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -162,6 +166,26 @@ const RouterCustomer = () => {
             title: 'Giỏ hàng',
             headerRight: () => <CustomHeaderRight />,
           }}
+        />
+        <Stack.Screen
+          name="DetailVaccines"
+          component={DetailVaccines}
+          options={{
+            title: 'Chi tiết sản phẩm',
+            headerRight: () => <CustomHeaderRightUpdate />,
+          }}
+        />
+        <Stack.Screen
+          name="UpdateVaccines"
+          component={UpdateVaccines}
+          options={{
+            title: 'Cập nhật sản phẩm'}}
+        />
+        <Stack.Screen
+          name="Info"
+          component={Info}
+          options={{
+            title: 'Thông tin người tiêm'}}
         />
       </Stack.Navigator>
     </MyContextControllerProvider>

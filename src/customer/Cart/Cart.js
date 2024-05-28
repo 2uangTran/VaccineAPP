@@ -10,19 +10,29 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {useRoute, useNavigation} from '@react-navigation/native';
-import COLORS from '../../../constants';
+import COLORS from '../../theme/constants';
 import {deleteVaccines} from '../../context/index';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import auth from "@react-native-firebase/auth";
+import Feather from 'react-native-vector-icons/Feather';
+
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   // const {cartid} = route.params;
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(price);
+  };
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const cartSnapshot = await firestore().collection('Cart').get();
+        const userId = auth().currentUser.uid;
+        const cartSnapshot = await firestore().collection('Cart').where('userId', '==', userId).get();
         const items = cartSnapshot.docs.map(doc => ({
           iddoc: doc.id,
           ...doc.data(),
@@ -32,9 +42,11 @@ const Cart = () => {
         console.error('Error fetching cart items:', error);
       }
     };
-
+  
     fetchCartItems();
   }, []);
+
+
   const handleRemoveFromCart = async iddoc => {
     Alert.alert(
       'Warning',
@@ -67,17 +79,25 @@ const Cart = () => {
   
   const renderItem = ({item}) => (
     <View style={styles.itemContainer}>
-      <Image source={{uri: item.imageUrl}} style={styles.image} />
-      <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.price}>{item.price}</Text>
-        <Text style={styles.description}>{item.description}</Text>
-      </View>
-      <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)}>
-        <Icon name="delete" size={24} color={COLORS.red} />
-      </TouchableOpacity>
+      <View style={styles.rowContainer}>
+          <Image source={{ uri: item.imageUrl }} style={styles.image} />
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>{item.title}</Text>
+          </View>
+        </View>
+        <Text style={styles.description}>
+            <Text style={styles.boldText}>Phòng bệnh: </Text>
+            {item.description}
+          </Text>
+          <View style={{ flexDirection: 'row' }}>
+          <Text style={styles.price}>{formatPrice(item.price)}</Text>
+          <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={{ marginLeft: 'auto' }}>
+            <Feather name="trash-2" size={24} color={COLORS.red} />
+          </TouchableOpacity>
+        </View>
     </View>
   );
+  
   return (
     <View style={styles.container}>
       <FlatList
@@ -99,13 +119,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   itemContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
     padding: 10,
     backgroundColor: '#fff',
+   
+  },
+  rowContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   image: {
@@ -114,20 +138,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: 10,
   },
-  detailsContainer: {
+  titleContainer: {
     flex: 1,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  price: {
-    fontSize: 16,
-    color: COLORS.blue,
+    fontSize: 23,
+    marginTop: -47,
+    color: COLORS.black,
   },
   description: {
-    fontSize: 14,
-    color: COLORS.gray,
+    fontSize: 17,
+    marginTop: 10,
+    paddingBottom:20
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'left',
+    color: COLORS.blue,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: COLORS.black,
   },
 });
 

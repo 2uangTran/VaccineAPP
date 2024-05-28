@@ -121,22 +121,42 @@ const deleteVaccines = async id => {
 
 const getCartCount = async (dispatch) => {
   try {
-    const cartSnapshot = await Cart.get();
-    const cartCount = cartSnapshot.size;
-    dispatch({type: 'SET_CART_COUNT', value: cartCount});
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      const cartSnapshot = await Cart.where('userId', '==', currentUser.uid).get();
+      let cartCount = 0;
+      cartSnapshot.forEach(doc => {
+        const productData = doc.data();
+        if (productData.userId === currentUser.uid) {
+          cartCount++;
+        }
+      });
+      dispatch({type: 'SET_CART_COUNT', value: cartCount});
+    }
   } catch (error) {
     console.error('Error getting cart count:', error);
   }
 };
 
+
 const listenToCartCount = (dispatch) => {
   return Cart.onSnapshot(snapshot => {
-    const cartCount = snapshot.size;
+    let cartCount = 0;
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      snapshot.forEach(doc => {
+        const productData = doc.data();
+        if (productData.userId === currentUser.uid) {
+          cartCount++;
+        }
+      });
+    }
     dispatch({type: 'SET_CART_COUNT', value: cartCount});
   }, error => {
     console.error('Error listening to cart count:', error);
   });
 };
+
 
 
 export {

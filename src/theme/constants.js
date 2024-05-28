@@ -7,4 +7,6 @@ export default {
   pink: '#FF3366',
   white: '#fff',
   navy: '#000080',
+  red: '#FF0000',
+  grey:'#808080'
 };

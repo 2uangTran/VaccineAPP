@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import COLORS from '../../constants';
+import COLORS from '../theme/constants';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import { useMyContextController, logout } from '../../src/context';
@@ -13,7 +13,6 @@ const Personal = () => {
   const { userLogin } = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
-
 
   useEffect(() => {
     return ref.onSnapshot(querySnapshot => {
@@ -26,31 +25,48 @@ const Personal = () => {
   if (loading) {
     return null;
   }
+
   const handleLogout = () => {
     logout(dispatch, navigation); 
   };
+
+  const translateGender = (gender) => {
+    switch (gender) {
+      case 'male':
+        return 'Nam';
+      case 'female':
+        return 'Nữ';
+      default:
+        return 'N/A';
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-      <Appbar.Header style={styles.appbar}>
+        <Appbar.Header style={styles.appbar}>
           <View style={styles.userInfo}>
             <Appbar.Action 
               icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
               onPress={() => {}} 
               style={{justifyContent:'flex-start'}}
             />
-          
-              <MaterialCommunityIcons
-                name="account-circle"
-                size={80}
-                color={COLORS.white}
-                style={{alignSelf:'center'}}
-              />
-           
+            <View>
+              {userLogin && userLogin.avatarUrl ? (
+                <Image source={{ uri: userLogin.avatarUrl }} style={styles.userImage} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="account-circle"
+                  size={80}
+                  color={COLORS.white}
+                  style={{alignSelf:'center'}}
+                />
+              )}
+            </View>
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
               <Text style={styles.userDetails}>
-                {userLogin ? userLogin.phone : 'N/A'} - {userLogin ? userLogin.gender : 'N/A'} - {userLogin ? userLogin.dateOfBirth : 'N/A'}
+                {userLogin ? userLogin.phone : 'N/A'} - {userLogin ? translateGender(userLogin.gender) : 'N/A'} - {userLogin ? userLogin.dateOfBirth : 'N/A'}
               </Text>
             </View>
           </View>
@@ -77,10 +93,10 @@ const Personal = () => {
             <Text style={styles.menuItemText}>Đổi mật khẩu</Text>
           </View>
           <View style={styles.menuItem}>
-          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}> 
-            <MaterialCommunityIcons name="logout" size={24} color={COLORS.blue} />
-            <Text style={styles.menuItemText}>Đăng xuất</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={{flexDirection:'row'}} onPress={handleLogout}> 
+              <MaterialCommunityIcons name="logout" size={24} color={COLORS.blue} />
+              <Text style={styles.menuItemText}>Đăng xuất</Text>
+            </TouchableOpacity>
           </View>
           <Text style={styles.contactHeader}>Thông tin liên hệ</Text>
           <View style={styles.contactItem}>
@@ -121,17 +137,13 @@ const styles = StyleSheet.create({
     marginTop:120,
     flexDirection: 'column',
     justifyContent:'center',
-   
     flex: 1,
     height: 150, 
-    
   },
   userInfoText: {
-
     alignItems: 'center',
     marginStart:0,
     width:'100%',
-    
   },
   userName: {
     color: COLORS.white,
@@ -148,7 +160,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     flex: 1,
-    paddingHorizontal: 20,
+    width:'110%',
   },
   menuItem: {
     flexDirection: 'row',
@@ -156,6 +168,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    borderWidth:0.4,
+    paddingLeft:25,
+    borderBlockColor:'#C0C0C0'
   },
   menuItemText: {
     fontSize: 16,
@@ -166,24 +181,27 @@ const styles = StyleSheet.create({
   contactHeader: {
     fontSize: 18,
     color: COLORS.black,
-    marginVertical: 15,
+    marginVertical: 0,
     fontWeight: 'bold',
+    backgroundColor:'#DDDDDD',
+    flex:1,
+    padding:10,
   },
   contactItem: {
- 
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
-   
+    borderWidth:0.4,
+    borderBlockColor:'#C0C0C0'
   },
   contactItemText: {
-    flex:1,
     fontSize: 16,
     color: COLORS.black,
-     
+    width:'50%',
+    paddingLeft:25,
   },
   contactItemPhone: {
-    
+    paddingRight:60,
     fontSize: 16,
     color: COLORS.blue,
   },
@@ -194,6 +212,5 @@ const styles = StyleSheet.create({
     alignSelf:'center',
   },
 });
-
 
 export default Personal;

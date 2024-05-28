@@ -10,7 +10,7 @@ import {
 } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useMyContextController, register } from "../../src/context";
-import COLORS from "../../constants";
+import COLORS from "../theme/constants";
 import { format } from "date-fns";
 
 const Register = ({ navigation }) => {
@@ -46,8 +46,12 @@ const Register = ({ navigation }) => {
       navigation.navigate("Login");
       Alert.alert("Success", "Registration successful");
     } catch (error) {
-      console.error("Error registering:", error.message);
-      setError(error.message);
+      if (error.message.includes("email already exists")) {
+        setError("This email is already registered.");
+      } else {
+        console.error("Error registering:", error.message);
+        setError(error.message);
+      }
     }
   };
 
@@ -190,4 +194,3 @@ const Register = ({ navigation }) => {
 };
 
 export default Register;
-

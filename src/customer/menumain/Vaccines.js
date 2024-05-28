@@ -1,5 +1,4 @@
-// Vaccines.js
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,18 +8,20 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {Button, Menu} from 'react-native-paper';
-import {useNavigation} from '@react-navigation/native';
-import COLORS from '../../../constants';
-import {useMyContextController, addToCart} from '../../context';
+import { Button, Menu } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import COLORS from '../../theme/constants';
+import { useMyContextController } from '../../context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import firestore from '@react-native-firebase/firestore';
+import { showMessage } from 'react-native-flash-message';
+import auth from "@react-native-firebase/auth";
 
-const Vaccines = ({id, title, price, imageUrl, description}) => {
+const Vaccines = ({ id, title, price, imageUrl,origin, description,usage }) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
-  const [controller, dispatch] = useMyContextController();
-  const {userLogin} = controller;
+  const [controller] = useMyContextController();
+  const { userLogin } = controller;
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -33,29 +34,39 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
   };
 
   const handleAddToCartWrapper = async () => {
-    const item = { id, title, price, imageUrl, description };
-
+    const userId = auth().currentUser.uid;
+    const item = { id, title, price, imageUrl, description, userId };
+  
     try {
       const cartSnapshot = await firestore()
         .collection('Cart')
-        .where('id', '==', id)
+        .where('vaccineId', '==', id)
+        .where('userId', '==', userId)
         .get();
-
+  
       if (!cartSnapshot.empty) {
-      
         Alert.alert(
           'Thông báo',
           'Bạn đã thêm vaccines này rồi. Vui lòng kiểm tra trong giỏ hàng.',
         );
-        return; 
+        return;
       }
-
-      await firestore().collection('Cart').add(item);
+  
+      await firestore().collection('Cart').add({
+        ...item,
+        vaccineId: id, 
+      });
       console.log('Product added to cart:', item);
+      showMessage({
+        message: 'Thông báo',
+        description: 'Vắc xin đã được thêm vào giỏ hàng',
+        type: 'success',
+      });
     } catch (error) {
       console.error('Error adding product to cart:', error);
     }
   };
+  
 
   const handleBuyNow = () => {
     // Viết logic xử lý khi mua ngay ở đây
@@ -66,17 +77,31 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cardContainer}>
-        <View style={styles.rowContainer}>
-          <Image source={{uri: imageUrl}} style={styles.image} />
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{title}</Text>
+      <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('DetailVaccines', {
+              id,
+              title,
+              price,
+              imageUrl,
+              description,
+              origin,
+              usage,
+            });            
+          }}
+        >
+          <View style={styles.rowContainer}>
+            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{title}</Text>
+            </View>
           </View>
-        </View>
-        <Text style={styles.description}>
-          <Text style={styles.boldText}>Phòng bệnh: </Text>
-          {description}
-        </Text>
-        <Text style={styles.price}>{formatPrice(price)}</Text>
+          </TouchableOpacity>
+          <Text style={styles.description}>
+            <Text style={styles.boldText}>Phòng bệnh: </Text>
+            {description}
+          </Text>
+          <Text style={styles.price}>{formatPrice(price)}</Text>
 
         <View style={styles.buttonContainer}>
           {!isAdmin && (
@@ -85,7 +110,7 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
                 name="shoppingcart"
                 size={20}
                 color={COLORS.white}
-                style={{marginRight: 10}}
+                style={{ marginRight: 10 }}
               />
               <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
             </Button>
@@ -97,48 +122,47 @@ const Vaccines = ({id, title, price, imageUrl, description}) => {
           )}
         </View>
 
-        {userLogin && isAdmin && (
-        <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          anchor={
-            <TouchableOpacity onPress={openMenu}>
-              <Text style={styles.menuAnchor}>...</Text>
-            </TouchableOpacity>
-          }>
-          {isAdmin ? (
-            <>
-              <Menu.Item
-                onPress={() => {
-                  navigation.navigate('UpdateVaccine', {
-                    id,
-                    title,
-                    price,
-                    imageUrl,
-                    description,
-                  });
-                  closeMenu();
-                }}
-                title="Cập nhật Vaccine"
-              />
-              <Menu.Item
-                onPress={() => {
-                  navigation.navigate('VaccineDetail', {
-                    id,
-                    title,
-                    price,
-                    imageUrl,
-                    description,
-                  });
-                  closeMenu();
-                }}
-                title="Chi tiết Vaccine"
-              />
-            </>
-          ) : null}
-        </Menu>
-)}
-
+        {/* {userLogin && isAdmin && (
+          <Menu
+            visible={visible}
+            onDismiss={closeMenu}
+            anchor={
+              <TouchableOpacity onPress={openMenu}>
+                <Text style={styles.menuAnchor}>...</Text>
+              </TouchableOpacity>
+            }>
+            {isAdmin ? (
+              <>
+                <Menu.Item
+                  onPress={() => {
+                    navigation.navigate('UpdateVaccine', {
+                      id,
+                      title,
+                      price,
+                      imageUrl,
+                      description,
+                    });
+                    closeMenu();
+                  }}
+                  title="Cập nhật Vaccine"
+                />
+                <Menu.Item
+                  onPress={() => {
+                    navigation.navigate('DetailVaccines', {
+                      id,
+                      title,
+                      price,
+                      imageUrl,
+                      description,
+                    });
+                    closeMenu();
+                  }}
+                  title="Chi tiết Vaccine"
+                />
+              </>
+            ) : null}
+          </Menu>
+        )} */}
       </View>
     </SafeAreaView>
   );

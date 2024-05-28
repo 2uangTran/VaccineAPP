@@ -1,15 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Image,
-  Platform,
-  StyleSheet,
-} from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {Picker} from '@react-native-picker/picker';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, Image, Platform, StyleSheet } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { Picker } from '@react-native-picker/picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
@@ -43,21 +35,21 @@ const AddNewVaccine = () => {
     } else {
       setVaccineError('');
     }
-
+  
     if (isNaN(parseFloat(price))) {
       setPriceError('Chưa nhập giá tiền.');
       return;
     } else {
       setPriceError('');
     }
-
+  
     let imageUrl = '';
     if (imageUri) {
       const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
       const uploadUri =
         Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
       const task = storage().ref(filename).putFile(uploadUri);
-
+  
       try {
         await task;
         imageUrl = await storage().ref(filename).getDownloadURL();
@@ -65,18 +57,26 @@ const AddNewVaccine = () => {
         console.error(e);
       }
     }
-
+  
+    const currentDate = new Date();
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth() + 1; 
+    const year = currentDate.getFullYear();
+  
+    const formattedDate = `${day}/${month}/${year}`;
+  
     const newVaccine = {
       title: vaccine,
       price: parseFloat(price),
       imageUrl,
       description,
       origin,
-      usages,
+      usage,
+      date: formattedDate 
     };
-
+  
     ref.add(newVaccine);
-
+  
     setVaccine('');
     setPrice('');
     setImageUri(null);
@@ -84,6 +84,8 @@ const AddNewVaccine = () => {
     setOrigin('');
     setUsage('');
   }
+  
+  
 
   const selectImage = () => {
     launchImageLibrary({}, response => {
@@ -97,7 +99,7 @@ const AddNewVaccine = () => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
       querySnapshot.forEach(doc => {
-        const {title, price, imageUrl, description, origin, usage} = doc.data();
+        const { title, price, imageUrl, description, origin, usage } = doc.data();
         list.push({
           id: doc.id,
           title,

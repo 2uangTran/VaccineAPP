@@ -17,11 +17,14 @@ import COLORS from '../theme/constants';
 
 const { height } = Dimensions.get('window');
 
-const CustomHeaderRight = () => {
+const CustomHeaderRightUpdate = ({ route }) => {
   const navigation = useNavigation();
   const [controller, dispatch] = useMyContextController();
   const { userLogin, cartCount } = controller;
   const isAdmin = userLogin?.role === 'admin';
+
+  const { params } = route ? route : {};
+  const { id, title, price, imageUrl, description, origin, usage } = params ? params : {};
 
   const [isModalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -33,9 +36,17 @@ const CustomHeaderRight = () => {
     return () => unsubscribe();
   }, []);
 
-  const onPressHandler = () => {
-    if (userLogin && userLogin.role === 'admin') {
-      navigation.navigate('AddNewVaccine');
+  const handleEditPress = () => {
+    if (isAdmin) {
+      navigation.navigate('UpdateVaccines', {
+        id,
+        title,
+        price,
+        imageUrl,
+        description,
+        origin,
+        usage,
+      });
     } else {
       setModalVisible(true);
       Animated.timing(slideAnim, {
@@ -58,28 +69,18 @@ const CustomHeaderRight = () => {
 
   return (
     <View>
-      {isAdmin ? (
-        <TouchableOpacity onPress={onPressHandler} style={{ paddingRight: 20 }}>
-          <MaterialCommunityIcons
-            name="plus-circle-outline"
-            size={24}
-            color="white"
-          />
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity onPress={onPressHandler} style={{ paddingRight: 20 }}>
-          <MaterialCommunityIcons
-            name="shopping-outline"
-            size={24}
-            color="white"
-          />
-          {cartCount > 0 && (
-            <Text style={styles.cartCount}>
-              {cartCount}
-            </Text>
-          )}
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity onPress={handleEditPress} style={{ paddingRight: 20 }}>
+        <MaterialCommunityIcons
+          name={isAdmin ? "square-edit-outline" : "shopping-outline"}
+          size={24}
+          color="white"
+        />
+        {!isAdmin && cartCount > 0 && (
+          <Text style={styles.cartCount}>
+            {cartCount}
+          </Text>
+        )}
+      </TouchableOpacity>
 
       <Modal
         transparent={true}
@@ -87,19 +88,18 @@ const CustomHeaderRight = () => {
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
-          
           <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
-          <Appbar style={styles.appbar}>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={styles.appbarText}>Danh sách vắc xin chọn mua</Text>
-          </View>
-            <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
-                 <Text style={styles.closeButtonText}>Đóng</Text>
-            </TouchableOpacity>
-          </Appbar>
-              <Cart/>
+            <Appbar style={styles.appbar}>
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={styles.appbarText}>Danh sách vắc xin chọn mua</Text>
+              </View>
+              <TouchableOpacity onPress={closeModal}>
+                <Text style={styles.closeButtonText}>Đóng</Text>
+              </TouchableOpacity>
+            </Appbar>
+            <Cart />
             <TouchableOpacity onPress={closeModal} style={styles.buttonvictim}>
-                 <Text style={styles.ButtonTextVictim}>Đăng ký mũi tiêm ({cartCount})</Text>
+              <Text style={styles.ButtonTextVictim}>Đăng ký mũi tiêm ({cartCount})</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -134,16 +134,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     height: height / 1.16,
   },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  closeButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
-  },
   appbar: {
     width: '100%',
     flexDirection: 'row',
@@ -153,27 +143,26 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: 'red',
-    paddingRight:0,
-    top:-9,
+    paddingRight: 0,
+    top: -9,
   },
   appbarText: {
     color: 'black',
     fontSize: 18,
-    paddingLeft:33,
-    top:-20,
+    paddingLeft: 33,
+    top: -20,
     fontWeight: 'bold',
   },
-  buttonvictim:{
+  buttonvictim: {
     backgroundColor: COLORS.blue,
     alignItems: 'center',
-    borderRadius:8,
-    padding:10
+    borderRadius: 8,
+    padding: 10,
   },
-  ButtonTextVictim:{
-    color:COLORS.white,
-    fontSize:17,
+  ButtonTextVictim: {
+    color: COLORS.white,
+    fontSize: 17,
   }
 });
 
-
-export default CustomHeaderRight;
+export default CustomHeaderRightUpdate;
