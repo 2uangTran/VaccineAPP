@@ -155,8 +155,7 @@ const RouterCustomer = () => {
           name="InfoVictim"
           component={InfoVictim}
           options={{
-            title: 'Thông tin người được tiêm',
-            headerRight: () => <CustomHeaderRight />,
+            title: 'Thông tin người được tiêm'
           }}
         />
         <Stack.Screen

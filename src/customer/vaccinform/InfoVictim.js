@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
-import {Icon} from 'react-native-elements';
+
 
 const VaccineForm = () => {
   const [center, setCenter] = useState('');
@@ -17,6 +18,7 @@ const VaccineForm = () => {
   const [vaccine, setVaccine] = useState('');
 
   return (
+    <SafeAreaView style={{flex:1}}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.name}>ĐỖ HUY HOÀNG</Text>
 
@@ -42,12 +44,6 @@ const VaccineForm = () => {
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>Chọn vắc xin *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Chọn vắc xin"
-          value={vaccine}
-          onChangeText={setVaccine}
-        />
       </View>
 
       <View style={styles.buttonGroup}>
@@ -59,12 +55,18 @@ const VaccineForm = () => {
         </TouchableOpacity>
       </View>
 
+     
+    </ScrollView>
+    <View style={{flexDirection:'row' , justifyContent: 'space-between',paddingVertical: 17,padding:19}}>
+      <View style={{flexDirection:'column'}}>
+      <Text style={styles.totalText}>Tổng cộng </Text>
+      <Text style={styles.totalPrice}>0 VNĐ</Text>
+      </View>
       <TouchableOpacity style={styles.confirmButton}>
         <Text style={styles.confirmButtonText}>Xác nhận</Text>
       </TouchableOpacity>
-
-      <Text style={styles.totalText}>Tổng cộng 0 VNĐ</Text>
-    </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -122,19 +124,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#007bff',
     padding: 15,
     borderRadius: 5,
-    marginBottom: 20,
+    
   },
   confirmButtonText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
+    paddingHorizontal:28
   },
   totalText: {
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
   },
+  totalPrice:{
+    fontSize: 19,
+    color:'black'
+  }
 });
 
 export default VaccineForm;

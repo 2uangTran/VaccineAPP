@@ -121,48 +121,6 @@ const Vaccines = ({ id, title, price, imageUrl,origin, description,usage }) => {
             </Button>
           )}
         </View>
-
-        {/* {userLogin && isAdmin && (
-          <Menu
-            visible={visible}
-            onDismiss={closeMenu}
-            anchor={
-              <TouchableOpacity onPress={openMenu}>
-                <Text style={styles.menuAnchor}>...</Text>
-              </TouchableOpacity>
-            }>
-            {isAdmin ? (
-              <>
-                <Menu.Item
-                  onPress={() => {
-                    navigation.navigate('UpdateVaccine', {
-                      id,
-                      title,
-                      price,
-                      imageUrl,
-                      description,
-                    });
-                    closeMenu();
-                  }}
-                  title="Cập nhật Vaccine"
-                />
-                <Menu.Item
-                  onPress={() => {
-                    navigation.navigate('DetailVaccines', {
-                      id,
-                      title,
-                      price,
-                      imageUrl,
-                      description,
-                    });
-                    closeMenu();
-                  }}
-                  title="Chi tiết Vaccine"
-                />
-              </>
-            ) : null}
-          </Menu>
-        )} */}
       </View>
     </SafeAreaView>
   );
