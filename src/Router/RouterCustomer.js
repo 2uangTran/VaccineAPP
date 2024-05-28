@@ -19,7 +19,7 @@ import COLORS from '../theme/constants';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import UpdateInfo from '../customer/menuperson/UpdateInfo';
 import {IconButton} from 'react-native-paper';
-import AddNewVaccine from '../customer/menumain/AddNewVaccine';
+import AddNewVaccine from '../customer/menumain/Vaccines/AddNewVaccine';
 import {useNavigation} from '@react-navigation/native';
 import CustomHeaderRight from './CustomHeaderRight';
 import InfoVictim from '../customer/vaccinform/InfoVictim';

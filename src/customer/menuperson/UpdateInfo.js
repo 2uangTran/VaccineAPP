@@ -49,13 +49,14 @@ const UpdateInfo = () => {
       }
     });
   };
-
   const uploadImage = async (imageUri) => {
     try {
-      const imageRef = storage().ref('user_avatars').child(`${auth().currentUser.email}_avatar`);
-      await imageRef.putFile(imageUri);
-      const imageUrl = await imageRef.getDownloadURL();
-      return imageUrl;
+      const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
+      const uploadUri = Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
+      const imageRef = storage().ref('user_avatars').child(`${auth().currentUser.email}_avatar/${filename}`);
+      await imageRef.putFile(uploadUri);
+      const imageUrl = await imageRef.getDownloadURL(); // Lấy URL HTTP của ảnh
+      return imageUrl; 
     } catch (error) {
       console.error('Error uploading image:', error);
       return null;
@@ -198,30 +199,21 @@ const UpdateInfo = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      let imageUrl = imageUri; 
-    
-      if (selectedImageUri) { 
-        imageUrl = await uploadImage(selectedImageUri); 
+      let imageUrl = formData.avatarUrl; 
+  
+      if (imageUri) { 
+        imageUrl = await uploadImage(imageUri); 
         if (!imageUrl) {
           console.error('Failed to upload image.');
           return;
         }
-      } else { 
-      
-        if (imageUri) {
-          imageUrl = imageUri;
-        } else {
-          imageUrl = ''; 
-        }
       }
       
-    
       const currentUserEmail = auth().currentUser.email;
       const userData = { ...formData };
-      delete userData.imageUri;
+      delete userData.avatarUrl; 
       if (imageUrl) {
-        userData.avatarUrl = imageUrl;
-        setImageUri(imageUrl); 
+        userData.avatarUrl = imageUrl; 
       }
       await firestore().collection('USERS').doc(currentUserEmail).update(userData);
       console.log('User data updated successfully');
@@ -236,8 +228,8 @@ const UpdateInfo = () => {
       console.error('Error updating user data:', error);
     }
     finally {
-    setIsSaving(false); 
-  }
+      setIsSaving(false); 
+    }
   };
   
   
@@ -390,7 +382,9 @@ const UpdateInfo = () => {
         </View>
 
         <Button title="Lưu" onPress={handleSave} disabled={loading || isSaving}/>
-        {isSaving && (
+        
+      </ScrollView>
+      {isSaving && (
           <View style={styles.loadingContainer}>
             <LottieView
               style={{ width: 200, height: 200,justifyContent:'center',alignItems:'center' }} 
@@ -400,7 +394,6 @@ const UpdateInfo = () => {
             />
           </View>
         )}
-      </ScrollView>
     </KeyboardAvoidingView>
   );
 };

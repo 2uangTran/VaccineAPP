@@ -55,14 +55,10 @@ const Personal = () => {
               {userLogin && userLogin.avatarUrl ? (
                 <Image source={{ uri: userLogin.avatarUrl }} style={styles.userImage} />
               ) : (
-                <MaterialCommunityIcons
-                  name="account-circle"
-                  size={80}
-                  color={COLORS.white}
-                  style={{alignSelf:'center'}}
-                />
+                <Image source={require('../theme/image/images.png')} style={styles.userImage} />
               )}
             </View>
+
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
               <Text style={styles.userDetails}>
