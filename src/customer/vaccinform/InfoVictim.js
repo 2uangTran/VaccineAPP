@@ -27,7 +27,7 @@ const { height } = Dimensions.get('window');
 const VaccineForm = () => {
   const [center, setCenter] = useState('');
   const [date, setDate] = useState('');
-  const [vaccine, setVaccine] = useState('');
+  const [vaccine, setVaccine] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -36,7 +36,6 @@ const VaccineForm = () => {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const [isCenterModalVisible, setIsCenterModalVisible] = useState(false);
   const [isCartModalVisible, setIsCartModalVisible] = useState(false);
-  const [showCheckBox, setShowCheckBox] = useState(false);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -76,7 +75,6 @@ const VaccineForm = () => {
   
    const modalCart = () =>{
     setIsCartModalVisible(true); 
-    setShowCheckBox(true); 
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
@@ -85,7 +83,6 @@ const VaccineForm = () => {
   }
   
   const closeModal = () => {
-    setShowCheckBox(false); 
     Animated.timing(slideAnim, {
       toValue: height,
       duration: 300,
@@ -113,7 +110,12 @@ const VaccineForm = () => {
 
   const handleCenterSelect = (selectedCenter) => {
     setCenter(selectedCenter.name);
-    setIsModalVisible(false);
+    setIsCenterModalVisible(false);
+  };
+
+  const handleSelectItems = (selectedItems) => {
+    setVaccine(selectedItems);
+    setIsCartModalVisible(false);
   };
 
   return (
@@ -186,264 +188,279 @@ const VaccineForm = () => {
             date={selectedDate}
             onConfirm={handleDateConfirm}
             onCancel={() => setShowDatePicker(false)}
-            minimumDate={new Date()} 
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Chọn vắc xin *</Text>
-          <View style={{ flexDirection: 'column', alignItems: 'center', padding:50}}>
-            <FontAwesome6
-              name="table-list"
-              size={100}
-              color={COLORS.gray}
+            minimumDate={new Date()}
             />
-              <Text style={{ left:'14%',color:'#CCCCCC' ,width:'100%'}}>Danh sách vắc xin chọn mua trống</Text>
-          </View>
-        </View>
-
-        <View style={styles.buttonGroup}>
-          <TouchableOpacity style={[styles.buttonAdd]} onPress={modalCart}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <AntDesign
-                name="shoppingcart"
-                size={20}
-                color={COLORS.white}
-                style={{ marginRight: 13,left:'100%' }}
-              />
-              <Text style={[styles.buttonTextAdd]}>Thêm từ giỏ</Text>
             </View>
-          </TouchableOpacity>
-  
-          <TouchableOpacity style={[styles.buttonBuy]}>
-            <Text style={[styles.buttonTextBuy]}>Thêm mới vắc xin</Text>
-          </TouchableOpacity>
-        </View>
-  
-      </ScrollView>
-      <View style={styles.footer}>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>Tổng cộng</Text>
-          <Text style={styles.totalPrice}>0 VNĐ</Text>
-        </View>
-        <TouchableOpacity style={styles.confirmButton}>
-          <Text style={styles.confirmButtonText}>Xác nhận</Text>
-        </TouchableOpacity>
-      </View>
-  
-      <Modal
-          transparent={true}
-          visible={isCenterModalVisible}
-          onRequestClose={() => setIsCenterModalVisible(false)}
-        >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
-            <Appbar style={styles.appbar}>
-              <View style={{ flex: 1, alignItems: 'center' }}>
-                <Text style={styles.appbarText}>Danh sách trung tâm</Text>
-              </View>
-              <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
-                 <Text style={styles.closeButtonText}>Đóng</Text>
+    
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Chọn vắc xin *</Text>
+              {vaccine.length ? (
+                <View>
+                  {vaccine.map((item, index) => (
+                    <Text key={index}>{item.name}</Text>
+                  ))}
+                </View>
+              ) : (
+                <View style={{ flexDirection: 'column', alignItems: 'center', padding: 50 }}>
+                  <FontAwesome6
+                    name="table-list"
+                    size={100}
+                    color={COLORS.gray}
+                  />
+                  <Text style={{ color: '#CCCCCC' }}>Danh sách vắc xin chọn mua trống</Text>
+                </View>
+              )}
+            </View>
+    
+            <View style={styles.buttonGroup}>
+              <TouchableOpacity style={[styles.buttonAdd]} onPress={modalCart}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <AntDesign
+                    name="shoppingcart"
+                    size={20}
+                    color={COLORS.white}
+                    style={{ marginRight: 13 }}
+                  />
+                  <Text style={styles.buttonTextAdd}>Thêm từ giỏ</Text>
+                </View>
               </TouchableOpacity>
-            </Appbar>
-            <Centers onSelect={handleCenterSelect} />
-          </Animated.View>
-        </View>
-      </Modal>
-
-      <Modal
-    transparent={true}
-    visible={isCartModalVisible}
-    onRequestClose={() => setIsCartModalVisible(false)}
-  >
-    <View style={styles.modalOverlay}>
-      <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
-        <Appbar style={styles.appbar}>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={styles.appbarText}>Danh sách trung tâm</Text>
+      
+              <TouchableOpacity style={[styles.buttonBuy]}>
+                <Text style={styles.buttonTextBuy}>Thêm mới vắc xin</Text>
+              </TouchableOpacity>
+            </View>
+      
+          </ScrollView>
+          <View style={styles.footer}>
+            <View style={styles.totalContainer}>
+              <Text style={styles.totalText}>Tổng cộng</Text>
+              <Text style={styles.totalPrice}>0 VNĐ</Text>
+            </View>
+            <TouchableOpacity style={styles.confirmButton}>
+              <Text style={styles.confirmButtonText}>Xác nhận</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
-             <Text style={styles.closeButtonText}>Đóng</Text>
-          </TouchableOpacity>
-        </Appbar>
-        <Cart isOpenedFromVaccineForm={isCartModalVisible} />
-
-        {showCheckBox && ( 
-          <TouchableOpacity onPress={closeModal} style={styles.buttonConfirm}>
-            <Text style={styles.ButtonTextConfirm}>Xác nhận</Text>
-          </TouchableOpacity>
-        )}
-
-      </Animated.View>
-    </View>
-  </Modal>
-    </SafeAreaView>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginVertical: 20,
-    color: COLORS.blue,
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    marginBottom: 5,
-    fontSize: 16,
-    color:COLORS.black,
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    flex: 1,
-    marginRight: 10,
-    backgroundColor: '#fff',
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  buttonAdd: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: COLORS.blue,
-    padding: 10,
-    borderRadius: 5,
-  },
-  buttonBuy: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: COLORS.white,
-    padding: 10,
-    borderRadius: 5,
-    borderWidth:1,
-    borderColor:COLORS.blue,
-  },
-  buttonTextAdd: {
-    color: COLORS.white,
-    textAlign: 'center',
-    width:'70%'
-  },
-  buttonTextBuy: {
-    color: COLORS.blue,
-    textAlign: 'center',
-  },
-  confirmButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 16,
-    paddingHorizontal: 50, 
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  confirmButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  totalText: {
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  totalPrice: {
-    fontSize: 19,
-    color: 'black',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 17,
-    padding: 19,
-  },
-  totalContainer: {
-    flexDirection: 'column',
-  },
-  infoBox: {
-    paddingVertical: 20, 
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 5,
-  },
-  infoLabel: {
-    fontWeight: 'bold',
-    width:'50%'
-  },
-  infoText: {
-    flexShrink: 1,
-    flex:1,
-    textAlign: 'right',
-    color:'black'
-  },
-  modalCloseButton: {
-    alignSelf: 'flex-end',
-    marginBottom: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightradius: 20,
-    height: height / 1.16,
-  },
-  appbar: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    alignItems: 'center',
-  },
-  appbarText: {
-    color: 'black',
-    fontSize: 20,
-    paddingLeft:33,
-    top:-20,
-    fontWeight: 'bold',
-  },
-  closeButtonText: {
-    color: 'red',
-    paddingRight:0,
-    top:-9,
-  },
-  buttonConfirm:{
-    backgroundColor: COLORS.blue,
-    alignItems: 'center',
-    borderRadius:8,
-    padding:10
-  },
-  ButtonTextConfirm:{
-    color:COLORS.white,
-    fontSize:17,
-  }
-});
-
-export default VaccineForm;
-
+      
+          <Modal
+              transparent={true}
+              visible={isCenterModalVisible}
+              onRequestClose={() => setIsCenterModalVisible(false)}
+            >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+                <Appbar style={styles.appbar}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Text style={styles.appbarText}>Danh sách trung tâm</Text>
+                  </View>
+                  <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
+                     <Text style={styles.closeButtonText}>Đóng</Text>
+                  </TouchableOpacity>
+                  </View>
+                </Appbar>
+                <Centers onSelect={handleCenterSelect} />
+              </Animated.View>
+            </View>
+          </Modal>
+    
+          <Modal
+              transparent={true}
+              visible={isCartModalVisible}
+              onRequestClose={() => setIsCartModalVisible(false)}
+            >
+            <View style={styles.modalOverlay}>
+              <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+                <Appbar style={styles.appbar}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={styles.appbarText}>Danh sách vắc xin</Text>
+                  </View>
+                  <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
+                      <Text style={styles.closeButtonText}>Đóng</Text>
+                  </TouchableOpacity>
+              </View>
+                </Appbar>
+                <Cart onSelectItems={handleSelectItems} isOpenedFromVaccineForm={isCartModalVisible} />
+                <TouchableOpacity onPress={closeModal} style={styles.buttonvictim}>
+                 <Text style={styles.ButtonTextVictim}>Xác nhận</Text>
+            </TouchableOpacity>
+              </Animated.View>
+            </View>
+          </Modal>
+        </SafeAreaView>
+      );
+    };
+    
+    const styles = StyleSheet.create({
+      container: {
+        padding: 20,
+        backgroundColor: '#f5f5f5',
+      },
+      headerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      },
+      header: {
+        fontSize: 20,
+        fontWeight: 'bold',
+      },
+      title: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        marginVertical: 20,
+        color: COLORS.blue,
+      },
+      formGroup: {
+        marginBottom: 20,
+      },
+      label: {
+        marginBottom: 5,
+        fontSize: 16,
+        color: COLORS.black,
+      },
+      input: {
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        flex: 1,
+        marginRight: 10,
+        backgroundColor: '#fff',
+      },
+      buttonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+      },
+      buttonAdd: {
+        flex: 1,
+        marginHorizontal: 5,
+        backgroundColor: COLORS.blue,
+        padding: 10,
+        borderRadius: 5,
+      },
+      buttonBuy: {
+        flex: 1,
+        marginHorizontal: 5,
+        backgroundColor: COLORS.white,
+        padding: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: COLORS.blue,
+      },
+      buttonTextAdd: {
+        color: COLORS.white,
+        textAlign: 'center',
+        width: '70%'
+      },
+      buttonTextBuy: {
+        color: COLORS.blue,
+        textAlign: 'center',
+      },
+      confirmButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 16,
+        paddingHorizontal: 50, 
+        borderRadius: 5,
+        marginHorizontal: 5,
+      },
+      confirmButtonText: {
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
+      totalText: {
+        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
+      totalPrice: {
+        fontSize: 19,
+        color: 'black',
+      },
+      footer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 17,
+        padding: 19,
+      },
+      totalContainer: {
+        flexDirection: 'column',
+      },
+      infoBox: {
+        paddingVertical: 20, 
+      },
+      infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 5,
+      },
+      infoLabel: {
+        fontWeight: 'bold',
+        width: '50%'
+      },
+      infoText: {
+        flexShrink: 1,
+        flex: 1,
+        textAlign: 'right',
+        color: 'black'
+      },
+      modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+      },
+      modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        height: height / 1.16,
+      },
+      appbar: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+        alignItems: 'center',
+      },
+      appbarText: {
+        color: 'black',
+        fontSize: 20,
+        paddingLeft:33,
+        top:-20,
+        fontWeight: 'bold',
+      },
+      closeButtonText: {
+        color: 'red',
+        paddingRight:0,
+        top:-9,
+      },
+      buttonConfirm:{
+        backgroundColor: COLORS.blue,
+        alignItems: 'center',
+        borderRadius:8,
+        padding:10
+      },
+      ButtonTextConfirm:{
+        color:COLORS.white,
+        fontSize:17,
+      },
+      buttonvictim:{
+        backgroundColor: COLORS.blue,
+        alignItems: 'center',
+        borderRadius:8,
+        padding:10
+      },
+      ButtonTextVictim:{
+        color:COLORS.white,
+        fontSize:17,
+      }
+    });
+    
+  export default VaccineForm;
+    
+    

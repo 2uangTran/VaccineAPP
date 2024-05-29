@@ -70,10 +70,14 @@ const DetailVaccines = ({ route }) => {
         .get();
 
       if (!cartSnapshot.empty) {
-        Alert.alert(
-          'Thông báo',
-          'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
-        );
+        showMessage({
+          message: 'Thông báo',
+          description: 'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
+          type: 'warning',
+          floating: true, 
+          autoHide: true, 
+          duration: 3000,
+        });
         return;
       }
 
@@ -83,6 +87,9 @@ const DetailVaccines = ({ route }) => {
         message: 'Thông báo',
         description: 'Vắc xin đã được thêm vào giỏ hàng',
         type: 'success',
+        floating: true, 
+        autoHide: true, 
+        duration: 3000,
       });
     } catch (error) {
       console.error('Error adding product to cart:', error);

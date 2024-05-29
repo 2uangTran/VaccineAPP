@@ -221,6 +221,9 @@ const UpdateInfo = () => {
         message: 'Thông báo',
         description: 'Cập nhật thông tin thành công',
         type: 'success',
+        floating: true, 
+        autoHide: true, 
+        duration: 3000,
       });
       
       navigation.navigate('Main');

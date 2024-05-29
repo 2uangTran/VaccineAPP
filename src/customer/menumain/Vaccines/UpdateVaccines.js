@@ -108,6 +108,9 @@ const UpdateVaccines = () => {
           message: 'Thông báo',
           description: 'Cập nhật thành công',
           type: 'success',
+          floating: true, 
+          autoHide: true, 
+          duration: 3000,
         });
         navigation.navigate('ListVaccin');
       })
