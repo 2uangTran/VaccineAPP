@@ -7,15 +7,16 @@ import COLORS from '../../theme/constants';
 import {useMyContextController} from '../../context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {FlatList} from 'react-native-gesture-handler';
-import Vaccines from './Vaccines';
+// import News from '../menumain/News';
 import {Button} from 'react-native-elements';
+import Newss from './News';
 
-const ListVaccin = () => {
+const ListNews = () => {
   const [loading, setLoading] = useState(true);
-  const [vaccines, setVaccines] = useState([]);
+  const [news, setNews] = useState([]);
   const [controller, dispatch] = useMyContextController();
   const {userLogin} = controller;
-  const ref = firestore().collection('vaccines');
+  const ref = firestore().collection('News');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -23,25 +24,24 @@ const ListVaccin = () => {
       const list = [];
 
       querySnapshot.forEach(doc => {
-        const {title, price, imageUrl, description, date} = doc.data();
+        const {title, imageUrl, description, date} = doc.data();
         list.push({
           id: doc.id,
           title,
-          price,
           imageUrl,
           description,
           date: date ? new Date(date) : null,
         });
       });
 
-      list.sort((a, b) => {
-        if (!a.date && !b.date) return 0;
-        if (!a.date) return 1;
-        if (!b.date) return -1;
-        return b.date - a.date;
-      });
+      // list.sort((a, b) => {
+      //   if (!a.date && !b.date) return 0;
+      //   if (!a.date) return 1;
+      //   if (!b.date) return -1;
+      //   return b.date - a.date;
+      // });
 
-      setVaccines(list);
+      setNews(list);
 
       if (loading) {
         setLoading(false);
@@ -54,25 +54,10 @@ const ListVaccin = () => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
-        <Appbar.Header style={styles.appbar}>
-          <View style={styles.searchContainer}>
-            <MaterialCommunityIcons
-              name="magnify"
-              size={24}
-              color={COLORS.white}
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Tìm theo tên gói, tên vắc xin,..."
-              placeholderTextColor={COLORS.white}
-            />
-          </View>
-        </Appbar.Header>
         <FlatList
-          data={vaccines}
+          data={news}
           keyExtractor={item => item.id}
-          renderItem={({item}) => <Vaccines {...item} />}
+          renderItem={({item}) => <Newss {...item} />}
           numColumns={1}
           contentContainerStyle={styles.list}
         />
@@ -166,4 +151,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ListVaccin;
+export default ListNews;

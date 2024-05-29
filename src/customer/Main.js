@@ -1,26 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, StyleSheet, Text, TouchableOpacity, ScrollView, Modal, Button, Image } from 'react-native';
-import { Appbar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
+import {
+  SafeAreaView,
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Button,
+  Image,
+} from 'react-native';
+import {Appbar} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
-import { useMyContextController } from '../../src/context';
+import {useMyContextController} from '../../src/context';
 import COLORS from '../theme/constants';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import UpdateInfo from '../customer/menuperson/UpdateInfo'; 
-
+import UpdateInfo from '../customer/menuperson/UpdateInfo';
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
   const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
   const [userInfoComplete, setUserInfoComplete] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const checkUserInfoComplete = (user) => {
+  const checkUserInfoComplete = user => {
     if (
       user.phoneNumber &&
       user.fullName &&
@@ -55,8 +64,8 @@ const Main = () => {
         setLoading(false);
       }
     });
-    return unsubscribe; 
-  }, []); 
+    return unsubscribe;
+  }, []);
 
   const handleModalClose = () => {
     setModalVisible(false);
@@ -136,37 +145,54 @@ const Main = () => {
             )}
             onPress={() => {}}
           />
-         
-            {getCurrentTimeMessage()}
+
+          {getCurrentTimeMessage()}
           {/* <View style={styles.greetingContainer}>
           </View> */}
           <View style={styles.spacer} />
         </Appbar.Header>
 
-        <View style={{position:'relative',height:200,backgroundColor:COLORS.white}}>
-        <View style={{height:100,backgroundColor:COLORS.blue}}/>
-          <View style={{position:'absolute', justifyContent: 'center',alignItems: 'center' , top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,}}>
-          <Image
-          source={{ uri: 'https://ik.imagekit.io/tvlk/blog/2021/09/du-lich-anh-2.jpg?tr=dpr-2,w-675' }}
-           style={{height:150,width:'80%',borderRadius:10}} />
+        <View
+          style={{
+            position: 'relative',
+            height: 200,
+            backgroundColor: COLORS.white,
+          }}>
+          <View style={{height: 100, backgroundColor: COLORS.blue}} />
+          <View
+            style={{
+              position: 'absolute',
+              justifyContent: 'center',
+              alignItems: 'center',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}>
+            <Image
+              source={{
+                uri: 'https://ik.imagekit.io/tvlk/blog/2021/09/du-lich-anh-2.jpg?tr=dpr-2,w-675',
+              }}
+              style={{height: 150, width: '80%', borderRadius: 10}}
+            />
           </View>
-          
         </View>
-        
+
         <Modal
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={handleModalClose}
-        >
+          onRequestClose={handleModalClose}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Thông tin tài khoản của bạn chưa đầy đủ. Vui lòng cập nhật thông tin của bạn để tiếp tục.</Text>
+              <Text style={styles.modalText}>
+                Thông tin tài khoản của bạn chưa đầy đủ. Vui lòng cập nhật thông
+                tin của bạn để tiếp tục.
+              </Text>
               <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={[styles.buttonmodal, styles.button]} onPress={handleUpdateInfo}>
+                <TouchableOpacity
+                  style={[styles.buttonmodal, styles.button]}
+                  onPress={handleUpdateInfo}>
                   <Text style={styles.buttonTextmodal}>Update Info</Text>
                 </TouchableOpacity>
               </View>
@@ -254,7 +280,9 @@ const Main = () => {
               ))}
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}>
+              <TouchableOpacity
+                style={styles.squareButton}
+                onPress={() => navigation.navigate('News')}>
                 <FontAwesome6 name="newspaper" size={24} color="white" />
               </TouchableOpacity>
               {splitDescription('Tin tức vắc xin').map((part, index) => (
@@ -268,11 +296,10 @@ const Main = () => {
         <View>
           <Text style={styles.news}>Tin tức và Kiến thức</Text>
           <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ width: "347%" }}
-              style={styles.buttonScroll}
-            >
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{width: '347%'}}
+            style={styles.buttonScroll}>
             <TouchableOpacity style={styles.whiteButton}>
               <Text style={styles.whiteButtonText}>Vắc xin người lớn</Text>
             </TouchableOpacity>
@@ -307,11 +334,11 @@ const Main = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:COLORS.white,
+    backgroundColor: COLORS.white,
   },
   appbar: {
     backgroundColor: COLORS.blue,
-    
+
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -327,7 +354,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
-    width:'80%'
+    width: '80%',
   },
   modalText: {
     marginBottom: 20,
@@ -337,26 +364,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     width: '100%',
-    
   },
   buttonmodal: {
     borderRadius: 10,
     backgroundColor: COLORS.white,
-    borderColor:COLORS.blue,
-    borderWidth: 1, 
-    padding:6,
+    borderColor: COLORS.blue,
+    borderWidth: 1,
+    padding: 6,
     alignItems: 'center',
-    width:"33%"
+    width: '33%',
   },
-  buttonTextmodal:{
-    color:COLORS.blue,
-    width:'100%',
-    paddingLeft:6
+  buttonTextmodal: {
+    color: COLORS.blue,
+    width: '100%',
+    paddingLeft: 6,
   },
   greetingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop:15,
+    paddingTop: 15,
   },
   spacer: {
     width: 24,
@@ -365,9 +391,8 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 17,
     textAlign: 'center',
-    justifyContent:'center',
-    width:'150%',
-  
+    justifyContent: 'center',
+    width: '150%',
   },
   userName: {
     fontSize: 16,
@@ -376,14 +401,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 10,
-    marginRight:20,
-    
+    marginRight: 20,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    paddingLeft:19,
+    paddingLeft: 19,
   },
   buttonWrapper: {
     alignItems: 'center',
@@ -402,7 +426,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     textAlign: 'center',
-    width:'100%'
+    width: '100%',
   },
   newsContainer: {
     marginTop: 20,
@@ -411,28 +435,25 @@ const styles = StyleSheet.create({
   news: {
     fontSize: 24,
     color: COLORS.black,
-    paddingLeft:10
+    paddingLeft: 10,
   },
   buttonScroll: {
     marginTop: 10,
-    
   },
   whiteButton: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.black,
-    paddingHorizontal: '1%', 
-    paddingVertical: '1%', 
+    paddingHorizontal: '1%',
+    paddingVertical: '1%',
     borderRadius: 5,
     marginHorizontal: 5,
   },
-  
+
   whiteButtonText: {
     color: COLORS.black,
-    fontSize: 17, 
+    fontSize: 17,
   },
-  
 });
-
 
 export default Main;

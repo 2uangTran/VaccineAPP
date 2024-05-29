@@ -16,9 +16,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import firestore from '@react-native-firebase/firestore';
 import {showMessage} from 'react-native-flash-message';
 import auth from '@react-native-firebase/auth';
+
 // import {Button} from 'react-native-elements';
 
-const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
+const Newss = ({id, title, imageUrl, description}) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
   const [controller] = useMyContextController();
@@ -27,53 +28,6 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const formatPrice = price => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
-
-  const handleAddToCartWrapper = async () => {
-    const userId = auth().currentUser.uid;
-    const item = {id, title, price, imageUrl, description, userId};
-
-    try {
-      const cartSnapshot = await firestore()
-        .collection('Cart')
-        .where('vaccineId', '==', id)
-        .where('userId', '==', userId)
-        .get();
-
-      if (!cartSnapshot.empty) {
-        Alert.alert(
-          'Thông báo',
-          'Bạn đã thêm vaccines này rồi. Vui lòng kiểm tra trong giỏ hàng.',
-        );
-        return;
-      }
-
-      await firestore()
-        .collection('Cart')
-        .add({
-          ...item,
-          vaccineId: id,
-        });
-      console.log('Product added to cart:', item);
-      showMessage({
-        message: 'Thông báo',
-        description: 'Vắc xin đã được thêm vào giỏ hàng',
-        type: 'success',
-      });
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
-    }
-  };
-
-  const handleBuyNow = () => {
-    // Viết logic xử lý khi mua ngay ở đây
-  };
-
   const isAdmin = userLogin?.role === 'admin';
 
   return (
@@ -81,14 +35,11 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
       <View style={styles.cardContainer}>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('DetailVaccines', {
+            navigation.navigate('DetailNews', {
               id,
               title,
-              price,
               imageUrl,
               description,
-              origin,
-              usage,
             });
           }}>
           <View style={styles.rowContainer}>
@@ -99,29 +50,9 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
           </View>
         </TouchableOpacity>
         <Text style={styles.description}>
-          <Text style={styles.boldText}>Phòng bệnh: </Text>
+          <Text style={styles.boldText}>Nội dung: </Text>
           {description}
         </Text>
-        <Text style={styles.price}>{formatPrice(price)}</Text>
-
-        <View style={styles.buttonContainer}>
-          {!isAdmin && (
-            <Button style={styles.buttonadd} onPress={handleAddToCartWrapper}>
-              <AntDesign
-                name="shoppingcart"
-                size={20}
-                color={COLORS.white}
-                style={{marginRight: 10}}
-              />
-              <Text style={styles.buttonLabel}>Thêm vào giỏ</Text>
-            </Button>
-          )}
-          {!isAdmin && (
-            <Button style={styles.buttonbuy} onPress={handleBuyNow}>
-              <Text style={styles.buttonLabelbuy}>Mua ngay</Text>
-            </Button>
-          )}
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -206,4 +137,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Vaccines;
+export default Newss;

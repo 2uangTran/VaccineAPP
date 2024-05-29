@@ -28,7 +28,11 @@ import DetailVaccines from '../customer/menumain/Vaccines/DetailVaccines';
 import CustomHeaderRightUpdate from './CustomHeaderRightUpdate';
 import UpdateVaccines from '../customer/menumain/Vaccines/UpdateVaccines';
 import Info from '../customer/vaccinform/Info';
-
+import News from '../customer/menumain/ListNews';
+import AddNews from '../customer/menumain/News/AddNews';
+import CustomHeaderRightNews from '../Router/CustomHeaderRightNews';
+import ListNews from '../customer/menumain/ListNews';
+import DetailNews from '../customer/menumain/News/DetailNews';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const CustomerTabNavigator = () => {
@@ -147,15 +151,44 @@ const RouterCustomer = () => {
           }}
         />
         <Stack.Screen
+          name="ListNews"
+          component={ListNews}
+          options={{
+            title: 'Danh mục vắc xin',
+            headerRight: () => <CustomHeaderRight />,
+          }}
+        />
+        <Stack.Screen
+          name="News"
+          component={News}
+          options={{
+            title: 'Tin tức',
+            headerRight: () => <CustomHeaderRightNews />,
+          }}
+        />
+        <Stack.Screen
+          name="DetailNews"
+          component={DetailNews}
+          options={{
+            title: 'Chi tiết sản phẩm',
+            headerRight: () => <CustomHeaderRightUpdate />,
+          }}
+        />
+        <Stack.Screen
           name="AddNewVaccine"
           component={AddNewVaccine}
           options={{title: 'Thêm Vaccine'}}
         />
         <Stack.Screen
+          name="AddNews"
+          component={AddNews}
+          options={{title: 'Thêm tin tức'}}
+        />
+        <Stack.Screen
           name="InfoVictim"
           component={InfoVictim}
           options={{
-            title: 'Thông tin người được tiêm'
+            title: 'Thông tin người được tiêm',
           }}
         />
         <Stack.Screen
@@ -178,13 +211,15 @@ const RouterCustomer = () => {
           name="UpdateVaccines"
           component={UpdateVaccines}
           options={{
-            title: 'Cập nhật sản phẩm'}}
+            title: 'Cập nhật sản phẩm',
+          }}
         />
         <Stack.Screen
           name="Info"
           component={Info}
           options={{
-            title: 'Thông tin người tiêm'}}
+            title: 'Thông tin người tiêm',
+          }}
         />
       </Stack.Navigator>
     </MyContextControllerProvider>

@@ -13,7 +13,7 @@ import {useMyContextController, login} from '../../src/context';
 import COLORS from '../theme/constants';
 
 const Login = ({navigation}) => {
-  const [email, setEmail] = useState('hoang12@gmail.com');
+  const [email, setEmail] = useState('hoang123@gmail.com');
   const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
   const [controller, dispatch] = useMyContextController();

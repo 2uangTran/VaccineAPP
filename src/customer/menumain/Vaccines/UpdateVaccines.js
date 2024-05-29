@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
+import COLORS from '../../../theme/constants';
+import {Button, Icon} from 'react-native-elements';
 import {
   View,
   Text,
   TextInput,
-  Button,
+  // Button,
   Image,
   Platform,
   StyleSheet,
@@ -11,17 +13,25 @@ import {
   ScrollView,
 } from 'react-native';
 import LottieView from 'lottie-react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { Picker } from '@react-native-picker/picker';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {Picker} from '@react-native-picker/picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { showMessage } from 'react-native-flash-message';
+import {useRoute, useNavigation} from '@react-navigation/native';
+import {showMessage} from 'react-native-flash-message';
 
 const UpdateVaccines = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { id, title = '', price = 0, imageUrl = '', description = '', origin = '', usage = '' } = route.params || {};
+  const {
+    id,
+    title = '',
+    price = 0,
+    imageUrl = '',
+    description = '',
+    origin = '',
+    usage = '',
+  } = route.params || {};
 
   const [vaccine, setVaccine] = useState(title);
   const [vaccineError, setVaccineError] = useState('');
@@ -32,7 +42,7 @@ const UpdateVaccines = () => {
   const [imageUri, setImageUri] = useState(imageUrl);
   const [descriptionState, setDescription] = useState(description);
   const [originState, setOrigin] = useState(origin);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   const ref = firestore().collection('vaccines');
   const origins = ['USA', 'China', 'India', 'Russia', 'UK', 'Bỉ'];
@@ -56,42 +66,42 @@ const UpdateVaccines = () => {
   }, [title, price, imageUrl, description, origin, usage]);
 
   async function updateVaccine() {
-    setIsLoading(true); 
+    setIsLoading(true);
 
     if (vaccine.trim() === '') {
       setVaccineError('Chưa nhập vắc xin');
-      setIsLoading(false); 
+      setIsLoading(false);
       return;
     } else {
       setVaccineError('');
     }
-  
+
     if (isNaN(parseFloat(priceState))) {
       setPriceError('Chưa nhập giá tiền.');
-      setIsLoading(false); 
+      setIsLoading(false);
       return;
     } else {
       setPriceError('');
     }
-  
+
     let imageUrlUpdated = imageUri;
     if (imageUri && imageUri !== imageUrl) {
       const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
       const uploadUri =
         Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
       const task = storage().ref(filename).putFile(uploadUri);
-  
+
       try {
         await task;
         imageUrlUpdated = await storage().ref(filename).getDownloadURL();
       } catch (e) {
         console.error('Failed to upload image', e);
         Alert.alert('Error', 'Failed to upload image. Please try again.');
-        setIsLoading(false); 
+        setIsLoading(false);
         return;
       }
     }
-  
+
     ref
       .doc(id)
       .update({
@@ -111,79 +121,100 @@ const UpdateVaccines = () => {
         });
         navigation.navigate('ListVaccin');
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Failed to update vaccine', error);
         Alert.alert('Error', 'Failed to update vaccine. Please try again.');
       })
       .finally(() => {
-        setIsLoading(false); 
+        setIsLoading(false);
       });
   }
 
   return (
     <ScrollView style={styles.scrollView}>
       <View style={styles.container}>
-        <Text style={styles.label}>Vaccine:</Text>
+        <Text style={styles.label}>Tên Vắc xin:</Text>
         <TextInput
           style={styles.input}
           value={vaccine}
-          onChangeText={(text) => setVaccine(text)}
+          onChangeText={text => setVaccine(text)}
         />
         {vaccineError ? <Text style={styles.error}>{vaccineError}</Text> : null}
-  
-        <Text style={styles.label}>Price:</Text>
+
+        <Text style={styles.label}>Giá tiền:</Text>
         <TextInput
           style={styles.input}
           value={priceState}
           keyboardType="numeric"
-          onChangeText={(text) => setPrice(text)}
+          onChangeText={text => setPrice(text)}
         />
         {priceError ? <Text style={styles.error}>{priceError}</Text> : null}
-  
-        <Text style={styles.label}>Description:</Text>
+
+        <Text style={styles.label}>Mô tả:</Text>
         <TextInput
           style={styles.input}
           value={descriptionState}
-          onChangeText={(text) => setDescription(text)}
+          onChangeText={text => setDescription(text)}
         />
-  
-        <Text style={styles.label}>Origin:</Text>
-        <Picker
-          selectedValue={originState}
-          onValueChange={(itemValue) => setOrigin(itemValue)}
-          style={styles.picker}
-        >
-          {origins.map((origin) => (
-            <Picker.Item key={origin} label={origin} value={origin} />
-          ))}
-        </Picker>
-  
-        <Text style={styles.label}>Usage:</Text>
-        <Picker
-          selectedValue={usageState}
-          onValueChange={(itemValue) => setUsage(itemValue)}
-          style={styles.picker}
-        >
-          {usages.map((usage) => (
-            <Picker.Item key={usage} label={usage} value={usage} />
-          ))}
-        </Picker>
-  
-        <Button title="Select Image" onPress={() => launchImageLibrary({}, (response) => {
-          if (response.assets) {
-            setImageUri(response.assets[0].uri);
+
+        <Text style={styles.label}>Xuất xứ:</Text>
+        <View style={styles.picker}>
+          <Picker
+            selectedValue={originState}
+            onValueChange={itemValue => setOrigin(itemValue)}>
+            {origins.map(origin => (
+              <Picker.Item key={origin} label={origin} value={origin} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Cách sử dụng:</Text>
+        <View style={styles.picker}>
+          <Picker
+            selectedValue={usageState}
+            onValueChange={itemValue => setUsage(itemValue)}>
+            {usages.map(usage => (
+              <Picker.Item key={usage} label={usage} value={usage} />
+            ))}
+          </Picker>
+        </View>
+
+        <Button
+          buttonStyle={styles.btn}
+          title="Thêm ảnh"
+          onPress={() =>
+            launchImageLibrary({}, response => {
+              if (response.assets) {
+                setImageUri(response.assets[0].uri);
+              }
+            })
           }
-        })} />
-  
-        {imageUri ? <Image source={{ uri: imageUri }} style={styles.image} /> : null}
-  
-        <Button title="Update Vaccine" onPress={updateVaccine} disabled={loading || isLoading} />
-  
-      
+          icon={
+            <Icon
+              name="image"
+              type="font-awesome"
+              size={20}
+              color="white"
+              style={{marginRight: 10}}
+            />
+          }
+          iconLeft
+        />
+
+        {imageUri ? (
+          <Image source={{uri: imageUri}} style={styles.image} />
+        ) : null}
+
+        <Button
+          title="Cập nhật"
+          onPress={updateVaccine}
+          disabled={loading || isLoading}
+        />
+
         {isLoading && (
           <View style={styles.loadingContainer}>
             <LottieView
-              style={{ width: 100, height: 100 }} 
+              style={{width: 100, height: 100}}
               source={require('../../../theme/Loading/loadingdot.json')}
               autoPlay
               loop
@@ -196,9 +227,21 @@ const UpdateVaccines = () => {
 };
 
 const styles = StyleSheet.create({
-  scrollView:
-  {
+  scrollView: {
     flex: 1,
+  },
+  btn: {
+    backgroundColor: COLORS.orange,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  inputContainer: {
+    marginBottom: 15,
+    borderColor: '#000000',
   },
   container: {
     flex: 1,
@@ -232,11 +275,11 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   loadingContainer: {
-    ...StyleSheet.absoluteFillObject, 
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    zIndex:1,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
 });
 

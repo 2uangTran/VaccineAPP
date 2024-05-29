@@ -35,26 +35,26 @@ const CustomHeaderRight = () => {
 
   const onPressHandler = () => {
     if (userLogin && userLogin.role === 'admin') {
-      navigation.navigate('AddNewVaccine');
+      navigation.navigate('AddNews');
     } else {
-      setModalVisible(true);
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      //   setModalVisible(true);
+      //   Animated.timing(slideAnim, {
+      //     toValue: 0,
+      //     duration: 300,
+      //     useNativeDriver: true,
+      //   }).start();
     }
   };
 
-  const closeModal = () => {
-    Animated.timing(slideAnim, {
-      toValue: height,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setModalVisible(false);
-    });
-  };
+  //   const closeModal = () => {
+  //     Animated.timing(slideAnim, {
+  //       toValue: height,
+  //       duration: 300,
+  //       useNativeDriver: true,
+  //     }).start(() => {
+  //       setModalVisible(false);
+  //     });
+  //   };
 
   return (
     <View>
@@ -66,48 +66,7 @@ const CustomHeaderRight = () => {
             color="white"
           />
         </TouchableOpacity>
-      ) : (
-        <TouchableOpacity onPress={onPressHandler} style={{paddingRight: 20}}>
-          <MaterialCommunityIcons
-            name="shopping-outline"
-            size={24}
-            color="white"
-          />
-          {cartCount > 0 && <Text style={styles.cartCount}>{cartCount}</Text>}
-        </TouchableOpacity>
-      )}
-
-      <Modal
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={closeModal}>
-        <View style={styles.modalOverlay}>
-          <Animated.View
-            style={[
-              styles.modalContent,
-              {transform: [{translateY: slideAnim}]},
-            ]}>
-            <Appbar style={styles.appbar}>
-              <View style={{flex: 1, alignItems: 'center'}}>
-                <Text style={styles.appbarText}>
-                  Danh sách vắc xin chọn mua
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={closeModal}
-                style={styles.closeButtonText}>
-                <Text style={styles.closeButtonText}>Đóng</Text>
-              </TouchableOpacity>
-            </Appbar>
-            <Cart />
-            <TouchableOpacity onPress={closeModal} style={styles.buttonvictim}>
-              <Text style={styles.ButtonTextVictim}>
-                Đăng ký mũi tiêm ({cartCount})
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </Modal>
+      ) : null}
     </View>
   );
 };
