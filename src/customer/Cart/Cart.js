@@ -1,25 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, CheckBox } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import {useRoute, useNavigation} from '@react-navigation/native';
 import COLORS from '../../theme/constants';
-import {deleteVaccines} from '../../context/index';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import auth from "@react-native-firebase/auth";
 import Feather from 'react-native-vector-icons/Feather';
+import auth from "@react-native-firebase/auth";
 
-
-const Cart = () => {
+const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
   const [cartItems, setCartItems] = useState([]);
-  // const {cartid} = route.params;
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -42,70 +30,63 @@ const Cart = () => {
         console.error('Error fetching cart items:', error);
       }
     };
-  
+
     fetchCartItems();
   }, []);
 
-
-  const handleRemoveFromCart = async iddoc => {
-    Alert.alert(
-      'Warning',
-      'Are you sure you want to remove this service from your cart? This action cannot be undone.',
-      [
-        {
-          text: 'Remove',
-          onPress: async () => {
-            try {
-              await deleteVaccines(iddoc);
-              console.log(`Removing vaccine with id: ${iddoc}`);
-              setCartItems(prevItems =>
-                prevItems.filter(item => item.iddoc !== iddoc),
-              );
-             
-            } catch (error) {
-              console.error('Error removing item from cart:', error);
-            }
-          },
-        },
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-      ],
-      {cancelable: false},
-    );
+  const handleSelectItem = (item) => {
+    if (selectedItems.includes(item)) {
+      setSelectedItems(selectedItems.filter(selectedItem => selectedItem.iddoc !== item.iddoc));
+    } else {
+      setSelectedItems([...selectedItems, item]);
+    }
   };
-  
-  const renderItem = ({item}) => (
+
+  const handleConfirmSelection = () => {
+    onSelectItems(selectedItems);
+  };
+
+  const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.rowContainer}>
-          <Image source={{ uri: item.imageUrl }} style={styles.image} />
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-          </View>
+        <Image source={{ uri: item.imageUrl }} style={styles.image} />
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>{item.title}</Text>
         </View>
-        <Text style={styles.description}>
-            <Text style={styles.boldText}>Phòng bệnh: </Text>
-            {item.description}
-          </Text>
-          <View style={{ flexDirection: 'row' }}>
-          <Text style={styles.price}>{formatPrice(item.price)}</Text>
-          <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={{ marginLeft: 'auto' }}>
+      </View>
+      <Text style={styles.description}>
+        <Text style={styles.boldText}>Phòng bệnh: </Text>
+        {item.description}
+      </Text>
+      <View style={styles.rowContainer}>
+        <Text style={styles.price}>{formatPrice(item.price)}</Text>
+        {isOpenedFromVaccineForm ? (
+          <CheckBox
+            value={selectedItems.includes(item)}
+            onValueChange={() => handleSelectItem(item)}
+          />
+        ) : (
+          <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={styles.trashButton}>
             <Feather name="trash-2" size={24} color={COLORS.red} />
           </TouchableOpacity>
-        </View>
+        )}
+      </View>
     </View>
   );
-  
+
   return (
     <View style={styles.container}>
       <FlatList
         data={cartItems}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.iddoc}
         contentContainerStyle={styles.listContainer}
       />
+      {isOpenedFromVaccineForm && (
+        <TouchableOpacity onPress={handleConfirmSelection} style={styles.confirmButton}>
+          <Text style={styles.confirmButtonText}>Xác nhận</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -126,7 +107,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     backgroundColor: '#fff',
-   
   },
   rowContainer: {
     flexDirection: 'row',
@@ -160,6 +140,9 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: 'bold',
     color: COLORS.black,
+  },
+  trashButton: {
+    marginLeft: 'auto',
   },
 });
 
