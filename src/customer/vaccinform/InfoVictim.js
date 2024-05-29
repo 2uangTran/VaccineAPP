@@ -27,7 +27,7 @@ const {height} = Dimensions.get('window');
 const VaccineForm = () => {
   const [center, setCenter] = useState('');
   const [date, setDate] = useState('');
-  const [vaccine, setVaccine] = useState('');
+  const [vaccine, setVaccine] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -36,7 +36,6 @@ const VaccineForm = () => {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const [isCenterModalVisible, setIsCenterModalVisible] = useState(false);
   const [isCartModalVisible, setIsCartModalVisible] = useState(false);
-  const [showCheckBox, setShowCheckBox] = useState(false);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -79,7 +78,6 @@ const VaccineForm = () => {
 
   const modalCart = () => {
     setIsCartModalVisible(true);
-    setShowCheckBox(true);
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
@@ -88,7 +86,6 @@ const VaccineForm = () => {
   };
 
   const closeModal = () => {
-    setShowCheckBox(false);
     Animated.timing(slideAnim, {
       toValue: height,
       duration: 300,
@@ -116,7 +113,12 @@ const VaccineForm = () => {
 
   const handleCenterSelect = selectedCenter => {
     setCenter(selectedCenter.name);
-    setIsModalVisible(false);
+    setIsCenterModalVisible(false);
+  };
+
+  const handleSelectItems = selectedItems => {
+    setVaccine(selectedItems);
+    setIsCartModalVisible(false);
   };
 
   return (
@@ -222,17 +224,25 @@ const VaccineForm = () => {
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Chọn vắc xin *</Text>
-          <View
-            style={{
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: 50,
-            }}>
-            <FontAwesome6 name="table-list" size={100} color={COLORS.gray} />
-            <Text style={{left: '14%', color: '#CCCCCC', width: '100%'}}>
-              Danh sách vắc xin chọn mua trống
-            </Text>
-          </View>
+          {vaccine.length ? (
+            <View>
+              {vaccine.map((item, index) => (
+                <Text key={index}>{item.name}</Text>
+              ))}
+            </View>
+          ) : (
+            <View
+              style={{
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: 50,
+              }}>
+              <FontAwesome6 name="table-list" size={100} color={COLORS.gray} />
+              <Text style={{color: '#CCCCCC'}}>
+                Danh sách vắc xin chọn mua trống
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.buttonGroup}>
@@ -242,14 +252,14 @@ const VaccineForm = () => {
                 name="shoppingcart"
                 size={20}
                 color={COLORS.white}
-                style={{marginRight: 13, left: '100%'}}
+                style={{marginRight: 13}}
               />
-              <Text style={[styles.buttonTextAdd]}>Thêm từ giỏ</Text>
+              <Text style={styles.buttonTextAdd}>Thêm từ giỏ</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.buttonBuy]}>
-            <Text style={[styles.buttonTextBuy]}>Thêm mới vắc xin</Text>
+            <Text style={styles.buttonTextBuy}>Thêm mới vắc xin</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -274,14 +284,17 @@ const VaccineForm = () => {
               {transform: [{translateY: slideAnim}]},
             ]}>
             <Appbar style={styles.appbar}>
-              <View style={{flex: 1, alignItems: 'center'}}>
-                <Text style={styles.appbarText}>Danh sách trung tâm</Text>
+              <View
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 1, alignItems: 'center'}}>
+                  <Text style={styles.appbarText}>Danh sách trung tâm</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={styles.closeButtonText}>
+                  <Text style={styles.closeButtonText}>Đóng</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={closeModal}
-                style={styles.closeButtonText}>
-                <Text style={styles.closeButtonText}>Đóng</Text>
-              </TouchableOpacity>
             </Appbar>
             <Centers onSelect={handleCenterSelect} />
           </Animated.View>
@@ -299,24 +312,25 @@ const VaccineForm = () => {
               {transform: [{translateY: slideAnim}]},
             ]}>
             <Appbar style={styles.appbar}>
-              <View style={{flex: 1, alignItems: 'center'}}>
-                <Text style={styles.appbarText}>Danh sách trung tâm</Text>
+              <View
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 1, alignItems: 'center'}}>
+                  <Text style={styles.appbarText}>Danh sách vắc xin</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={styles.closeButtonText}>
+                  <Text style={styles.closeButtonText}>Đóng</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={closeModal}
-                style={styles.closeButtonText}>
-                <Text style={styles.closeButtonText}>Đóng</Text>
-              </TouchableOpacity>
             </Appbar>
-            <Cart isOpenedFromVaccineForm={isCartModalVisible} />
-
-            {showCheckBox && (
-              <TouchableOpacity
-                onPress={closeModal}
-                style={styles.buttonConfirm}>
-                <Text style={styles.ButtonTextConfirm}>Xác nhận</Text>
-              </TouchableOpacity>
-            )}
+            <Cart
+              onSelectItems={handleSelectItems}
+              isOpenedFromVaccineForm={isCartModalVisible}
+            />
+            <TouchableOpacity onPress={closeModal} style={styles.buttonvictim}>
+              <Text style={styles.ButtonTextVictim}>Xác nhận</Text>
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
@@ -441,10 +455,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: 'black',
   },
-  modalCloseButton: {
-    alignSelf: 'flex-end',
-    marginBottom: 10,
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -454,7 +464,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderTopLeftRadius: 20,
-    borderTopRightradius: 20,
+    borderTopRightRadius: 20,
     height: height / 1.16,
   },
   appbar: {
@@ -483,6 +493,16 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   ButtonTextConfirm: {
+    color: COLORS.white,
+    fontSize: 17,
+  },
+  buttonvictim: {
+    backgroundColor: COLORS.blue,
+    alignItems: 'center',
+    borderRadius: 8,
+    padding: 10,
+  },
+  ButtonTextVictim: {
     color: COLORS.white,
     fontSize: 17,
   },

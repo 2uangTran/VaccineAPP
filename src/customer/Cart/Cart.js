@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, CheckBox } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
 import Feather from 'react-native-vector-icons/Feather';
 import auth from "@react-native-firebase/auth";
+import { showMessage } from 'react-native-flash-message';
 
-const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
+const Cart = ({ isOpenedFromVaccineForm }) => {
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -24,6 +25,7 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
         const items = cartSnapshot.docs.map(doc => ({
           iddoc: doc.id,
           ...doc.data(),
+          selected: false, 
         }));
         setCartItems(items);
       } catch (error) {
@@ -34,25 +36,62 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
     fetchCartItems();
   }, []);
 
-  const handleSelectItem = (item) => {
-    if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter(selectedItem => selectedItem.iddoc !== item.iddoc));
-    } else {
-      setSelectedItems([...selectedItems, item]);
-    }
+  const handleToggleCheckbox = (id) => {
+    const updatedItems = cartItems.map(item => {
+      if (item.iddoc === id) {
+        return { ...item, selected: !item.selected };
+      }
+      return item;
+    });
+    setCartItems(updatedItems);
   };
 
-  const handleConfirmSelection = () => {
-    onSelectItems(selectedItems);
+  const handleRemoveFromCart = async (iddoc) => {
+    Alert.alert(
+      'Warning',
+      'Are you sure you want to remove this service from your cart? This action cannot be undone.',
+      [
+        {
+          text: 'Remove',
+          onPress: async () => {
+            try {
+              await firestore().collection('Cart').doc(iddoc).delete();    
+              setCartItems(prevItems =>
+                prevItems.filter(item => item.iddoc !== iddoc),
+              );
+              showMessage({
+                message: 'Thông báo',
+                description: 'Xóa vắc xin thành công',
+                type: 'success',
+                floating: true, 
+                autoHide: true, 
+                duration: 3000,
+              });
+            } catch (error) {
+              console.error('Error removing item from cart:', error);
+            }
+          },
+        },
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+      ],
+      { cancelable: false },
+    );
   };
+  
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.rowContainer}>
+       
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{item.title}</Text>
         </View>
+       
       </View>
       <Text style={styles.description}>
         <Text style={styles.boldText}>Phòng bệnh: </Text>
@@ -60,33 +99,34 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
       </Text>
       <View style={styles.rowContainer}>
         <Text style={styles.price}>{formatPrice(item.price)}</Text>
-        {isOpenedFromVaccineForm ? (
-          <CheckBox
-            value={selectedItems.includes(item)}
-            onValueChange={() => handleSelectItem(item)}
-          />
-        ) : (
+        {!isOpenedFromVaccineForm && (
           <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={styles.trashButton}>
             <Feather name="trash-2" size={24} color={COLORS.red} />
           </TouchableOpacity>
         )}
+         {isOpenedFromVaccineForm && (
+          <TouchableOpacity onPress={() => handleToggleCheckbox(item.iddoc)}>
+            <Feather
+              name={item.selected ? 'check-square' : 'square'}
+              size={24}
+              color={item.selected ? COLORS.blue : COLORS.black}
+              style={{}}
+            />
+          </TouchableOpacity>
+        )}
       </View>
+      
     </View>
   );
-
+  
   return (
     <View style={styles.container}>
       <FlatList
         data={cartItems}
         renderItem={renderItem}
-        keyExtractor={item => item.iddoc}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.listContainer}
       />
-      {isOpenedFromVaccineForm && (
-        <TouchableOpacity onPress={handleConfirmSelection} style={styles.confirmButton}>
-          <Text style={styles.confirmButtonText}>Xác nhận</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -111,6 +151,7 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', 
   },
   image: {
     width: 100,
@@ -141,9 +182,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.black,
   },
-  trashButton: {
-    marginLeft: 'auto',
-  },
+
 });
 
 export default Cart;

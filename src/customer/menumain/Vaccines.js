@@ -41,15 +41,19 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
     try {
       const cartSnapshot = await firestore()
         .collection('Cart')
-        .where('vaccineId', '==', id)
+        .where('id', '==', id)
         .where('userId', '==', userId)
         .get();
 
       if (!cartSnapshot.empty) {
-        Alert.alert(
-          'Thông báo',
-          'Bạn đã thêm vaccines này rồi. Vui lòng kiểm tra trong giỏ hàng.',
-        );
+        showMessage({
+          message: 'Thông báo',
+          description: 'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
+          type: 'warning',
+          floating: true, 
+          autoHide: true, 
+          duration: 5000,
+        });
         return;
       }
 
@@ -64,6 +68,9 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
         message: 'Thông báo',
         description: 'Vắc xin đã được thêm vào giỏ hàng',
         type: 'success',
+        floating: true, 
+        autoHide: true, 
+        duration: 3000,
       });
     } catch (error) {
       console.error('Error adding product to cart:', error);
