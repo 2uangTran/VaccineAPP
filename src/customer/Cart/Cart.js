@@ -6,9 +6,16 @@ import Feather from 'react-native-vector-icons/Feather';
 import auth from "@react-native-firebase/auth";
 import { showMessage } from 'react-native-flash-message';
 
-const Cart = ({ isOpenedFromVaccineForm }) => {
-  const [selectedItems, setSelectedItems] = useState([]);
+const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
   const [cartItems, setCartItems] = useState([]);
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(price);
+  };
+
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -75,8 +82,13 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
     );
   };
 
+  const handleConfirmSelection = () => {
+    const selectedItems = cartItems.filter(item => item.selected);
+    onSelectItems(selectedItems);
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
+    <View key={item.iddoc} style={styles.itemContainer}>
       <View style={styles.rowContainer}>
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <View style={styles.titleContainer}>
@@ -88,7 +100,7 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
         {item.description}
       </Text>
       <View style={styles.rowContainer}>
-        <Text style={styles.price}>{item.price}</Text>
+      <Text style={styles.price}>{formatPrice(item.price)}</Text>
         {!isOpenedFromVaccineForm && (
           <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={styles.trashButton}>
             <Feather name="trash-2" size={24} color={COLORS.red} />
@@ -112,9 +124,14 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
       <FlatList
         data={cartItems}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.iddoc}
         contentContainerStyle={styles.listContainer}
       />
+      {isOpenedFromVaccineForm && (
+        <TouchableOpacity onPress={handleConfirmSelection} style={styles.confirmButton}>
+          <Text style={styles.confirmButtonText}>Xác nhận</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -169,6 +186,16 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: 'bold',
     color: COLORS.black,
+  },
+  confirmButton: {
+    backgroundColor: COLORS.blue,
+    alignItems: 'center',
+    borderRadius: 8,
+    padding: 10,
+  },
+  confirmButtonText: {
+    color: COLORS.white,
+    fontSize: 17,
   },
 });
 
