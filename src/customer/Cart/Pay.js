@@ -6,6 +6,7 @@ import COLORS from '../../theme/constants';
 import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from '../../context';
 import firestore from '@react-native-firebase/firestore';
+import { RadioButton } from 'react-native-paper';
 
 const Pay = () => {
   const [controller] = useMyContextController();
@@ -15,7 +16,10 @@ const Pay = () => {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
   const [detailsVisible, setDetailsVisible] = useState(true);
+  const [payVisible, setPayVisible] = useState(true);
   const navigation = useNavigation();
+  const [checked, setChecked] = useState('');
+
   const [formData, setFormData] = useState({
     phoneNumber: '',
     fullName: '',
@@ -115,7 +119,9 @@ const Pay = () => {
   const toggleDetails = () => {
     setDetailsVisible(!detailsVisible);
   };
-
+  const togglePays = () => {
+    setPayVisible(!payVisible);
+  };
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -127,8 +133,7 @@ const Pay = () => {
               <Text style={styles.titleLabel}>Chi tiết người tiêm</Text>
               <Feather
                 name={detailsVisible ? 'chevron-up' : 'chevron-down'}
-                size={20}
-                color="black"
+                style={styles.titleLabels}
               />
             </TouchableOpacity>
           </View>
@@ -136,13 +141,13 @@ const Pay = () => {
             <Text>Loading...</Text>
           ) : detailsVisible ? (
             <>
-             <Text style={styles.label}>Họ và tên</Text>
+             <Text style={styles.label}>Họ và tên <Text style={{color:'red'}}>*</Text></Text>
               <TextInput
                 style={styles.input}
                 value={formData.fullName}
                 onChangeText={(value) => handleInputChange('fullName', value)}
               />
-              <Text style={styles.label}>Số điện thoại</Text>
+              <Text style={styles.label}>Số điện thoại <Text style={{color:'red'}}>*</Text></Text>
               <TextInput
                 style={styles.input}
                 value={formData.phoneNumber}
@@ -155,7 +160,7 @@ const Pay = () => {
                 editable={false}
                 onChangeText={(value) => handleInputChange('email', value)}
               />
-              <Text style={styles.label}>Tỉnh / Thành phố</Text>
+              <Text style={styles.label}>Tỉnh / Thành phố <Text style={{color:'red'}}>*</Text></Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.province}
@@ -172,7 +177,7 @@ const Pay = () => {
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Quận / Huyện</Text>
+              <Text style={styles.label}>Quận / Huyện <Text style={{color:'red'}}>*</Text></Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.district}
@@ -189,7 +194,7 @@ const Pay = () => {
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Phường / Xã</Text>
+              <Text style={styles.label}>Phường / Xã <Text style={{color:'red'}}>*</Text></Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.ward}
@@ -206,7 +211,7 @@ const Pay = () => {
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Địa chỉ</Text>
+              <Text style={styles.label}>Địa chỉ <Text style={{color:'red'}}>*</Text></Text>
               <TextInput
                 style={styles.input}
                 value={formData.address}
@@ -217,6 +222,51 @@ const Pay = () => {
             </>
           ) : null}
         </View>
+        <View style={{ borderWidth: 1, padding: 10, borderRadius: 10, marginTop: '2%' }}>
+    <View style={styles.headerContainer}>
+        <TouchableOpacity
+        onPress={togglePays}
+        style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={styles.titleLabel}>Chi tiết người tiêm</Text>
+        <Feather
+            name={payVisible ? 'chevron-up' : 'chevron-down'}
+            style={styles.titleLabels}
+        />
+        </TouchableOpacity>
+    </View>
+    {loading ? (
+        <Text>Loading...</Text>
+    ) : payVisible ? (
+        <>
+       
+       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <RadioButton
+            value="credit_card"
+            status={checked === 'credit_card' ? 'checked' : 'unchecked'}
+            onPress={() => setChecked('credit_card')}
+        />
+    <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+                value="paypal"
+                status={checked === 'paypal' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('paypal')}
+            />
+            <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+                value="zalo"
+                status={checked === 'zalo' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('zalo')}
+            />
+            <Text style={{ fontSize: 20, color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
+        </View>
+        </>
+    ) : null}
+    </View>
+
       </ScrollView>
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
@@ -241,6 +291,14 @@ const styles = StyleSheet.create({
   titleLabel: {
     fontWeight: 'bold',
     fontSize: 16,
+    color:COLORS.blue,
+    paddingTop:'2%'
+  },
+  titleLabels:{
+    fontWeight: 'bold',
+    fontSize: 19,
+    color:COLORS.blue,
+    paddingTop:'2%'
   },
   label: {
     fontWeight: 'bold',

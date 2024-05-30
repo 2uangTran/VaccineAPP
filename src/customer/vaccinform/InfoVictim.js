@@ -148,16 +148,12 @@ const VaccineForm = () => {
       navigation.navigate('ConfirmCart', { 
         userInfo: userInfo, 
         center: center, 
-        selectedDate: { 
-          day: selectedDate.getDate(),
-          month: selectedDate.getMonth(),
-          year: selectedDate.getFullYear()
-        },
+        selectedDateTimestamp: selectedDate.getTime(), 
         vaccine: vaccine 
       });
-      
     }
   };
+  
 
   const validateForm = () => {
     let isValid = true;

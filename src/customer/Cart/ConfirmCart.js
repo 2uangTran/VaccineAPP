@@ -6,7 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 
 const ConfirmCart = ({ route }) => {
   const navigation = useNavigation();
-  const { userInfo, center, selectedDate, vaccine } = route.params;
+  const { userInfo, center, selectedDateTimestamp, vaccine } = route.params;
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -14,6 +14,7 @@ const ConfirmCart = ({ route }) => {
       currency: 'VND',
     }).format(price);
   };
+  const selectedDate = new Date(selectedDateTimestamp);
 
   const calculateTotalPrice = () => {
     let totalPrice = 0;
@@ -22,18 +23,28 @@ const ConfirmCart = ({ route }) => {
     });
     return formatPrice(totalPrice);
   };
+
   const handlePay = () => {
     navigation.navigate('Pay', { 
-        userInfo: userInfo, 
-        center: center, 
-        selectedDate: { 
-            day: selectedDate.getDate(),
-            month: selectedDate.getMonth(),
-            year: selectedDate.getFullYear()
-        },
-        vaccine: vaccine 
+      userInfo: userInfo, 
+      center: center, 
+      vaccine: vaccine 
     });
-};
+  };
+  
+    const formatDate = (date) => {
+  
+        const day = date.getDate();
+        const month = date.getMonth() + 1; 
+        const year = date.getFullYear();
+    
+       
+        const paddedDay = day < 10 ? `0${day}` : day;
+        const paddedMonth = month < 10 ? `0${month}` : month;
+    
+       
+        return `${paddedDay}/${paddedMonth}/${year}`;
+    };
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -69,7 +80,7 @@ const ConfirmCart = ({ route }) => {
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Ngày tiêm:</Text>
-          <Text style={styles.info}>{selectedDate.toLocaleDateString()}</Text>
+          <Text style={styles.info}><Text style={styles.info}>{formatDate(selectedDate)}</Text></Text>
         </View>
         </View>
         <Text style={styles.header}>Thông tin vắc xin đã chọn</Text>
