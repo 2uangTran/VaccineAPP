@@ -16,42 +16,21 @@ import storage from '@react-native-firebase/storage';
 import COLORS from '../../../theme/constants';
 import {ScrollView} from 'react-native-gesture-handler';
 
-const AddNewVaccine = () => {
-  const [vaccine, setVaccine] = useState('');
-  const [vaccineError, setVaccineError] = useState('');
-  const [price, setPrice] = useState('');
-  const [priceError, setPriceError] = useState('');
-  const [usage, setUsage] = useState('');
+const AddNews = () => {
+  const [newss, setNewss] = useState('');
+  const [newsError, setNewsError] = useState('');
   const [loading, setLoading] = useState(true);
   const [imageUri, setImageUri] = useState(null);
   const [description, setDescription] = useState('');
-  const [origin, setOrigin] = useState('');
-  const ref = firestore().collection('vaccines');
-  const [vaccines, setVaccines] = useState([]);
-  const origins = ['USA', 'China', 'India', 'Russia', 'UK', 'Bỉ'];
-  const usages = [
-    'Miệng',
-    'Tiêm',
-    'Nhỏ giọt',
-    'Hít vào',
-    'Đường uống',
-    'Tiêm bắp',
-    'Tiêm trong da',
-  ];
+  const ref = firestore().collection('News');
+  const [news, setNewsList] = useState([]);
 
-  async function addVaccine() {
-    if (vaccine.trim() === '') {
-      setVaccineError('Chưa nhập vắc xin');
+  async function addNews() {
+    if (newss.trim() === '') {
+      setNewsError('Chưa nhập vắc xin');
       return;
     } else {
-      setVaccineError('');
-    }
-
-    if (isNaN(parseFloat(price))) {
-      setPriceError('Chưa nhập giá tiền.');
-      return;
-    } else {
-      setPriceError('');
+      setNewsError('');
     }
 
     let imageUrl = '';
@@ -76,24 +55,17 @@ const AddNewVaccine = () => {
 
     const formattedDate = `${day}/${month}/${year}`;
 
-    const newVaccine = {
-      title: vaccine,
-      price: parseFloat(price),
+    const newNews = {
+      title: newss,
       imageUrl,
       description,
-      origin,
-      usage,
       date: formattedDate,
     };
 
-    ref.add(newVaccine);
-
-    setVaccine('');
-    setPrice('');
+    ref.add(newNews);
+    setNewss('');
     setImageUri(null);
     setDescription('');
-    setOrigin('');
-    setUsage('');
   }
 
   const selectImage = () => {
@@ -108,18 +80,15 @@ const AddNewVaccine = () => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
       querySnapshot.forEach(doc => {
-        const {title, price, imageUrl, description, origin, usage} = doc.data();
+        const {title, imageUrl, description} = doc.data();
         list.push({
           id: doc.id,
           title,
-          price,
           imageUrl,
           description,
-          origin,
-          usage,
         });
       });
-      setVaccines(list);
+      setNewsList(list);
 
       if (loading) {
         setLoading(false);
@@ -136,68 +105,26 @@ const AddNewVaccine = () => {
   return (
     <ScrollView style={styles.scrollView}>
       <View style={styles.container}>
-        <Text style={styles.title}>Tên Vắc xin</Text>
+        <Text style={styles.title}>Tiêu đề tin tức</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            // placeholder="Tên vắc xin"
-            value={vaccine}
-            onChangeText={setVaccine}
+            // placeholder="tiêu đề"
+            value={newss}
+            onChangeText={setNewss}
           />
-          {vaccineError ? (
-            <Text style={styles.errorText}>{vaccineError}</Text>
-          ) : null}
+          {newsError ? <Text style={styles.errorText}>{newsError}</Text> : null}
         </View>
-        <Text style={styles.title}>Giá tiền</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            // placeholder="Giá tiền"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-          />
-          {priceError ? (
-            <Text style={styles.errorText}>{priceError}</Text>
-          ) : null}
-        </View>
-        <Text style={styles.title}>Mô tả</Text>
+
+        <Text style={styles.title}>Nội dung</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={[styles.input, styles.descriptionInput]}
-            // placeholder="Mô tả"
+            // placeholder="nội dung"
             value={description}
             onChangeText={setDescription}
             multiline
           />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              style={styles.picker}
-              selectedValue={origin}
-              onValueChange={(itemValue, itemIndex) => setOrigin(itemValue)}>
-              <Picker.Item label="Chọn nguồn gốc" value="" />
-              {origins.map((item, index) => {
-                return <Picker.Item label={item} value={item} key={index} />;
-              })}
-            </Picker>
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              style={styles.picker}
-              selectedValue={usage}
-              onValueChange={(itemValue, itemIndex) => setUsage(itemValue)}>
-              <Picker.Item label="Chọn cách sử dụng" value="" />
-              {usages.map((item, index) => {
-                return <Picker.Item label={item} value={item} key={index} />;
-              })}
-            </Picker>
-          </View>
         </View>
 
         <View style={styles.inputContainer}>
@@ -221,7 +148,7 @@ const AddNewVaccine = () => {
           ) : null}
         </View>
         <View style={styles.inputContainer}>
-          <Button title="Thêm vắc xin" onPress={addVaccine} />
+          <Button title="Thêm tin tức" onPress={addNews} />
         </View>
       </View>
     </ScrollView>
@@ -282,4 +209,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddNewVaccine;
+export default AddNews;
