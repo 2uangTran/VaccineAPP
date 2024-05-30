@@ -36,6 +36,9 @@ const VaccineForm = () => {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const [isCenterModalVisible, setIsCenterModalVisible] = useState(false);
   const [isCartModalVisible, setIsCartModalVisible] = useState(false);
+  const [selectedCartItems, setSelectedCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -63,6 +66,8 @@ const VaccineForm = () => {
 
     fetchUserInfo();
   }, []);
+
+
 
   const modalCenter = () =>{
     setIsCenterModalVisible(true); 
@@ -114,10 +119,10 @@ const VaccineForm = () => {
   };
 
   const handleSelectItems = (selectedItems) => {
-    setVaccine(selectedItems);
     setIsCartModalVisible(false);
+    onSelectItems(selectedItems);
   };
-
+  
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -264,29 +269,30 @@ const VaccineForm = () => {
           </Modal>
     
           <Modal
-              transparent={true}
-              visible={isCartModalVisible}
-              onRequestClose={() => setIsCartModalVisible(false)}
-            >
+            transparent={true}
+            visible={isCartModalVisible}
+            onRequestClose={() => setIsCartModalVisible(false)}
+          >
             <View style={styles.modalOverlay}>
               <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
                 <Appbar style={styles.appbar}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flex: 1, alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
                       <Text style={styles.appbarText}>Danh sách vắc xin</Text>
-                  </View>
-                  <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
+                    </View>
+                    <TouchableOpacity onPress={closeModal} style={styles.closeButtonText}>
                       <Text style={styles.closeButtonText}>Đóng</Text>
-                  </TouchableOpacity>
-              </View>
+                    </TouchableOpacity>
+                  </View>
                 </Appbar>
                 <Cart onSelectItems={handleSelectItems} isOpenedFromVaccineForm={isCartModalVisible} />
-                <TouchableOpacity onPress={closeModal} style={styles.buttonvictim}>
-                 <Text style={styles.ButtonTextVictim}>Xác nhận</Text>
-            </TouchableOpacity>
+                <TouchableOpacity onPress={handleSelectItems} style={styles.buttonConfirm}>
+                  <Text style={styles.ButtonTextConfirm}>Xác nhận</Text>
+                </TouchableOpacity>
               </Animated.View>
             </View>
           </Modal>
+
         </SafeAreaView>
       );
     };

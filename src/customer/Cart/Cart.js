@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
@@ -7,15 +7,8 @@ import auth from "@react-native-firebase/auth";
 import { showMessage } from 'react-native-flash-message';
 
 const Cart = ({ isOpenedFromVaccineForm }) => {
-  const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
+  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -25,7 +18,7 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
         const items = cartSnapshot.docs.map(doc => ({
           iddoc: doc.id,
           ...doc.data(),
-          selected: false, 
+          selected: false,
         }));
         setCartItems(items);
       } catch (error) {
@@ -55,7 +48,7 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
           text: 'Remove',
           onPress: async () => {
             try {
-              await firestore().collection('Cart').doc(iddoc).delete();    
+              await firestore().collection('Cart').doc(iddoc).delete();
               setCartItems(prevItems =>
                 prevItems.filter(item => item.iddoc !== iddoc),
               );
@@ -63,8 +56,8 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
                 message: 'Thông báo',
                 description: 'Xóa vắc xin thành công',
                 type: 'success',
-                floating: true, 
-                autoHide: true, 
+                floating: true,
+                autoHide: true,
                 duration: 3000,
               });
             } catch (error) {
@@ -81,44 +74,39 @@ const Cart = ({ isOpenedFromVaccineForm }) => {
       { cancelable: false },
     );
   };
-  
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.rowContainer}>
-       
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{item.title}</Text>
         </View>
-       
       </View>
       <Text style={styles.description}>
         <Text style={styles.boldText}>Phòng bệnh: </Text>
         {item.description}
       </Text>
       <View style={styles.rowContainer}>
-        <Text style={styles.price}>{formatPrice(item.price)}</Text>
+        <Text style={styles.price}>{item.price}</Text>
         {!isOpenedFromVaccineForm && (
           <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={styles.trashButton}>
             <Feather name="trash-2" size={24} color={COLORS.red} />
           </TouchableOpacity>
         )}
-         {isOpenedFromVaccineForm && (
+        {isOpenedFromVaccineForm && (
           <TouchableOpacity onPress={() => handleToggleCheckbox(item.iddoc)}>
             <Feather
               name={item.selected ? 'check-square' : 'square'}
               size={24}
               color={item.selected ? COLORS.blue : COLORS.black}
-              style={{}}
             />
           </TouchableOpacity>
         )}
       </View>
-      
     </View>
   );
-  
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -151,7 +139,7 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', 
+    justifyContent: 'space-between',
   },
   image: {
     width: 100,
@@ -170,7 +158,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 17,
     marginTop: 10,
-    paddingBottom:20
+    paddingBottom: 20,
   },
   price: {
     fontSize: 20,
@@ -182,7 +170,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.black,
   },
-
 });
 
 export default Cart;
