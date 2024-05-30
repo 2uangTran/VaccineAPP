@@ -33,6 +33,11 @@ import AddNews from '../customer/menumain/News/AddNews';
 import CustomHeaderRightNews from '../Router/CustomHeaderRightNews';
 import ListNews from '../customer/menumain/ListNews';
 import DetailNews from '../customer/menumain/News/DetailNews';
+import ConfirmCart from '../customer/Cart/ConfirmCart';
+import Pay from '../customer/Cart/Pay';
+
+
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const CustomerTabNavigator = () => {
@@ -219,6 +224,20 @@ const RouterCustomer = () => {
           component={Info}
           options={{
             title: 'Thông tin người tiêm',
+          }}
+        />
+        <Stack.Screen
+          name="ConfirmCart"
+          component={ConfirmCart}
+          options={{
+            title: 'Xác nhận đơn hàng',
+          }}
+        />
+        <Stack.Screen
+          name="Pay"
+          component={Pay}
+          options={{
+            title: 'Thanh toán',
           }}
         />
       </Stack.Navigator>

@@ -22,7 +22,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Appbar} from 'react-native-paper';
 import Cart from '../Cart/Cart';
-
+import {useNavigation} from '@react-navigation/native';
 
 
 const {height} = Dimensions.get('window');
@@ -39,6 +39,10 @@ const VaccineForm = () => {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const [isCenterModalVisible, setIsCenterModalVisible] = useState(false);
   const [isCartModalVisible, setIsCartModalVisible] = useState(false);
+  const [centerError, setCenterError] = useState('');
+  const [dateError, setDateError] = useState('');
+  const [vaccineError, setVaccineError] = useState('');
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -99,19 +103,13 @@ const VaccineForm = () => {
     });
   };
 
-  const translateGender = gender => {
-    if (gender === 'male') return 'Nam';
-    if (gender === 'female') return 'Nữ';
-    return gender;
+  const toggleDetails = () => {
+    setDetailsVisible(!detailsVisible);
   };
 
   const handleDateConfirm = date => {
     setSelectedDate(date);
     setShowDatePicker(false);
-  };
-
-  const toggleDetails = () => {
-    setDetailsVisible(!detailsVisible);
   };
 
   const handleCenterSelect = selectedCenter => {
@@ -121,15 +119,16 @@ const VaccineForm = () => {
 
   const handleSelectItems = selectedItems => {
     setVaccine(selectedItems);
-    console.log("Dữ liệu của giỏ hàng đã được lấy thành công:", selectedItems);
     setIsCartModalVisible(false);
   };
-  const formatPrice = (price) => {
+
+  const formatPrice = price => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
     }).format(price);
   };
+
   const calculateTotalPrice = () => {
     let totalPrice = 0;
     vaccine.forEach(item => {
@@ -137,12 +136,59 @@ const VaccineForm = () => {
     });
     return formatPrice(totalPrice);
   };
+
   const removeVaccine = index => {
     const updatedVaccine = [...vaccine];
     updatedVaccine.splice(index, 1);
     setVaccine(updatedVaccine);
   };
-  
+
+  const handleConfirmCart = () => {
+    if (validateForm()) {
+      navigation.navigate('ConfirmCart', { 
+        userInfo: userInfo, 
+        center: center, 
+        selectedDate: { 
+          day: selectedDate.getDate(),
+          month: selectedDate.getMonth(),
+          year: selectedDate.getFullYear()
+        },
+        vaccine: vaccine 
+      });
+      
+    }
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!center) {
+      setCenterError('Vui lòng chọn trung tâm');
+      isValid = false;
+    } else {
+      setCenterError('');
+    }
+
+    if (!selectedDate) {
+      setDateError('Vui lòng chọn ngày tiêm');
+      isValid = false;
+    } else {
+      setDateError('');
+    }
+
+    if (vaccine.length === 0) {
+      setVaccineError('Vui lòng thêm vắc xin');
+      isValid = false;
+    } else {
+      setVaccineError('');
+    }
+
+    return isValid;
+  };
+
+  const formatDate = date => {
+    return format(date, 'dd/MM/yyyy');
+  };
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -223,6 +269,7 @@ const VaccineForm = () => {
           <TouchableOpacity style={styles.input} onPress={modalCenter}>
             <Text style={{padding: 9}}>{center || 'Chọn địa điểm tiêm'}</Text>
           </TouchableOpacity>
+          {centerError ? <Text style={styles.errorText}>{centerError}</Text> : null}
         </View>
 
         <View style={styles.formGroup}>
@@ -243,6 +290,7 @@ const VaccineForm = () => {
               />
             </View>
           </TouchableOpacity>
+          {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
           <DateTimePickerModal
             isVisible={showDatePicker}
             mode="date"
@@ -292,7 +340,7 @@ const VaccineForm = () => {
               </Text>
             </View>
           )}
-
+      {vaccineError ? <Text style={styles.errorText}>{vaccineError}</Text> : null}
         </View>
 
         <View style={styles.buttonGroup}>
@@ -320,7 +368,7 @@ const VaccineForm = () => {
           <Text style={styles.totalText}>Tổng cộng</Text>
           <Text style={styles.totalPrice}>{calculateTotalPrice()}</Text>
         </View>
-        <TouchableOpacity style={styles.confirmButton}>
+        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmCart}>
           <Text style={styles.confirmButtonText}>Xác nhận</Text>
         </TouchableOpacity>
       </View>
@@ -601,6 +649,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.black,
   },
+  errorText:{
+    color:COLORS.red,
+  }
 });
 
 export default VaccineForm;
