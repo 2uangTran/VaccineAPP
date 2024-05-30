@@ -95,7 +95,7 @@ const ConfirmCart = ({ route }) => {
         <Text style={styles.header}>Thông tin thanh toán</Text>
         <View style={{borderWidth:1,borderRadius:5, padding:5}}>
           <View style={{flexDirection:'row'}}>
-            <Text style={{fontSize:17}}>Tổng tiền ({vaccine.length} sp)</Text>
+            <Text style={{fontSize:17,width:'50%'}}>Tổng tiền ({vaccine.length} sp)</Text>
             <Text style={styles.totalprices}>{calculateTotalPrice()}</Text>
           </View>
           <View style={{flexDirection:'row'}}>

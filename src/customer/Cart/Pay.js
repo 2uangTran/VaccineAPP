@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, NativeModules, NativeEventEmitter } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Feather from 'react-native-vector-icons/Feather';
@@ -19,87 +19,96 @@ const Pay = () => {
   const [payVisible, setPayVisible] = useState(true);
   const navigation = useNavigation();
   const [checked, setChecked] = useState('');
-
-  const [formData, setFormData] = useState({
-    phoneNumber: '',
-    fullName: '',
-    birthDate: '',
-    gender: '',
-    nationality: 'Việt Nam',
-    province: '',
-    district: '',
-    ward: '',
-    address: '',
-    email: '',
-    occupation: 'Học sinh-sinh viên',
-  });
+  const { PayZaloBridge } = NativeModules;
+  const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const currentUserEmail = user?.email;
+        const userDoc = await firestore().collection('USERS').doc(currentUserEmail).get();
+        const userData = userDoc.data();
+        setFormData(userData);
+        if (userData.province) {
+          await fetchDistricts(userData.province);
+        }
+        if (userData.province && userData.district) {
+          await fetchWards(userData.province, userData.district);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    const fetchProvinces = async () => {
+      try {
+        const areaSnapshot = await firestore().collection('area').get();
+        const provincesData = areaSnapshot.docs.map(doc => doc.id);
+        setProvinces(provincesData);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchDistricts = async (province) => {
+      try {
+        const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
+        if (!citySnapshot.empty) {
+          const districtData = citySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setDistricts(districtData);
+        } else {
+          console.log('No cities data found for the province:', province);
+          setDistricts([]);
+        }
+        setWards([]);
+      } catch (error) {
+        console.error('Error fetching districts:', error);
+      }
+    };
+
+    const fetchWards = async (province, district) => {
+      try {
+        const areaSnapshot = await firestore().collection('area').doc(province).collection('cities').doc(district).get();
+        if (areaSnapshot.exists) {
+          const wardsData = areaSnapshot.data().wards;
+          setWards(wardsData);
+        } else {
+          console.log('No wards data found');
+        }
+      } catch (error) {
+        console.error('Error fetching wards:', error);
+      }
+    };
+
+    const handlePayment = () => {
+      if (checked === 'zalo') {
+        let payZP = NativeModules.PayZaloBridge;
+        payZP.payOrder(zpTransToken.text);
+      } else {
+        // Handle other payment methods here
+      }
+    };
+
     fetchUserData();
     fetchProvinces();
+
+    const subscription = payZaloBridgeEmitter.addListener('EventPayZalo', (data) => {
+      if(data.returnCode == 1){
+        alert('Payment successfully!');
+      } else{
+        alert('Payment failed!');
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const currentUserEmail = user?.email;
-      const userDoc = await firestore().collection('USERS').doc(currentUserEmail).get();
-      const userData = userDoc.data();
-      setFormData(userData);
-      if (userData.province) {
-        await fetchDistricts(userData.province);
-      }
-      if (userData.province && userData.district) {
-        await fetchWards(userData.province, userData.district);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
-
-  const fetchProvinces = async () => {
-    try {
-      const areaSnapshot = await firestore().collection('area').get();
-      const provincesData = areaSnapshot.docs.map(doc => doc.id);
-      setProvinces(provincesData);
-    } catch (error) {
-      console.error('Error fetching provinces:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDistricts = async (province) => {
-    try {
-      const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
-      if (!citySnapshot.empty) {
-        const districtData = citySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setDistricts(districtData);
-      } else {
-        console.log('No cities data found for the province:', province);
-        setDistricts([]);
-      }
-      setWards([]);
-    } catch (error) {
-      console.error('Error fetching districts:', error);
-    }
-  };
-
-  const fetchWards = async (province, district) => {
-    try {
-      const areaSnapshot = await firestore().collection('area').doc(province).collection('cities').doc(district).get();
-      if (areaSnapshot.exists) {
-        const wardsData = areaSnapshot.data().wards;
-        setWards(wardsData);
-      } else {
-        console.log('No wards data found');
-      }
-    } catch (error) {
-      console.error('Error fetching wards:', error);
-    }
-  };
 
   const handleInputChange = (key, value) => {
     setFormData(prevFormData => {
@@ -119,9 +128,11 @@ const Pay = () => {
   const toggleDetails = () => {
     setDetailsVisible(!detailsVisible);
   };
+
   const togglePays = () => {
     setPayVisible(!payVisible);
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -141,139 +152,60 @@ const Pay = () => {
             <Text>Loading...</Text>
           ) : detailsVisible ? (
             <>
-             <Text style={styles.label}>Họ và tên <Text style={{color:'red'}}>*</Text></Text>
-              <TextInput
-                style={styles.input}
-                value={formData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
-              />
-              <Text style={styles.label}>Số điện thoại <Text style={{color:'red'}}>*</Text></Text>
-              <TextInput
-                style={styles.input}
-                value={formData.phoneNumber}
-                onChangeText={(value) => handleInputChange('phoneNumber', value)}
-              />
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.email}
-                editable={false}
-                onChangeText={(value) => handleInputChange('email', value)}
-              />
-              <Text style={styles.label}>Tỉnh / Thành phố <Text style={{color:'red'}}>*</Text></Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={formData.province}
-                  style={styles.picker}
-                  onValueChange={(value) => handleInputChange('province', value)}
-                >
-                  {provinces.length > 0 ? (
-                    provinces.map((province) => (
-                      <Picker.Item key={province} label={province} value={province} />
-                    ))
-                  ) : (
-                    <Picker.Item label="Không có dữ liệu" value="" />
-                  )}
-                </Picker>
-              </View>
-
-              <Text style={styles.label}>Quận / Huyện <Text style={{color:'red'}}>*</Text></Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={formData.district}
-                  style={styles.picker}
-                  onValueChange={(value) => handleInputChange('district', value)}
-                >
-                  {districts && districts.length > 0 ? (
-                    districts.map((district) => (
-                      <Picker.Item key={district.id} label={district.id} value={district.id} />
-                    ))
-                  ) : (
-                    <Picker.Item label="Không có dữ liệu" value="" />
-                  )}
-                </Picker>
-              </View>
-
-              <Text style={styles.label}>Phường / Xã <Text style={{color:'red'}}>*</Text></Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={formData.ward}
-                  style={styles.picker}
-                  onValueChange={(value) => handleInputChange('ward', value)}
-                >
-                  {wards.length > 0 ? (
-                    wards.map((ward) => (
-                      <Picker.Item key={ward} label={ward} value={ward} />
-                    ))
-                  ) : (
-                    <Picker.Item label="Không có dữ liệu" value="" />
-                  )}
-                </Picker>
-              </View>
-
-              <Text style={styles.label}>Địa chỉ <Text style={{color:'red'}}>*</Text></Text>
-              <TextInput
-                style={styles.input}
-                value={formData.address}
-                onChangeText={(value) => handleInputChange('address', value)}
-              />
-
-             
+              {/* Input fields for user details */}
             </>
           ) : null}
         </View>
         <View style={{ borderWidth: 1, padding: 10, borderRadius: 10, marginTop: '2%' }}>
-    <View style={styles.headerContainer}>
-        <TouchableOpacity
-        onPress={togglePays}
-        style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={styles.titleLabel}>Chi tiết người tiêm</Text>
-        <Feather
-            name={payVisible ? 'chevron-up' : 'chevron-down'}
-            style={styles.titleLabels}
-        />
-        </TouchableOpacity>
-    </View>
-    {loading ? (
-        <Text>Loading...</Text>
-    ) : payVisible ? (
-        <>
-       
-       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <RadioButton
-            value="credit_card"
-            status={checked === 'credit_card' ? 'checked' : 'unchecked'}
-            onPress={() => setChecked('credit_card')}
-        />
-    <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity
+              onPress={togglePays}
+              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.titleLabel}>Phương thức thanh toán</Text>
+              <Feather
+                name={payVisible ? 'chevron-up' : 'chevron-down'}
+                style={styles.titleLabels}
+              />
+            </TouchableOpacity>
+          </View>
+          {loading ? (
+            <Text>Loading...</Text>
+          ) : payVisible ? (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <RadioButton
+                  value="credit_card"
+                  status={checked === 'credit_card' ? 'checked' : 'unchecked'}
+                  onPress={() => setChecked('credit_card')}
+                />
+                <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <RadioButton
+                  value="paypal"
+                  status={checked === 'paypal' ? 'checked' : 'unchecked'}
+                  onPress={() => setChecked('paypal')}
+                />
+                <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <RadioButton
+                  value="zalo"
+                  status={checked === 'zalo' ? 'checked': 'unchecked'}
+                  onPress={() => setChecked('zalo')}
+                />
+                <Text style={{ fontSize: 20, color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
+              </View>
+            </>
+          ) : null}
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <RadioButton
-                value="paypal"
-                status={checked === 'paypal' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('paypal')}
-            />
-            <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <RadioButton
-                value="zalo"
-                status={checked === 'zalo' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('zalo')}
-            />
-            <Text style={{ fontSize: 20, color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
-        </View>
-        </>
-    ) : null}
-    </View>
-
       </ScrollView>
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Tổng cộng</Text>
           <Text style={styles.totalPrice}>0</Text>
         </View>
-        <TouchableOpacity style={styles.confirmButton} >
+        <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
           <Text style={styles.confirmButtonText}>Thanh toán</Text>
         </TouchableOpacity>
       </View>
@@ -291,18 +223,14 @@ const styles = StyleSheet.create({
   titleLabel: {
     fontWeight: 'bold',
     fontSize: 16,
-    color:COLORS.blue,
-    paddingTop:'2%'
+    color: COLORS.blue,
+    paddingTop: '2%'
   },
-  titleLabels:{
+  titleLabels: {
     fontWeight: 'bold',
     fontSize: 19,
-    color:COLORS.blue,
-    paddingTop:'2%'
-  },
-  label: {
-    fontWeight: 'bold',
-    marginBottom: 5,
+    color: COLORS.blue,
+    paddingTop: '2%'
   },
   pickerWrapper: {
     borderWidth: 1,
@@ -320,24 +248,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 15,
-    color:COLORS.black,
-  },
-  button: {
-    backgroundColor: COLORS.blue,
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: COLORS.black,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 17,
-    paddingHorizontal: 20, 
+    paddingHorizontal: 20,
     backgroundColor: COLORS.gray,
   },
   totalContainer: {
@@ -346,12 +263,12 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.grey, 
+    color: COLORS.grey,
   },
   totalPrice: {
     fontSize: 19,
     fontWeight: 'bold',
-    color: COLORS.black, 
+    color: COLORS.black,
   },
   confirmButton: {
     backgroundColor: COLORS.blue,
@@ -369,3 +286,4 @@ const styles = StyleSheet.create({
 });
 
 export default Pay;
+
