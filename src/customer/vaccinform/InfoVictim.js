@@ -23,6 +23,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Appbar} from 'react-native-paper';
 import Cart from '../Cart/Cart';
 
+
+
 const {height} = Dimensions.get('window');
 
 const VaccineForm = () => {
@@ -135,7 +137,13 @@ const VaccineForm = () => {
     });
     return formatPrice(totalPrice);
   };
+  const removeVaccine = index => {
+    const updatedVaccine = [...vaccine];
+    updatedVaccine.splice(index, 1);
+    setVaccine(updatedVaccine);
+  };
   
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -251,6 +259,7 @@ const VaccineForm = () => {
             <View>
               {vaccine.map((item, index) => (
                 <View style={styles.itemContainer} key={index}>
+                 
                   <View style={styles.rowContainer}>
                     <Image source={{ uri: item.imageUrl }} style={styles.image} />
                     <View style={styles.titleContainer}>
@@ -263,6 +272,9 @@ const VaccineForm = () => {
                   </Text>
                   <View style={styles.rowContainer}>
                     <Text style={styles.price}>{formatPrice(item.price)}</Text>
+                    <TouchableOpacity onPress={() => removeVaccine(index)} style={styles.removeButton}>
+                      <Feather name="trash-2" size={24} color={COLORS.red} />
+                  </TouchableOpacity>
                   </View>
                 </View>
               ))}
@@ -280,6 +292,7 @@ const VaccineForm = () => {
               </Text>
             </View>
           )}
+
         </View>
 
         <View style={styles.buttonGroup}>
