@@ -172,6 +172,14 @@ const Pay = () => {
             <Text>Loading...</Text>
           ) : payVisible ? (
             <>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <RadioButton
+                  value="tt"
+                  status={checked === 'tt' ? 'checked': 'unchecked'}
+                  onPress={() => setChecked('tt')}
+                />
+                <Text style={{ fontSize: 20, color: checked === 'tt' ? 'black' : 'grey' }}>Thanh toán trực tiếp</Text>
+              </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <RadioButton
                   value="credit_card"
