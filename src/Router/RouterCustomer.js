@@ -36,8 +36,12 @@ import DetailNews from '../customer/menumain/News/DetailNews';
 import ConfirmCart from '../customer/Cart/ConfirmCart';
 import Pay from '../customer/Cart/Pay';
 import Zalo from '../customer/Cart/Zalo';
-
-
+import AddNoti from '../customer/menumain/Notification/AddNoti';
+import DetailNoti from '../customer/menumain/Notification/DetailNoti';
+import UpdateNoti from '../customer/menumain/Notification/UpdateNoti';
+import ListNotification from '../customer/menumain/ListNotification';
+import Notification from '../customer/menumain/Notification';
+import CustomHeaderRightNotification from './CustomHeaderRightNotification';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -241,11 +245,39 @@ const RouterCustomer = () => {
             title: 'Thanh toán',
           }}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Zalo"
           component={Zalo}
           options={{
             title: 'Thanh toán',
+          }}
+        />
+        <Stack.Screen
+          name="AddNoti"
+          component={AddNoti}
+          options={{title: 'Thêm thông báo'}}
+        />
+        <Stack.Screen
+          name="DetailNoti"
+          component={DetailNoti}
+          options={{title: 'Chi tiết thông báo'}}
+        />
+        <Stack.Screen
+          name="UpdateNoti"
+          component={UpdateNoti}
+          options={{title: 'Cập nhật thông báo'}}
+        />
+        <Stack.Screen
+          name="ListNotification"
+          component={ListNotification}
+          options={{title: 'Danh sách Thông báo'}}
+        />
+        <Stack.Screen
+          name="Notification"
+          component={Notification}
+          options={{
+            title: 'Thông báo',
+            headerRight: () => <CustomHeaderRightNotification />,
           }}
         />
       </Stack.Navigator>

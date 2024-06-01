@@ -19,6 +19,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import UpdateInfo from '../customer/menuperson/UpdateInfo';
+import Notification from './menumain/Notification';
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
@@ -143,7 +144,7 @@ const Main = () => {
                 color="white"
               />
             )}
-            onPress={() => {}}
+            onPress={() => navigation.navigate('Notification')}
           />
 
           {getCurrentTimeMessage()}
