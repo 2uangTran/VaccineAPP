@@ -116,43 +116,6 @@ const Register = ({ navigation }) => {
         <HelperText type="error" visible={hasErrorPasswordConfirm()}>
           Passwords do not match.
         </HelperText>
-        <TextInput
-          placeholder="Phone"
-          value={phone}
-          onChangeText={setPhone}
-          style={{ marginVertical: 10, width: 390 }}
-          mode="outlined"
-        />
-        <HelperText type="error" visible={hasErrorPhone()}>
-          Please enter your phone number.
-        </HelperText>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginVertical: 10,
-            width: 390,
-          }}
-        >
-          <TextInput
-            placeholder="Date of Birth"
-            value={dateOfBirth}
-            onChangeText={setDateOfBirth}
-            style={{ flex: 1 }}
-            mode="outlined"
-            editable={false} // Make it readonly
-          />
-          <IconButton icon="calendar" size={30} onPress={showDatePicker} />
-        </View>
-        <HelperText type="error" visible={hasErrorDateOfBirth()}>
-          Please enter your date of birth.
-        </HelperText>
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-        />
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Checkbox.Android
             status={gender === "male" ? "checked" : "unchecked"}
@@ -176,8 +139,6 @@ const Register = ({ navigation }) => {
             hasErrorPassword() ||
             hasErrorPasswordConfirm() ||
             hasErrorFullname() ||
-            hasErrorPhone() ||
-            hasErrorDateOfBirth() ||
             hasErrorGender()
           }
           style={{ marginVertical: 10, padding: 5 }}

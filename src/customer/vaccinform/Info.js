@@ -50,7 +50,7 @@ const Info = () => {
         ) : userInfo ? (
           <View style={styles.infoBox}>
             <InfoItem label="Họ và tên" value={userInfo.fullName} />
-            <InfoItem label="Số điện thoại" value={userInfo.phone} />
+            <InfoItem label="Số điện thoại" value={userInfo.phoneNumber} />
             <InfoItem label="Ngày sinh" value={userInfo.birthDate} />
             <InfoItem label="Giới tính" value={userInfo.gender} />
             <InfoItem label="Địa chỉ" value={`${userInfo.address}, ${userInfo.ward}, ${userInfo.district}, ${userInfo.province}`} numberOfLines={2} />

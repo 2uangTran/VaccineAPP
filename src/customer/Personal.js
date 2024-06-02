@@ -62,7 +62,7 @@ const Personal = () => {
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
               <Text style={styles.userDetails}>
-                {userLogin ? userLogin.phone : 'N/A'} - {userLogin ? translateGender(userLogin.gender) : 'N/A'} - {userLogin ? userLogin.dateOfBirth : 'N/A'}
+                {userLogin ? userLogin.phoneNumber : 'N/A'} - {userLogin ? translateGender(userLogin.gender) : 'N/A'} - {userLogin ? userLogin.birthDate : 'N/A'}
               </Text>
             </View>
           </View>

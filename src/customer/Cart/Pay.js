@@ -1,14 +1,15 @@
-import React, { useState, useEffect, NativeModules, NativeEventEmitter } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
+import { Picker } from '@react-native-picker/picker';
 import COLORS from '../../theme/constants';
 import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from '../../context';
 import firestore from '@react-native-firebase/firestore';
 import { RadioButton } from 'react-native-paper';
 
-const Pay = () => {
+const Pay = ({ route }) => {
+  const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
   const [controller] = useMyContextController();
   const user = controller.userLogin;
   const [loading, setLoading] = useState(true);
@@ -19,8 +20,80 @@ const Pay = () => {
   const [payVisible, setPayVisible] = useState(true);
   const navigation = useNavigation();
   const [checked, setChecked] = useState('');
-  const { PayZaloBridge } = NativeModules;
-  const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    email: user?.email || '',
+    birthDate: '',
+    province: '',
+    district: '',
+    ward: '',
+    address: ''
+  });
+  const [paymentSelected, setPaymentSelected] = useState(false);
+
+  const formatDate = (date) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(date).toLocaleDateString('vi-VN', options);
+  };
+
+  const generateOrderId = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  };
+
+  const handlePayment = async () => {
+    if (!paymentSelected) {
+      Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
+      return;
+    }
+
+    const orderId = generateOrderId();
+    const orderDetails = {
+      orderId,
+      fullname: `${formData.fullName}-${formData.birthDate}`, 
+      totalPrice,
+      userInfo,
+      center,
+      vaccine,
+      paymentStatus: 0, 
+      vaccinationDate: formatDate(selectedDate),
+      paymentMethod: checked,
+      ...formData
+    };
+    console.log(orderDetails);
+  
+    try {
+      await firestore().collection('bills').doc(orderId).set(orderDetails);
+      for (const vaccine of orderDetails.vaccine) {
+        console.log("id:", vaccine.id);  
+        const cartSnapshot = await firestore().collection('Cart').get();
+        console.log("All documents in Cart collection:");
+        cartSnapshot.forEach(doc => {
+          console.log(doc.id, doc.data());
+        });
+        const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
+        console.log("Matching documents in Cart collection for id:", vaccine.id, matchingDocs.length);
+  
+        if (matchingDocs.length > 0) {
+          for (const doc of matchingDocs) {
+            console.log("Deleting document:", doc.id);
+            await firestore().collection('Cart').doc(doc.id).delete();
+            console.log("Deleted document:", doc.id);
+          }
+        } else {
+          console.log("No matching documents found in the cart for id:", vaccine.id);
+        }
+      }
+      navigation.navigate('ConfirmationScreen', { orderDetails });
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -85,44 +158,15 @@ const Pay = () => {
       }
     };
 
-    const handlePayment = () => {
-      if (checked === 'zalo') {
-        let payZP = NativeModules.PayZaloBridge;
-        payZP.payOrder(zpTransToken.text);
-      } else {
-        // Handle other payment methods here
-      }
-    };
-
     fetchUserData();
     fetchProvinces();
-
-    const subscription = payZaloBridgeEmitter.addListener('EventPayZalo', (data) => {
-      if(data.returnCode == 1){
-        alert('Payment successfully!');
-      } else{
-        alert('Payment failed!');
-      }
-    });
-
-    return () => {
-      subscription.remove();
-    };
   }, []);
 
   const handleInputChange = (key, value) => {
-    setFormData(prevFormData => {
-      const updatedFormData = { ...prevFormData, [key]: value };
-      if (key === 'province' && prevFormData.province !== value) {
-        fetchDistricts(value);
-        updatedFormData.district = '';
-        updatedFormData.ward = '';
-      } else if (key === 'district') {
-        fetchWards(formData.province, value);
-        updatedFormData.ward = '';
-      }
-      return updatedFormData;
-    });
+    setFormData(prevState => ({
+      ...prevState,
+      [key]: value
+    }));
   };
 
   const toggleDetails = () => {
@@ -131,6 +175,11 @@ const Pay = () => {
 
   const togglePays = () => {
     setPayVisible(!payVisible);
+  };
+
+  const handlePaymentSelection = (value) => {
+    setChecked(value);
+    setPaymentSelected(true);
   };
 
   return (
@@ -150,9 +199,86 @@ const Pay = () => {
           </View>
           {loading ? (
             <Text>Loading...</Text>
-          ) : detailsVisible ? (
+          ) :
+          detailsVisible ? (
             <>
-              {/* Input fields for user details */}
+              <Text style={styles.label}>Họ và tên <Text style={{color:'red'}}>*</Text></Text>
+              <TextInput
+                style={styles.input}
+                value={formData.fullName}
+                onChangeText={(value) => handleInputChange('fullName', value)}
+              />
+              <Text style={styles.label}>Số điện thoại <Text style={{color:'red'}}>*</Text></Text>
+              <TextInput
+                style={styles.input}
+                value={formData.phoneNumber}
+                onChangeText={(value) => handleInputChange('phoneNumber', value)}
+              />
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.email}
+                editable={false}
+                onChangeText={(value) => handleInputChange('email', value)}
+              />
+              <Text style={styles.label}>Tỉnh / Thành phố <Text style={{color:'red'}}>*</Text></Text>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={formData.province}
+                  style={styles.picker}
+                  onValueChange={(value) => handleInputChange('province', value)}
+                >
+                  {provinces.length > 0 ? (
+                    provinces.map((province) => (
+                      <Picker.Item key={province} label={province} value={province} />
+                    ))
+                  ) : (
+                    <Picker.Item label="Không có dữ liệu" value="" />
+                  )}
+                </Picker>
+              </View>
+
+              <Text style={styles.label}>Quận / Huyện <Text style={{color:'red'}}>*</Text></Text>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={formData.district}
+                  style={styles.picker}
+                 
+                  onValueChange={(value) => handleInputChange('district', value)}
+                >
+                  {districts && districts.length > 0 ? (
+                    districts.map((district) => (
+                      <Picker.Item key={district.id} label={district.id} value={district.id} />
+                    ))
+                  ) : (
+                    <Picker.Item label="Không có dữ liệu" value="" />
+                  )}
+                </Picker>
+              </View>
+
+              <Text style={styles.label}>Phường / Xã <Text style={{color:'red'}}>*</Text></Text>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={formData.ward}
+                  style={styles.picker}
+                  onValueChange={(value) => handleInputChange('ward', value)}
+                >
+                  {wards.length > 0 ? (
+                    wards.map((ward) => (
+                      <Picker.Item key={ward} label={ward} value={ward} />
+                    ))
+                  ) : (
+                    <Picker.Item label="Không có dữ liệu" value="" />
+                  )}
+                </Picker>
+              </View>
+
+              <Text style={styles.label}>Địa chỉ <Text style={{color:'red'}}>*</Text></Text>
+              <TextInput
+                style={styles.input}
+                value={formData.address}
+                onChangeText={(value) => handleInputChange('address', value)}
+              />
             </>
           ) : null}
         </View>
@@ -172,19 +298,19 @@ const Pay = () => {
             <Text>Loading...</Text>
           ) : payVisible ? (
             <>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <RadioButton
-                  value="tt"
-                  status={checked === 'tt' ? 'checked': 'unchecked'}
-                  onPress={() => setChecked('tt')}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <RadioButton
+                  value="Thanh toán tại trung tâm"
+                  status={checked === 'Thanh toán tại trung tâm' ? 'checked' : 'unchecked'} 
+                  onPress={() => handlePaymentSelection('Thanh toán tại trung tâm')} 
                 />
-                <Text style={{ fontSize: 20, color: checked === 'tt' ? 'black' : 'grey' }}>Thanh toán trực tiếp</Text>
+                <Text style={{ fontSize: 20, color: checked === 'Thanh toán tại trung tâm' ? 'black' : 'grey' }}>Thanh toán tại trung tâm</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <RadioButton
                   value="credit_card"
                   status={checked === 'credit_card' ? 'checked' : 'unchecked'}
-                  onPress={() => setChecked('credit_card')}
+                  onPress={() => handlePaymentSelection('credit_card')}
                 />
                 <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
               </View>
@@ -192,15 +318,15 @@ const Pay = () => {
                 <RadioButton
                   value="paypal"
                   status={checked === 'paypal' ? 'checked' : 'unchecked'}
-                  onPress={() => setChecked('paypal')}
+                  onPress={() => handlePaymentSelection('paypal')}
                 />
                 <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <RadioButton
                   value="zalo"
-                  status={checked === 'zalo' ? 'checked': 'unchecked'}
-                  onPress={() => setChecked('zalo')}
+                  status={checked === 'zalo' ? 'checked' : 'unchecked'}
+                  onPress={() => handlePaymentSelection('zalo')}
                 />
                 <Text style={{ fontSize: 20, color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
               </View>
@@ -211,7 +337,7 @@ const Pay = () => {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Tổng cộng</Text>
-          <Text style={styles.totalPrice}>0</Text>
+          <Text style={styles.totalPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}</Text>
         </View>
         <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
           <Text style={styles.confirmButtonText}>Thanh toán</Text>
@@ -232,13 +358,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     color: COLORS.blue,
-    paddingTop: '2%'
+    paddingTop: '2%',
   },
   titleLabels: {
     fontWeight: 'bold',
     fontSize: 19,
     color: COLORS.blue,
-    paddingTop: '2%'
+    paddingTop: '2%',
   },
   pickerWrapper: {
     borderWidth: 1,
@@ -264,6 +390,7 @@ const styles = StyleSheet.create({
     paddingVertical: 17,
     paddingHorizontal: 20,
     backgroundColor: COLORS.gray,
+ 
   },
   totalContainer: {
     flexDirection: 'column',
@@ -294,4 +421,3 @@ const styles = StyleSheet.create({
 });
 
 export default Pay;
-

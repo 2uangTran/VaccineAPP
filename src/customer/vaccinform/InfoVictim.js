@@ -222,7 +222,7 @@ const VaccineForm = () => {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Số điện thoại</Text>
               <Text style={[styles.infoText, {textAlign: 'right'}]}>
-                {userInfo.phone}
+                {userInfo.phoneNumber}
               </Text>
             </View>
             <View style={styles.infoRow}>

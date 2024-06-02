@@ -42,6 +42,7 @@ import UpdateNoti from '../customer/menumain/Notification/UpdateNoti';
 import ListNotification from '../customer/menumain/ListNotification';
 import Notification from '../customer/menumain/Notification';
 import CustomHeaderRightNotification from './CustomHeaderRightNotification';
+import ConfirmationScreen from '../customer/Cart/ConfirmationScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -278,6 +279,14 @@ const RouterCustomer = () => {
           options={{
             title: 'Thông báo',
             headerRight: () => <CustomHeaderRightNotification />,
+          }}
+        />
+        <Stack.Screen
+          name="ConfirmationScreen"
+          component={ConfirmationScreen}
+          options={{
+            title: 'Xác nhận',
+            
           }}
         />
       </Stack.Navigator>

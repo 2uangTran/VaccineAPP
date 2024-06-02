@@ -82,8 +82,6 @@ const register = async (
   fullName,
   email,
   password,
-  phone,
-  dateOfBirth,
   gender,
 ) => {
   try {
@@ -94,8 +92,6 @@ const register = async (
     const userData = {
       email: userCredential.user.email,
       fullName: fullName,
-      phone: phone,
-      dateOfBirth: dateOfBirth,
       gender: gender,
     };
     await USERS.doc(email).set(userData);

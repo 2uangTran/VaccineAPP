@@ -26,7 +26,7 @@ const UpdateInfo = () => {
   const [imageUri, setImageUri] = useState(null);
   const [selectedImageUri, setSelectedImageUri] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
-
+  const [genderChanged, setGenderChanged] = useState(false); 
 
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -55,7 +55,7 @@ const UpdateInfo = () => {
       const uploadUri = Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
       const imageRef = storage().ref('user_avatars').child(`${auth().currentUser.email}_avatar/${filename}`);
       await imageRef.putFile(uploadUri);
-      const imageUrl = await imageRef.getDownloadURL(); // Lấy URL HTTP của ảnh
+      const imageUrl = await imageRef.getDownloadURL(); 
       return imageUrl; 
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -84,9 +84,9 @@ const UpdateInfo = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        phoneNumber: user.phone || '',
+        phoneNumber: user.phoneNumber || '',
         fullName: user.fullName || '',
-        birthDate: user.dateOfBirth || '',
+        birthDate: user.birthDate || '',
         gender: user.gender || '',
         nationality: user.nationality || 'Việt Nam',
         ethnicity: user.ethnicity || '',
@@ -179,6 +179,9 @@ const UpdateInfo = () => {
         fetchWards(value);
         updatedFormData.ward = '';
       }
+      if (key === 'gender' && prevFormData.gender !== value) {
+        setGenderChanged(true); 
+      }
       return updatedFormData;
     });
   };
@@ -193,14 +196,22 @@ const UpdateInfo = () => {
 
   const handleConfirm = (date) => {
     setFormData({ ...formData, birthDate: format(date, 'dd/MM/yyyy') });
-    hideDatePicker();
+    hideDatePicker
   };
-  
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
+   
+      if (!genderChanged && !formData.gender) {
+        setFormData(prevFormData => ({
+          ...prevFormData,
+          gender: 'Nam' 
+        }));
+      }
+
       let imageUrl = formData.avatarUrl; 
-  
+
       if (imageUri) { 
         imageUrl = await uploadImage(imageUri); 
         if (!imageUrl) {
@@ -232,10 +243,10 @@ const UpdateInfo = () => {
     }
     finally {
       setIsSaving(false); 
+      setGenderChanged(false); 
     }
   };
-  
-  
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -388,15 +399,15 @@ const UpdateInfo = () => {
         
       </ScrollView>
       {isSaving && (
-          <View style={styles.loadingContainer}>
-            <LottieView
-              style={{ width: 200, height: 200,justifyContent:'center',alignItems:'center' }} 
-              source={loadingAnimation} 
-              autoPlay
-              loop
-            />
-          </View>
-        )}
+        <View style={styles.loadingContainer}>
+          <LottieView
+            style={{ width: 200, height: 200,justifyContent:'center',alignItems:'center' }} 
+            source={loadingAnimation} 
+            autoPlay
+            loop
+          />
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -447,7 +458,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   picker: {
-   
     height: 50,
     width: '100%',
   },
@@ -467,7 +477,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.1)', 
     justifyContent: 'center', 
     alignItems: 'center', 
-   
   },
 });
 

@@ -57,12 +57,17 @@ const Vaccine = () => {
           <TouchableOpacity style={styles.userInfoBox} onPress={handleUserInfoPress}>
             <View style={styles.userImageContainer}>
               <View style={styles.userImageWrapper}>
-                <Image source={{ uri: userInfo.avatarUrl }} style={styles.userImage} />
+              {userInfo.avatarUrl ? (
+              <Image source={{ uri: userInfo.avatarUrl }} style={styles.userImage} />
+              ) : (
+                <Image source={require('../theme/image/images.png')} style={styles.userImage} />
+              )}
+              
               </View>
             </View>
             <View style={styles.userInfoTextContainer}>
               <Text style={styles.userInfoTextName}>{userInfo.fullName}</Text>
-              <Text style={styles.userInfoText}>{userInfo.phone}</Text>
+              <Text style={styles.userInfoText}>{userInfo.phoneNumber}</Text>
               <Text style={styles.userInfoText}>{userInfo.birthDate}</Text>
             </View>
             <View style={styles.iconContainer}>
