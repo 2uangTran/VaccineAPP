@@ -43,6 +43,7 @@ import ListNotification from '../customer/menumain/ListNotification';
 import Notification from '../customer/menumain/Notification';
 import CustomHeaderRightNotification from './CustomHeaderRightNotification';
 import ConfirmationScreen from '../customer/Cart/ConfirmationScreen';
+import HistoryBuy from '../customer/menumain/HIstoryVaccines/HistoryBuy';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -286,7 +287,15 @@ const RouterCustomer = () => {
           component={ConfirmationScreen}
           options={{
             title: 'Xác nhận',
-            
+            headerShown:false
+          }}
+        />
+        <Stack.Screen
+          name="HistoryBuy"
+          component={HistoryBuy}
+          options={{
+            title: 'Lịch sử đăng ký mũi tiêm',
+           
           }}
         />
       </Stack.Navigator>

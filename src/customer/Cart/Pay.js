@@ -33,8 +33,11 @@ const Pay = ({ route }) => {
   const [paymentSelected, setPaymentSelected] = useState(false);
 
   const formatDate = (date) => {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return new Date(date).toLocaleDateString('vi-VN', options);
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   const generateOrderId = () => {
@@ -51,18 +54,19 @@ const Pay = ({ route }) => {
       Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
       return;
     }
-
+  
     const orderId = generateOrderId();
     const orderDetails = {
       orderId,
-      fullname: `${formData.fullName}-${formData.birthDate}`, 
+      fullname: `${formData.fullName}-${formData.birthDate}`,
       totalPrice,
       userInfo,
       center,
       vaccine,
-      paymentStatus: 0, 
+      paymentStatus: 0,
       vaccinationDate: formatDate(selectedDate),
       paymentMethod: checked,
+      createdAt: formatDate(new Date()), 
       ...formData
     };
     console.log(orderDetails);
@@ -70,7 +74,7 @@ const Pay = ({ route }) => {
     try {
       await firestore().collection('bills').doc(orderId).set(orderDetails);
       for (const vaccine of orderDetails.vaccine) {
-        console.log("id:", vaccine.id);  
+        console.log("id:", vaccine.id);
         const cartSnapshot = await firestore().collection('Cart').get();
         console.log("All documents in Cart collection:");
         cartSnapshot.forEach(doc => {
@@ -94,6 +98,7 @@ const Pay = ({ route }) => {
       console.error('Error creating order:', error);
     }
   };
+  
 
   useEffect(() => {
     const fetchUserData = async () => {

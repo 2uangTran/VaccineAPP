@@ -235,7 +235,8 @@ const Main = () => {
               ))}
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}>
+              <TouchableOpacity style={styles.squareButton}
+                onPress={() => navigation.navigate('HistoryBuy')}>
                 <FontAwesome6 name="book-medical" size={24} color="white" />
               </TouchableOpacity>
               {splitDescription('Lịch sử đặt vắc xin').map((part, index) => (

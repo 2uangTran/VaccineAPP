@@ -12,4 +12,7 @@ export default {
   gray: '#EEEEEE',
   orange: '#f3711b',
   green: '#50b946',
+  orange1:'#FFFF99',
+  orange2:'#EEAD0E',
+
 };
