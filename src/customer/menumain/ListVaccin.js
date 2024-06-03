@@ -1,29 +1,37 @@
-import {View, Text, SafeAreaView, StyleSheet, TextInput} from 'react-native';
-import React, {useState, useEffect} from 'react';
-import {Appbar} from 'react-native-paper';
-import {useNavigation} from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Appbar } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
-import {useMyContextController} from '../../context';
+import { useMyContextController } from '../../context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {FlatList} from 'react-native-gesture-handler';
+import { FlatList } from 'react-native-gesture-handler';
 import Vaccines from './Vaccines';
-import {Button} from 'react-native-elements';
+import LottieView from 'lottie-react-native'; 
 
 const ListVaccin = () => {
   const [loading, setLoading] = useState(true);
   const [vaccines, setVaccines] = useState([]);
   const [controller, dispatch] = useMyContextController();
-  const {userLogin} = controller;
+  const { userLogin } = controller;
   const ref = firestore().collection('vaccines');
   const navigation = useNavigation();
+
+  const handleButtonPress = () => {
+    setLoading(true); 
+   
+    setTimeout(() => {
+      setLoading(false); 
+    }, 2000); 
+  };
 
   useEffect(() => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
 
       querySnapshot.forEach(doc => {
-        const {title, price, imageUrl, description, date} = doc.data();
+        const { title, price, imageUrl, description, date } = doc.data();
         list.push({
           id: doc.id,
           title,
@@ -52,7 +60,7 @@ const ListVaccin = () => {
   }, [loading]);
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
         <Appbar.Header style={styles.appbar}>
           <View style={styles.searchContainer}>
@@ -72,10 +80,23 @@ const ListVaccin = () => {
         <FlatList
           data={vaccines}
           keyExtractor={item => item.id}
-          renderItem={({item}) => <Vaccines {...item} />}
+          renderItem={({ item }) => <Vaccines {...item} />}
           numColumns={1}
           contentContainerStyle={styles.list}
         />
+        <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
+          <Text style={styles.buttonLabel}>Press Me!</Text>
+        </TouchableOpacity>
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <LottieView
+              style={styles.loadingAnimation}
+              source={require('../../theme/Loading/loadingcricle.json')}
+              autoPlay
+              loop
+            />
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -112,57 +133,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
-  touchable: {
-    width: '100%',
-    marginBottom: 10,
-  },
-
-  rowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 23,
-    fontWeight: 'bold',
-  },
-  description: {
-    fontSize: 17,
-    marginTop: 5,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'left',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
   button: {
-    width: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.blue,
+    paddingVertical: 10,
+    marginTop: 10,
     borderRadius: 5,
-    borderColor: COLORS.blue,
-  },
-  buttonContent: {
-    backgroundColor: COLORS.white,
   },
   buttonLabel: {
-    color: COLORS.blue,
-  },
-  menuAnchor: {
-    fontSize: 24,
+    color: COLORS.white,
     fontWeight: 'bold',
-    padding: 5,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  loadingAnimation: {
+    width: 200,
+    height: 200,
   },
 });
 

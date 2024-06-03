@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import COLORS from '../../../theme/constants';

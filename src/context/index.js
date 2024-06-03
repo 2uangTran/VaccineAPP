@@ -82,7 +82,6 @@ const register = async (
   fullName,
   email,
   password,
-  gender,
 ) => {
   try {
     const userCredential = await auth().createUserWithEmailAndPassword(
@@ -92,7 +91,6 @@ const register = async (
     const userData = {
       email: userCredential.user.email,
       fullName: fullName,
-      gender: gender,
     };
     await USERS.doc(email).set(userData);
 

@@ -202,16 +202,17 @@ const UpdateInfo = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-   
+    
       if (!genderChanged && !formData.gender) {
+       
         setFormData(prevFormData => ({
           ...prevFormData,
           gender: 'Nam' 
         }));
       }
-
+  
       let imageUrl = formData.avatarUrl; 
-
+  
       if (imageUri) { 
         imageUrl = await uploadImage(imageUri); 
         if (!imageUrl) {
@@ -246,6 +247,7 @@ const UpdateInfo = () => {
       setGenderChanged(false); 
     }
   };
+  
 
   return (
     <KeyboardAvoidingView
@@ -305,8 +307,8 @@ const UpdateInfo = () => {
             style={styles.picker}
             onValueChange={(value) => handleInputChange('gender', value)}
           >
-            <Picker.Item label="Nam" value="male" />
-            <Picker.Item label="Nữ" value="female" />
+            <Picker.Item label="Nam" value="Nam" />
+            <Picker.Item label="Nữ" value="Nữ" />
           </Picker>
         </View>
 

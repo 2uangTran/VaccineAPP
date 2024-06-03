@@ -116,21 +116,6 @@ const Register = ({ navigation }) => {
         <HelperText type="error" visible={hasErrorPasswordConfirm()}>
           Passwords do not match.
         </HelperText>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Checkbox.Android
-            status={gender === "male" ? "checked" : "unchecked"}
-            onPress={() => setGender("male")}
-          />
-          <Text>Male</Text>
-          <Checkbox.Android
-            status={gender === "female" ? "checked" : "unchecked"}
-            onPress={() => setGender("female")}
-          />
-          <Text>Female</Text>
-        </View>
-        <HelperText type="error" visible={hasErrorGender()}>
-          Please select your gender.
-        </HelperText>
         <Button
           mode="contained"
           onPress={onSubmit}
