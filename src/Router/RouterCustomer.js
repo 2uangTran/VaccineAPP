@@ -287,7 +287,7 @@ const RouterCustomer = () => {
           component={ConfirmationScreen}
           options={{
             title: 'Xác nhận',
-            headerShown:false
+            headerShown: false,
           }}
         />
         <Stack.Screen
@@ -295,7 +295,6 @@ const RouterCustomer = () => {
           component={HistoryBuy}
           options={{
             title: 'Lịch sử đăng ký mũi tiêm',
-           
           }}
         />
       </Stack.Navigator>
