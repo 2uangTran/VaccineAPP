@@ -30,16 +30,7 @@ const Personal = () => {
     logout(dispatch, navigation); 
   };
 
-  const translateGender = (gender) => {
-    switch (gender) {
-      case 'male':
-        return 'Nam';
-      case 'female':
-        return 'Nữ';
-      default:
-        return 'N/A';
-    }
-  };
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -62,7 +53,7 @@ const Personal = () => {
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
               <Text style={styles.userDetails}>
-                {userLogin ? userLogin.phoneNumber : 'N/A'} - {userLogin ? translateGender(userLogin.gender) : 'N/A'} - {userLogin ? userLogin.birthDate : 'N/A'}
+                {userLogin ? userLogin.phoneNumber : 'N/A'} - {userLogin ? userLogin.gender : 'N/A'} - {userLogin ? userLogin.birthDate : 'N/A'}
               </Text>
             </View>
           </View>

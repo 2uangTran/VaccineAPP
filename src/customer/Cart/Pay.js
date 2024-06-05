@@ -7,6 +7,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from '../../context';
 import firestore from '@react-native-firebase/firestore';
 import { RadioButton } from 'react-native-paper';
+import { NativeModules, NativeEventEmitter } from 'react-native';
+
+const { PayZaloBridge } = NativeModules;
+const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
 
 const Pay = ({ route }) => {
   const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
@@ -31,6 +35,23 @@ const Pay = ({ route }) => {
     address: ''
   });
   const [paymentSelected, setPaymentSelected] = useState(false);
+
+  useEffect(() => {
+    const subscription = payZaloBridgeEmitter.addListener(
+      'EventPayZalo',
+      (data) => {
+        if(data.returnCode == 1){
+          alert('Giao dịch thành công!');
+        } else{
+          alert('Giao dịch thất bại!');
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const formatDate = (date) => {
     const d = new Date(date);
@@ -69,28 +90,17 @@ const Pay = ({ route }) => {
       createdAt: formatDate(new Date()), 
       ...formData
     };
-    console.log(orderDetails);
   
     try {
       await firestore().collection('bills').doc(orderId).set(orderDetails);
       for (const vaccine of orderDetails.vaccine) {
-        console.log("id:", vaccine.id);
         const cartSnapshot = await firestore().collection('Cart').get();
-        console.log("All documents in Cart collection:");
-        cartSnapshot.forEach(doc => {
-          console.log(doc.id, doc.data());
-        });
         const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
-        console.log("Matching documents in Cart collection for id:", vaccine.id, matchingDocs.length);
   
         if (matchingDocs.length > 0) {
           for (const doc of matchingDocs) {
-            console.log("Deleting document:", doc.id);
             await firestore().collection('Cart').doc(doc.id).delete();
-            console.log("Deleted document:", doc.id);
           }
-        } else {
-          console.log("No matching documents found in the cart for id:", vaccine.id);
         }
       }
       navigation.navigate('ConfirmationScreen', { orderDetails });
@@ -98,7 +108,6 @@ const Pay = ({ route }) => {
       console.error('Error creating order:', error);
     }
   };
-  
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -182,10 +191,24 @@ const Pay = ({ route }) => {
     setPayVisible(!payVisible);
   };
 
-  const handlePaymentSelection = (value) => {
+   const handlePaymentSelection = (value) => {
     setChecked(value);
     setPaymentSelected(true);
+    if (value === 'zalo') {
+      // Gọi phương thức payOrder từ NativeModule
+      PayZaloBridge.payOrder(zptranstoken)
+        .then(transactionId => {
+          // Thực hiện xử lý khi thanh toán thành công
+          alert('Giao dịch thành công! Mã giao dịch: ' + transactionId);
+        })
+        .catch(error => {
+          // Xử lý khi có lỗi xảy ra trong quá trình thanh toán
+          alert('Giao dịch thất bại!');
+          console.error('Error during payment:', error);
+        });
+    }
   };
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -333,7 +356,7 @@ const Pay = ({ route }) => {
                   status={checked === 'zalo' ? 'checked' : 'unchecked'}
                   onPress={() => handlePaymentSelection('zalo')}
                 />
-                <Text style={{ fontSize: 20, color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
+                <Text style={{ fontSize: 20,width:'100%', color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
               </View>
             </>
           ) : null}

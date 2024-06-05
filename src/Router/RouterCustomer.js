@@ -35,7 +35,6 @@ import ListNews from '../customer/menumain/ListNews';
 import DetailNews from '../customer/menumain/News/DetailNews';
 import ConfirmCart from '../customer/Cart/ConfirmCart';
 import Pay from '../customer/Cart/Pay';
-import Zalo from '../customer/Cart/Zalo';
 import AddNoti from '../customer/menumain/Notification/AddNoti';
 import DetailNoti from '../customer/menumain/Notification/DetailNoti';
 import UpdateNoti from '../customer/menumain/Notification/UpdateNoti';
@@ -247,13 +246,7 @@ const RouterCustomer = () => {
             title: 'Thanh toán',
           }}
         />
-        <Stack.Screen
-          name="Zalo"
-          component={Zalo}
-          options={{
-            title: 'Thanh toán',
-          }}
-        />
+        
         <Stack.Screen
           name="AddNoti"
           component={AddNoti}

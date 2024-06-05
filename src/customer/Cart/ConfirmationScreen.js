@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: COLORS.grey,
     width: '90%',
-    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 23,
@@ -121,12 +121,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.grey,
     padding: 10,
+    width:'40%'
   },
   info: {
     fontSize: 16,
+    fontWeight: 'bold',
     color: COLORS.black,
     padding: 10,
-    textAlign: 'right',
+   
+    
   },
   detailLink: {
     paddingTop: 10,
