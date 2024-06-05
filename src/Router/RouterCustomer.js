@@ -246,7 +246,7 @@ const RouterCustomer = () => {
             title: 'Thanh toán',
           }}
         />
-        
+
         <Stack.Screen
           name="AddNoti"
           component={AddNoti}

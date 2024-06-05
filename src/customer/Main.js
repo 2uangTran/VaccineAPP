@@ -194,7 +194,7 @@ const Main = () => {
                 <TouchableOpacity
                   style={[styles.buttonmodal, styles.button]}
                   onPress={handleUpdateInfo}>
-                  <Text style={styles.buttonTextmodal}>Update Info</Text>
+                  <Text style={styles.buttonTextmodal}>Cập nhật thông tin</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -235,7 +235,8 @@ const Main = () => {
               ))}
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}
+              <TouchableOpacity
+                style={styles.squareButton}
                 onPress={() => navigation.navigate('HistoryBuy')}>
                 <FontAwesome6 name="book-medical" size={24} color="white" />
               </TouchableOpacity>
