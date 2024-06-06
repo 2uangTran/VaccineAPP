@@ -1,27 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
 import Feather from 'react-native-vector-icons/Feather';
-import auth from "@react-native-firebase/auth";
-import { showMessage } from 'react-native-flash-message';
+import auth from '@react-native-firebase/auth';
+import {showMessage} from 'react-native-flash-message';
 
-const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
+const Cart = ({isOpenedFromVaccineForm, onSelectItems}) => {
   const [cartItems, setCartItems] = useState([]);
 
-  const formatPrice = (price) => {
+  const formatPrice = price => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
     }).format(price);
   };
 
-
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
         const userId = auth().currentUser.uid;
-        const cartSnapshot = await firestore().collection('Cart').where('userId', '==', userId).get();
+        const cartSnapshot = await firestore()
+          .collection('Cart')
+          .where('userId', '==', userId)
+          .get();
         const items = cartSnapshot.docs.map(doc => ({
           iddoc: doc.id,
           ...doc.data(),
@@ -36,17 +46,17 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
     fetchCartItems();
   }, []);
 
-  const handleToggleCheckbox = (id) => {
+  const handleToggleCheckbox = id => {
     const updatedItems = cartItems.map(item => {
       if (item.iddoc === id) {
-        return { ...item, selected: !item.selected };
+        return {...item, selected: !item.selected};
       }
       return item;
     });
     setCartItems(updatedItems);
   };
 
-  const handleRemoveFromCart = async (iddoc) => {
+  const handleRemoveFromCart = async iddoc => {
     Alert.alert(
       'Warning',
       'Are you sure you want to remove this service from your cart? This action cannot be undone.',
@@ -78,7 +88,7 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
           style: 'cancel',
         },
       ],
-      { cancelable: false },
+      {cancelable: false},
     );
   };
 
@@ -87,10 +97,10 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
     onSelectItems(selectedItems);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <View key={item.iddoc} style={styles.itemContainer}>
       <View style={styles.rowContainer}>
-        <Image source={{ uri: item.imageUrl }} style={styles.image} />
+        <Image source={{uri: item.imageUrl}} style={styles.image} />
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{item.title}</Text>
         </View>
@@ -100,9 +110,11 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
         {item.description}
       </Text>
       <View style={styles.rowContainer}>
-      <Text style={styles.price}>{formatPrice(item.price)}</Text>
+        <Text style={styles.price}>{formatPrice(item.price)}</Text>
         {!isOpenedFromVaccineForm && (
-          <TouchableOpacity onPress={() => handleRemoveFromCart(item.iddoc)} style={styles.trashButton}>
+          <TouchableOpacity
+            onPress={() => handleRemoveFromCart(item.iddoc)}
+            style={styles.trashButton}>
             <Feather name="trash-2" size={24} color={COLORS.red} />
           </TouchableOpacity>
         )}
@@ -128,7 +140,9 @@ const Cart = ({ isOpenedFromVaccineForm, onSelectItems }) => {
         contentContainerStyle={styles.listContainer}
       />
       {isOpenedFromVaccineForm && (
-        <TouchableOpacity onPress={handleConfirmSelection} style={styles.confirmButton}>
+        <TouchableOpacity
+          onPress={handleConfirmSelection}
+          style={styles.confirmButton}>
           <Text style={styles.confirmButtonText}>Xác nhận</Text>
         </TouchableOpacity>
       )}
@@ -168,9 +182,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 23,
+    fontSize: 16,
     marginTop: -47,
     color: COLORS.black,
+    fontWeight: 'bold',
   },
   description: {
     fontSize: 17,

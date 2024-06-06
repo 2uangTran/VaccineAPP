@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 import COLORS from '../../theme/constants';
-import { useNavigation } from '@react-navigation/native';
-import { useMyContextController } from '../../context';
+import {useNavigation} from '@react-navigation/native';
+import {useMyContextController} from '../../context';
 import firestore from '@react-native-firebase/firestore';
-import { RadioButton } from 'react-native-paper';
-import { NativeModules, NativeEventEmitter } from 'react-native';
+import {RadioButton} from 'react-native-paper';
+import {NativeModules, NativeEventEmitter} from 'react-native';
 
-const { PayZaloBridge } = NativeModules;
+const {PayZaloBridge} = NativeModules;
 const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
 
-const Pay = ({ route }) => {
-  const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
+const Pay = ({route}) => {
+  const {userInfo, center, vaccine, totalPrice, selectedDate} = route.params;
   const [controller] = useMyContextController();
   const user = controller.userLogin;
   const [loading, setLoading] = useState(true);
@@ -32,20 +41,20 @@ const Pay = ({ route }) => {
     province: '',
     district: '',
     ward: '',
-    address: ''
+    address: '',
   });
   const [paymentSelected, setPaymentSelected] = useState(false);
 
   useEffect(() => {
     const subscription = payZaloBridgeEmitter.addListener(
       'EventPayZalo',
-      (data) => {
-        if(data.returnCode == 1){
+      data => {
+        if (data.returnCode == 1) {
           alert('Giao dịch thành công!');
-        } else{
+        } else {
           alert('Giao dịch thất bại!');
         }
-      }
+      },
     );
 
     return () => {
@@ -53,7 +62,7 @@ const Pay = ({ route }) => {
     };
   }, []);
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -62,10 +71,13 @@ const Pay = ({ route }) => {
   };
 
   const generateOrderId = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 8; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+      result += characters.charAt(
+        Math.floor(Math.random() * characters.length),
+      );
     }
     return result;
   };
@@ -75,7 +87,7 @@ const Pay = ({ route }) => {
       Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
       return;
     }
-  
+
     const orderId = generateOrderId();
     const orderDetails = {
       orderId,
@@ -87,23 +99,25 @@ const Pay = ({ route }) => {
       paymentStatus: 0,
       vaccinationDate: formatDate(selectedDate),
       paymentMethod: checked,
-      createdAt: formatDate(new Date()), 
-      ...formData
+      createdAt: formatDate(new Date()),
+      ...formData,
     };
-  
+
     try {
       await firestore().collection('bills').doc(orderId).set(orderDetails);
       for (const vaccine of orderDetails.vaccine) {
         const cartSnapshot = await firestore().collection('Cart').get();
-        const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
-  
+        const matchingDocs = cartSnapshot.docs.filter(
+          doc => doc.data().id === vaccine.id,
+        );
+
         if (matchingDocs.length > 0) {
           for (const doc of matchingDocs) {
             await firestore().collection('Cart').doc(doc.id).delete();
           }
         }
       }
-      navigation.navigate('ConfirmationScreen', { orderDetails });
+      navigation.navigate('ConfirmationScreen', {orderDetails});
     } catch (error) {
       console.error('Error creating order:', error);
     }
@@ -113,7 +127,10 @@ const Pay = ({ route }) => {
     const fetchUserData = async () => {
       try {
         const currentUserEmail = user?.email;
-        const userDoc = await firestore().collection('USERS').doc(currentUserEmail).get();
+        const userDoc = await firestore()
+          .collection('USERS')
+          .doc(currentUserEmail)
+          .get();
         const userData = userDoc.data();
         setFormData(userData);
         if (userData.province) {
@@ -139,13 +156,17 @@ const Pay = ({ route }) => {
       }
     };
 
-    const fetchDistricts = async (province) => {
+    const fetchDistricts = async province => {
       try {
-        const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
+        const citySnapshot = await firestore()
+          .collection('area')
+          .doc(province)
+          .collection('cities')
+          .get();
         if (!citySnapshot.empty) {
           const districtData = citySnapshot.docs.map(doc => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }));
           setDistricts(districtData);
         } else {
@@ -160,7 +181,12 @@ const Pay = ({ route }) => {
 
     const fetchWards = async (province, district) => {
       try {
-        const areaSnapshot = await firestore().collection('area').doc(province).collection('cities').doc(district).get();
+        const areaSnapshot = await firestore()
+          .collection('area')
+          .doc(province)
+          .collection('cities')
+          .doc(district)
+          .get();
         if (areaSnapshot.exists) {
           const wardsData = areaSnapshot.data().wards;
           setWards(wardsData);
@@ -179,7 +205,7 @@ const Pay = ({ route }) => {
   const handleInputChange = (key, value) => {
     setFormData(prevState => ({
       ...prevState,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -191,7 +217,7 @@ const Pay = ({ route }) => {
     setPayVisible(!payVisible);
   };
 
-   const handlePaymentSelection = (value) => {
+  const handlePaymentSelection = value => {
     setChecked(value);
     setPaymentSelected(true);
     if (value === 'zalo') {
@@ -209,15 +235,14 @@ const Pay = ({ route }) => {
     }
   };
 
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={{ borderWidth: 1, padding: 10, borderRadius: 10 }}>
+        <View style={{borderWidth: 1, padding: 10, borderRadius: 10}}>
           <View style={styles.headerContainer}>
             <TouchableOpacity
               onPress={toggleDetails}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={styles.titleLabel}>Chi tiết người tiêm</Text>
               <Feather
                 name={detailsVisible ? 'chevron-up' : 'chevron-down'}
@@ -227,38 +252,46 @@ const Pay = ({ route }) => {
           </View>
           {loading ? (
             <Text>Loading...</Text>
-          ) :
-          detailsVisible ? (
+          ) : detailsVisible ? (
             <>
-              <Text style={styles.label}>Họ và tên <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Họ và tên <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={formData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
+                onChangeText={value => handleInputChange('fullName', value)}
               />
-              <Text style={styles.label}>Số điện thoại <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Số điện thoại <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={formData.phoneNumber}
-                onChangeText={(value) => handleInputChange('phoneNumber', value)}
+                onChangeText={value => handleInputChange('phoneNumber', value)}
               />
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
                 value={formData.email}
                 editable={false}
-                onChangeText={(value) => handleInputChange('email', value)}
+                onChangeText={value => handleInputChange('email', value)}
               />
-              <Text style={styles.label}>Tỉnh / Thành phố <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Tỉnh / Thành phố <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.province}
                   style={styles.picker}
-                  onValueChange={(value) => handleInputChange('province', value)}
-                >
+                  onValueChange={value => handleInputChange('province', value)}>
                   {provinces.length > 0 ? (
-                    provinces.map((province) => (
-                      <Picker.Item key={province} label={province} value={province} />
+                    provinces.map(province => (
+                      <Picker.Item
+                        key={province}
+                        label={province}
+                        value={province}
+                      />
                     ))
                   ) : (
                     <Picker.Item label="Không có dữ liệu" value="" />
@@ -266,17 +299,21 @@ const Pay = ({ route }) => {
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Quận / Huyện <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Quận / Huyện <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.district}
                   style={styles.picker}
-                 
-                  onValueChange={(value) => handleInputChange('district', value)}
-                >
+                  onValueChange={value => handleInputChange('district', value)}>
                   {districts && districts.length > 0 ? (
-                    districts.map((district) => (
-                      <Picker.Item key={district.id} label={district.id} value={district.id} />
+                    districts.map(district => (
+                      <Picker.Item
+                        key={district.id}
+                        label={district.id}
+                        value={district.id}
+                      />
                     ))
                   ) : (
                     <Picker.Item label="Không có dữ liệu" value="" />
@@ -284,15 +321,16 @@ const Pay = ({ route }) => {
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Phường / Xã <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Phường / Xã <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.ward}
                   style={styles.picker}
-                  onValueChange={(value) => handleInputChange('ward', value)}
-                >
+                  onValueChange={value => handleInputChange('ward', value)}>
                   {wards.length > 0 ? (
-                    wards.map((ward) => (
+                    wards.map(ward => (
                       <Picker.Item key={ward} label={ward} value={ward} />
                     ))
                   ) : (
@@ -301,20 +339,28 @@ const Pay = ({ route }) => {
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Địa chỉ <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Địa chỉ <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={formData.address}
-                onChangeText={(value) => handleInputChange('address', value)}
+                onChangeText={value => handleInputChange('address', value)}
               />
             </>
           ) : null}
         </View>
-        <View style={{ borderWidth: 1, padding: 10, borderRadius: 10, marginTop: '2%' }}>
+        <View
+          style={{
+            borderWidth: 1,
+            padding: 10,
+            borderRadius: 10,
+            marginTop: '2%',
+          }}>
           <View style={styles.headerContainer}>
             <TouchableOpacity
               onPress={togglePays}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={styles.titleLabel}>Phương thức thanh toán</Text>
               <Feather
                 name={payVisible ? 'chevron-up' : 'chevron-down'}
@@ -326,37 +372,81 @@ const Pay = ({ route }) => {
             <Text>Loading...</Text>
           ) : payVisible ? (
             <>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <RadioButton
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <RadioButton
                   value="Thanh toán tại trung tâm"
-                  status={checked === 'Thanh toán tại trung tâm' ? 'checked' : 'unchecked'} 
-                  onPress={() => handlePaymentSelection('Thanh toán tại trung tâm')} 
+                  status={
+                    checked === 'Thanh toán tại trung tâm'
+                      ? 'checked'
+                      : 'unchecked'
+                  }
+                  onPress={() =>
+                    handlePaymentSelection('Thanh toán tại trung tâm')
+                  }
+                  color={
+                    checked === 'Thanh toán tại trung tâm' ? 'blue' : 'black'
+                  }
                 />
-                <Text style={{ fontSize: 20, color: checked === 'Thanh toán tại trung tâm' ? 'black' : 'grey' }}>Thanh toán tại trung tâm</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: checked === 'Thanh toán tại trung tâm' ? 20 : 16,
+                    color:
+                      checked === 'Thanh toán tại trung tâm' ? 'blue' : 'black',
+                  }}>
+                  Thanh toán tại trung tâm
+                </Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <RadioButton
                   value="credit_card"
                   status={checked === 'credit_card' ? 'checked' : 'unchecked'}
                   onPress={() => handlePaymentSelection('credit_card')}
+                  color={checked === 'credit_card' ? 'blue' : 'black'}
                 />
-                <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: checked === 'credit_card' ? 20 : 16,
+                    color: checked === 'credit_card' ? 'blue' : 'black',
+                  }}>
+                  {' '}
+                  Thẻ tín dụng
+                </Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <RadioButton
                   value="paypal"
                   status={checked === 'paypal' ? 'checked' : 'unchecked'}
                   onPress={() => handlePaymentSelection('paypal')}
+                  color={checked === 'paypal' ? 'blue' : 'black'}
                 />
-                <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: checked === 'paypal' ? 20 : 16,
+                    color: checked === 'paypal' ? 'blue' : 'black',
+                  }}>
+                  {' '}
+                  PayPal
+                </Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <RadioButton
                   value="zalo"
                   status={checked === 'zalo' ? 'checked' : 'unchecked'}
                   onPress={() => handlePaymentSelection('zalo')}
+                  color={checked === 'zalo' ? 'blue' : 'black'}
                 />
-                <Text style={{ fontSize: 20,width:'100%', color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    width: '100%',
+                    color: checked === 'zalo' ? 'blue' : 'black',
+                  }}>
+                  ZaloPay
+                </Text>
               </View>
             </>
           ) : null}
@@ -365,7 +455,12 @@ const Pay = ({ route }) => {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Tổng cộng</Text>
-          <Text style={styles.totalPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}</Text>
+          <Text style={styles.totalPrice}>
+            {new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
+            }).format(totalPrice)}
+          </Text>
         </View>
         <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
           <Text style={styles.confirmButtonText}>Thanh toán</Text>
@@ -384,7 +479,7 @@ const styles = StyleSheet.create({
   },
   titleLabel: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.blue,
     paddingTop: '2%',
   },
@@ -417,8 +512,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 17,
     paddingHorizontal: 20,
-    backgroundColor: COLORS.gray,
- 
+    backgroundColor: COLORS.white,
   },
   totalContainer: {
     flexDirection: 'column',

@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 17,
     paddingHorizontal: 20,
-    backgroundColor: COLORS.gray,
+    backgroundColor: COLORS.white,
   },
   totalContainer: {
     flexDirection: 'column',

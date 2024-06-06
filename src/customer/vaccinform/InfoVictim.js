@@ -185,7 +185,7 @@ const VaccineForm = () => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <ScrollView contentContainerStyle={styles.container}>
         <View
           style={{
@@ -468,7 +468,7 @@ const VaccineForm = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.white,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -658,9 +658,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 23,
+    fontSize: 15,
     marginTop: -47,
     color: COLORS.black,
+    fontWeight: 'bold',
   },
   description: {
     fontSize: 17,
@@ -676,6 +677,7 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: 'bold',
     color: COLORS.black,
+    fontSize: 14,
   },
   errorText: {
     color: COLORS.red,
