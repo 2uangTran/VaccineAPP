@@ -17,7 +17,7 @@ import COLORS from '../theme/constants';
 
 const {height} = Dimensions.get('window');
 
-const CustomHeaderRight = () => {
+const CustomHeaderRightNews = () => {
   const navigation = useNavigation();
   const [controller, dispatch] = useMyContextController();
   const {userLogin, cartCount} = controller;
@@ -36,25 +36,8 @@ const CustomHeaderRight = () => {
   const onPressHandler = () => {
     if (userLogin && userLogin.role === 'admin') {
       navigation.navigate('AddNews');
-    } else {
-      //   setModalVisible(true);
-      //   Animated.timing(slideAnim, {
-      //     toValue: 0,
-      //     duration: 300,
-      //     useNativeDriver: true,
-      //   }).start();
     }
   };
-
-  //   const closeModal = () => {
-  //     Animated.timing(slideAnim, {
-  //       toValue: height,
-  //       duration: 300,
-  //       useNativeDriver: true,
-  //     }).start(() => {
-  //       setModalVisible(false);
-  //     });
-  //   };
 
   return (
     <View>
@@ -138,4 +121,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomHeaderRight;
+export default CustomHeaderRightNews;

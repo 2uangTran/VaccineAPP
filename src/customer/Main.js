@@ -171,10 +171,8 @@ const Main = () => {
               right: 0,
             }}>
             <Image
-              source={{
-                uri: 'https://ik.imagekit.io/tvlk/blog/2021/09/du-lich-anh-2.jpg?tr=dpr-2,w-675',
-              }}
-              style={{height: 150, width: '80%', borderRadius: 10}}
+              source={require('../theme/image/bn1.png')}
+              style={{height: 150, width: '93%', borderRadius: 10}}
             />
           </View>
         </View>
@@ -379,8 +377,8 @@ const styles = StyleSheet.create({
   },
   buttonTextmodal: {
     color: COLORS.blue,
-    width: '100%',
-    paddingLeft: 6,
+    // width: '100%',
+    // paddingLeft: 6,
   },
   greetingContainer: {
     alignItems: 'center',
@@ -410,7 +408,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    paddingLeft: 19,
+    paddingLeft: 15,
   },
   buttonWrapper: {
     alignItems: 'center',

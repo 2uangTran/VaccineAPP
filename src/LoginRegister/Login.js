@@ -6,12 +6,13 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Image, // Import Image component
+  Image,
 } from 'react-native';
 import {useMyContextController, login} from '../../src/context';
+import COLORS from '../theme/constants';
 
 const Login = ({navigation}) => {
-  const [email, setEmail] = useState('hoang12@gmail.com');
+  const [email, setEmail] = useState('colong@gmail.com');
   const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
   const [controller, dispatch] = useMyContextController();
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
-    backgroundColor: '#007aff',
+    backgroundColor: COLORS.blue,
     borderColor: '#007aff',
   },
   btnText: {

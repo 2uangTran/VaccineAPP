@@ -15,6 +15,7 @@ import auth from '@react-native-firebase/auth';
 import CustomHeaderRightUpdate from '../../../Router/CustomHeaderRightUpdate';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import CustomHeaderRightNews from '../../../Router/CustomHeaderRightNews';
 
 const DetailNews = ({route}) => {
   const {id, title, description} = route.params;
@@ -38,19 +39,12 @@ const DetailNews = ({route}) => {
       });
   }, [id]);
 
-  const formatPrice = price => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
-
   const navigation = useNavigation();
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <CustomHeaderRightUpdate
+        <CustomHeaderRightNews
           route={{
             params: {
               id,
@@ -67,51 +61,6 @@ const DetailNews = ({route}) => {
     });
   }, [navigation, vaccineData]);
 
-  const handleAddToCartWrapper = async () => {
-    const item = {
-      id,
-      title,
-      price,
-      imageUrl,
-      description,
-      userId: auth().currentUser.uid,
-    };
-
-    try {
-      const cartSnapshot = await firestore()
-        .collection('Cart')
-        .where('id', '==', id)
-        .where('userId', '==', auth().currentUser.uid)
-        .get();
-
-      if (!cartSnapshot.empty) {
-        showMessage({
-          message: 'Thông báo',
-          description:
-            'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
-          type: 'warning',
-          floating: true,
-          autoHide: true,
-          duration: 3000,
-        });
-        return;
-      }
-
-      await firestore().collection('Cart').add(item);
-      console.log('Product added to cart:', item);
-      showMessage({
-        message: 'Thông báo',
-        description: 'Vắc xin đã được thêm vào giỏ hàng',
-        type: 'success',
-        floating: true,
-        autoHide: true,
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
-    }
-  };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {vaccineData ? (
@@ -121,10 +70,7 @@ const DetailNews = ({route}) => {
             <Text style={styles.title}>{vaccineData.title}</Text>
             <Text style={styles.tag}>Còn hàng</Text>
 
-            <Text style={styles.info}>
-              <Text style={styles.boldText}>Nội dung:</Text>{' '}
-              {vaccineData.description}
-            </Text>
+            <Text style={styles.desText}>{vaccineData.description}</Text>
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -184,10 +130,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
     marginBottom: 5,
+    fontWeight: 'bold',
   },
   boldText: {
     fontWeight: 'bold',
     color: COLORS.black,
+  },
+  desText: {
+    fontSize: 16,
+    color: COLORS.black,
+    textAlign: 'justify',
   },
   price: {
     fontSize: 24,

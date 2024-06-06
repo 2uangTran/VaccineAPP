@@ -182,7 +182,7 @@ const RouterCustomer = () => {
           component={DetailNews}
           options={{
             title: 'Chi tiết Tin tức',
-            headerRight: () => <CustomHeaderRightUpdate />,
+            headerRight: () => <CustomHeaderRightNews />,
           }}
         />
         <Stack.Screen

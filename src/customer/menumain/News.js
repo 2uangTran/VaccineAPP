@@ -47,8 +47,7 @@ const Newss = ({id, title, imageUrl, description}) => {
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.description}>
-                <Text style={styles.boldText}>Tin tức - </Text>
-                {description}
+                <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
               </Text>
             </View>
           </View>

@@ -132,6 +132,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import COLORS from '../theme/constants';
 
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {register} from '../context';
@@ -147,7 +148,7 @@ const Register = ({navigation}) => {
     try {
       await register(fullName, email, password);
       navigation.navigate('Login');
-      Alert.alert('Success', 'Registration successful');
+      Alert.alert('Đăng ký tài khoản thành công');
     } catch (error) {
       if (error.message.includes('email already exists')) {
         setError('This email is already registered.');
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderWidth: 1,
-    backgroundColor: '#075eec',
+    backgroundColor: COLORS.blue,
     borderColor: '#075eec',
   },
   btnText: {
