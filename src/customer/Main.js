@@ -171,10 +171,8 @@ const Main = () => {
               right: 0,
             }}>
             <Image
-              source={{
-                uri: 'https://ik.imagekit.io/tvlk/blog/2021/09/du-lich-anh-2.jpg?tr=dpr-2,w-675',
-              }}
-              style={{height: 150, width: '80%', borderRadius: 10}}
+              source={require('../theme/image/bn1.png')}
+              style={{height: 150, width: '93%', borderRadius: 10}}
             />
           </View>
         </View>
@@ -194,7 +192,7 @@ const Main = () => {
                 <TouchableOpacity
                   style={[styles.buttonmodal, styles.button]}
                   onPress={handleUpdateInfo}>
-                  <Text style={styles.buttonTextmodal}>Update Info</Text>
+                  <Text style={styles.buttonTextmodal}>Cập nhật thông tin</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -235,7 +233,8 @@ const Main = () => {
               ))}
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}
+              <TouchableOpacity
+                style={styles.squareButton}
                 onPress={() => navigation.navigate('HistoryBuy')}>
                 <FontAwesome6 name="book-medical" size={24} color="white" />
               </TouchableOpacity>
@@ -378,8 +377,8 @@ const styles = StyleSheet.create({
   },
   buttonTextmodal: {
     color: COLORS.blue,
-    width: '100%',
-    paddingLeft: 6,
+    // width: '100%',
+    // paddingLeft: 6,
   },
   greetingContainer: {
     alignItems: 'center',
@@ -409,7 +408,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    paddingLeft: 19,
+    paddingLeft: 15,
   },
   buttonWrapper: {
     alignItems: 'center',
@@ -445,7 +444,7 @@ const styles = StyleSheet.create({
   whiteButton: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: COLORS.black,
+    borderColor: COLORS.gray,
     paddingHorizontal: '1%',
     paddingVertical: '1%',
     borderRadius: 5,

@@ -6,11 +6,13 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
+  Image,
 } from 'react-native';
 import {useMyContextController, login} from '../../src/context';
+import COLORS from '../theme/constants';
 
 const Login = ({navigation}) => {
-  const [email, setEmail] = useState('hoang12@gmail.com');
+  const [email, setEmail] = useState('colong@gmail.com');
   const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
   const [controller, dispatch] = useMyContextController();
@@ -32,12 +34,16 @@ const Login = ({navigation}) => {
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome back!</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
+          <Image
+            source={require('../theme/image/logo.jpg')}
+            style={styles.logo}
+          />
+          <Text style={styles.title}>Chào mừng quay trở lại!</Text>
+          <Text style={styles.subtitle}>Đăng nhập với tài khoản của bạn</Text>
         </View>
         <View style={styles.form}>
           <View style={styles.input}>
-            <Text style={styles.inputLabel}>Email address</Text>
+            <Text style={styles.inputLabel}>Nhập địa chỉ Email</Text>
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
@@ -51,7 +57,7 @@ const Login = ({navigation}) => {
             />
           </View>
           <View style={styles.input}>
-            <Text style={styles.inputLabel}>Password</Text>
+            <Text style={styles.inputLabel}>Nhập mật khẩu</Text>
             <TextInput
               autoCorrect={false}
               clearButtonMode="while-editing"
@@ -66,14 +72,14 @@ const Login = ({navigation}) => {
           <View style={styles.formAction}>
             <TouchableOpacity onPress={onSubmit}>
               <View style={styles.btn}>
-                <Text style={styles.btnText}>Sign in</Text>
+                <Text style={styles.btnText}>Đăng nhập</Text>
               </View>
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={navigateToRegister}>
             <Text style={styles.formFooter}>
-              Don't have an account?{' '}
-              <Text style={{textDecorationLine: 'underline'}}>Sign up</Text>
+              Bạn chưa có tài khoản?{' '}
+              <Text style={{textDecorationLine: 'underline'}}>Đăng ký</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -81,6 +87,7 @@ const Login = ({navigation}) => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     padding: 24,
@@ -90,6 +97,14 @@ const styles = StyleSheet.create({
   },
   header: {
     marginVertical: 36,
+    alignItems: 'center',
+  },
+  logo: {
+    width: 300,
+    height: 200,
+    marginBottom: 16,
+    padding: 10,
+    borderRadius: 50,
   },
   title: {
     fontSize: 32,
@@ -145,7 +160,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
-    backgroundColor: '#007aff',
+    backgroundColor: COLORS.blue,
     borderColor: '#007aff',
   },
   btnText: {
@@ -155,4 +170,5 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
+
 export default Login;

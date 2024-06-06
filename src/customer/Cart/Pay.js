@@ -1,32 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert, NativeModules, NativeEventEmitter } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 import COLORS from '../../theme/constants';
-import { useNavigation } from '@react-navigation/native';
-import { useMyContextController } from '../../context';
+import {useNavigation} from '@react-navigation/native';
+import {useMyContextController} from '../../context';
 import firestore from '@react-native-firebase/firestore';
 import { RadioButton } from 'react-native-paper';
-import CryptoJS from 'crypto-js';
+import { NativeModules, NativeEventEmitter } from 'react-native';
 
 const { PayZaloBridge } = NativeModules;
+const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
 
-const payZaloBridgeEmitter = new NativeEventEmitter();
-
-const subscription = payZaloBridgeEmitter.addListener(
-  'EventPayZalo',
-  async (data) => {
-    if (data.returnCode == 1) {
-      handleZaloPayCallback('success');
-    } else {
-      handleZaloPayCallback('failed');
-    }
-  }
-);
-
-const Pay = ({ route }) => {
-  const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
+const Pay = ({route}) => {
+  const {userInfo, center, vaccine, totalPrice, selectedDate} = route.params;
   const [controller] = useMyContextController();
   const user = controller.userLogin;
   const [loading, setLoading] = useState(true);
@@ -47,12 +34,28 @@ const Pay = ({ route }) => {
     province: '',
     district: '',
     ward: '',
-    address: ''
+    address: '',
   });
   const [paymentSelected, setPaymentSelected] = useState(false);
-  const [zaloPaymentStatus, setZaloPaymentStatus] = useState('idle');
 
-  const formatDate = (date) => {
+  useEffect(() => {
+    const subscription = payZaloBridgeEmitter.addListener(
+      'EventPayZalo',
+      (data) => {
+        if(data.returnCode == 1){
+          alert('Giao dịch thành công!');
+        } else{
+          alert('Giao dịch thất bại!');
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const formatDate = date => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -61,10 +64,13 @@ const Pay = ({ route }) => {
   };
 
   const generateOrderId = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 8; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+      result += characters.charAt(
+        Math.floor(Math.random() * characters.length),
+      );
     }
     return result;
   };
@@ -74,34 +80,7 @@ const Pay = ({ route }) => {
       Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
       return;
     }
-
-    if (checked === 'zalo' && !token) {
-      Alert.alert('Thông báo', 'Vui lòng chờ token ZaloPay được tạo trước khi thanh toán');
-      return;
-    }
-
-    if (checked === 'zalo' && zaloPaymentStatus === 'processing') {
-      Alert.alert('Thông báo', 'Đang xử lý thanh toán ZaloPay. Vui lòng đợi...');
-      return;
-    }
-
-    if (checked === 'zalo') {
-      payOrder();
-    } else {
-      createBill();
-    }
-  };
-
-  const handleZaloPayCallback = (result) => {
-    if (result === 'success') {
-      setZaloPaymentStatus('success');
-    } else {
-      setZaloPaymentStatus('failed');
-      alert('Pay error!');
-    }
-  };
-
-  const createBill = async () => {
+  
     const orderId = generateOrderId();
     const orderDetails = {
       orderId,
@@ -113,7 +92,7 @@ const Pay = ({ route }) => {
       paymentStatus: 0,
       vaccinationDate: formatDate(selectedDate),
       paymentMethod: checked,
-      createdAt: formatDate(new Date()),
+      createdAt: formatDate(new Date()), 
       ...formData
     };
 
@@ -122,16 +101,14 @@ const Pay = ({ route }) => {
       for (const vaccine of orderDetails.vaccine) {
         const cartSnapshot = await firestore().collection('Cart').get();
         const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
-
+  
         if (matchingDocs.length > 0) {
           for (const doc of matchingDocs) {
             await firestore().collection('Cart').doc(doc.id).delete();
           }
         }
       }
-
-
-navigation.navigate('ConfirmationScreen', { orderDetails });
+      navigation.navigate('ConfirmationScreen', { orderDetails });
     } catch (error) {
       console.error('Error creating order:', error);
     }
@@ -141,7 +118,10 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
     const fetchUserData = async () => {
       try {
         const currentUserEmail = user?.email;
-        const userDoc = await firestore().collection('USERS').doc(currentUserEmail).get();
+        const userDoc = await firestore()
+          .collection('USERS')
+          .doc(currentUserEmail)
+          .get();
         const userData = userDoc.data();
         setFormData(userData);
         if (userData.province) {
@@ -167,13 +147,17 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
       }
     };
 
-    const fetchDistricts = async (province) => {
+    const fetchDistricts = async province => {
       try {
-        const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
+        const citySnapshot = await firestore()
+          .collection('area')
+          .doc(province)
+          .collection('cities')
+          .get();
         if (!citySnapshot.empty) {
           const districtData = citySnapshot.docs.map(doc => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }));
           setDistricts(districtData);
         } else {
@@ -188,7 +172,12 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
 
     const fetchWards = async (province, district) => {
       try {
-        const areaSnapshot = await firestore().collection('area').doc(province).collection('cities').doc(district).get();
+        const areaSnapshot = await firestore()
+          .collection('area')
+          .doc(province)
+          .collection('cities')
+          .doc(district)
+          .get();
         if (areaSnapshot.exists) {
           const wardsData = areaSnapshot.data().wards;
           setWards(wardsData);
@@ -207,7 +196,7 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
   const handleInputChange = (key, value) => {
     setFormData(prevState => ({
       ...prevState,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -219,88 +208,33 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
     setPayVisible(!payVisible);
   };
 
-  const handlePaymentSelection = async (value) => {
+   const handlePaymentSelection = (value) => {
+    setChecked(value);
+    setPaymentSelected(true);
     if (value === 'zalo') {
-      try {
-        await createOrder(totalPrice);
-        setChecked(value);
-        setPaymentSelected(true);
-      } catch (error) {
-        console.error('Error creating ZaloPay token:', error);
-        // Handle error appropriately, e.g., show an error message to the user
-      }
-    } else {
-      setChecked(value);
-      setPaymentSelected(true);
+      // Gọi phương thức payOrder từ NativeModule
+      PayZaloBridge.payOrder(zptranstoken)
+        .then(transactionId => {
+          // Thực hiện xử lý khi thanh toán thành công
+          alert('Giao dịch thành công! Mã giao dịch: ' + transactionId);
+        })
+        .catch(error => {
+          // Xử lý khi có lỗi xảy ra trong quá trình thanh toán
+          alert('Giao dịch thất bại!');
+          console.error('Error during payment:', error);
+        });
     }
   };
 
-  function getCurrentDateYYMMDD() {
-    var todayDate = new Date().toISOString().slice(2, 10);
-    return todayDate.split('-').join('');
-  }
 
-  async function createOrder(totalPrice) {
-    let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime();
-
-    let appid = 2553;
-    let amount = parseInt(totalPrice);
-    let appuser = "ZaloPay";
-    let apptime = (new Date()).getTime();
-    let embeddata = "{}";
-    let item = "[]";
-    let description = "Merchant description for order #" + apptransid;
-    let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item;
-    let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL").toString();
-
-    var order = {
-      'app_id': appid,
-      'app_user': appuser,
-      'app_time': apptime,
-      'amount': amount,
-      'app_trans_id': apptransid,
-      'embed_data': embeddata,
-      'item': item,
-      'description': description,
-      'mac': mac
-    };
-
-    let formBody = [];
-    for (let i in order) {
-      var encodedKey = encodeURIComponent(i);
-      var encodedValue = encodeURIComponent(order[i]);
-      formBody.push(encodedKey + "=" + encodedValue);
-    }
-    formBody = formBody.join("&");
-
-    await fetch('https://sb-openapi.zalopay.vn/v2/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-      },
-      body: formBody
-    }).then(response => response.json())
-      .then(resJson => {
-        setToken(resJson.zp_trans_token);
-        setReturnCode(resJson.return_code);
-      })
-      .catch((error) => {
-        console.log("Error: ", error);
-      });
-  }
-
-  const payOrder = async () => {
-    var payZP = NativeModules.PayZaloBridge;
-    payZP.payOrder(token);
-  };
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={{ borderWidth: 1, padding: 10, borderRadius: 10 }}>
+        <View style={{borderWidth: 1, padding: 10, borderRadius: 10}}>
           <View style={styles.headerContainer}>
             <TouchableOpacity
               onPress={toggleDetails}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={styles.titleLabel}>Chi tiết người tiêm</Text>
               <Feather
                 name={detailsVisible ? 'chevron-up' : 'chevron-down'}
@@ -310,38 +244,46 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
           </View>
           {loading ? (
             <Text>Loading...</Text>
-          ) :
-          detailsVisible ? (
+          ) : detailsVisible ? (
             <>
-              <Text style={styles.label}>Họ và tên <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Họ và tên <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={formData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
+                onChangeText={value => handleInputChange('fullName', value)}
               />
-              <Text style={styles.label}>Số điện thoại <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Số điện thoại <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={formData.phoneNumber}
-                onChangeText={(value) => handleInputChange('phoneNumber', value)}
+                onChangeText={value => handleInputChange('phoneNumber', value)}
               />
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
                 value={formData.email}
                 editable={false}
-                onChangeText={(value) => handleInputChange('email', value)}
+                onChangeText={value => handleInputChange('email', value)}
               />
-              <Text style={styles.label}>Tỉnh / Thành phố <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Tỉnh / Thành phố <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.province}
                   style={styles.picker}
-                  onValueChange={(value) => handleInputChange('province', value)}
-                >
+                  onValueChange={value => handleInputChange('province', value)}>
                   {provinces.length > 0 ? (
-                    provinces.map((province) => (
-                      <Picker.Item key={province} label={province} value={province} />
+                    provinces.map(province => (
+                      <Picker.Item
+                        key={province}
+                        label={province}
+                        value={province}
+                      />
                     ))
                   ) : (
                     <Picker.Item label="Không có dữ liệu" value="" />
@@ -349,17 +291,21 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Quận / Huyện <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Quận / Huyện <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.district}
                   style={styles.picker}
-                 
-                  onValueChange={(value) => handleInputChange('district', value)}
-                >
+                  onValueChange={value => handleInputChange('district', value)}>
                   {districts && districts.length > 0 ? (
-                    districts.map((district) => (
-                      <Picker.Item key={district.id} label={district.id} value={district.id} />
+                    districts.map(district => (
+                      <Picker.Item
+                        key={district.id}
+                        label={district.id}
+                        value={district.id}
+                      />
                     ))
                   ) : (
                     <Picker.Item label="Không có dữ liệu" value="" />
@@ -367,15 +313,16 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Phường / Xã <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Phường / Xã <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={formData.ward}
                   style={styles.picker}
-                  onValueChange={(value) => handleInputChange('ward', value)}
-                >
+                  onValueChange={value => handleInputChange('ward', value)}>
                   {wards.length > 0 ? (
-                    wards.map((ward) => (
+                    wards.map(ward => (
                       <Picker.Item key={ward} label={ward} value={ward} />
                     ))
                   ) : (
@@ -384,20 +331,28 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
                 </Picker>
               </View>
 
-              <Text style={styles.label}>Địa chỉ <Text style={{color:'red'}}>*</Text></Text>
+              <Text style={styles.label}>
+                Địa chỉ <Text style={{color: 'red'}}>*</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={formData.address}
-                onChangeText={(value) => handleInputChange('address', value)}
+                onChangeText={value => handleInputChange('address', value)}
               />
             </>
           ) : null}
         </View>
-        <View style={{ borderWidth: 1, padding: 10, borderRadius: 10, marginTop: '2%' }}>
+        <View
+          style={{
+            borderWidth: 1,
+            padding: 10,
+            borderRadius: 10,
+            marginTop: '2%',
+          }}>
           <View style={styles.headerContainer}>
             <TouchableOpacity
               onPress={togglePays}
-              style={{ flexDirection: 'row', alignItems: 'center' }}>
+              style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={styles.titleLabel}>Phương thức thanh toán</Text>
               <Feather
                 name={payVisible ? 'chevron-up' : 'chevron-down'}
@@ -409,22 +364,63 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
             <Text>Loading...</Text>
           ) : payVisible ? (
             <>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <RadioButton
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <RadioButton
                   value="Thanh toán tại trung tâm"
-                  status={checked === 'Thanh toán tại trung tâm' ? 'checked' : 'unchecked'} 
-                  onPress={() => handlePaymentSelection('Thanh toán tại trung tâm')} 
+                  status={
+                    checked === 'Thanh toán tại trung tâm'
+                      ? 'checked'
+                      : 'unchecked'
+                  }
+                  onPress={() =>
+                    handlePaymentSelection('Thanh toán tại trung tâm')
+                  }
+                  color={
+                    checked === 'Thanh toán tại trung tâm' ? 'blue' : 'black'
+                  }
                 />
-                <Text style={{ fontSize: 20, color: checked === 'Thanh toán tại trung tâm' ? 'black' : 'grey' }}>Thanh toán tại trung tâm</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: checked === 'Thanh toán tại trung tâm' ? 20 : 16,
+                    color:
+                      checked === 'Thanh toán tại trung tâm' ? 'blue' : 'black',
+                  }}>
+                  Thanh toán tại trung tâm
+                </Text>
               </View>
-
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <RadioButton
+                  value="credit_card"
+                  status={checked === 'credit_card' ? 'checked' : 'unchecked'}
+                  onPress={() => handlePaymentSelection('credit_card')}
+                />
+                <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <RadioButton
+                  value="paypal"
+                  status={checked === 'paypal' ? 'checked' : 'unchecked'}
+                  onPress={() => handlePaymentSelection('paypal')}
+                />
+                <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
+              </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <RadioButton
                   value="zalo"
                   status={checked === 'zalo' ? 'checked' : 'unchecked'}
                   onPress={() => handlePaymentSelection('zalo')}
+                  color={checked === 'zalo' ? 'blue' : 'black'}
                 />
-                <Text style={{ fontSize: 20,width:'100%', color: checked === 'zalo' ? 'black' : 'grey' }}>ZaloPay</Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    width: '100%',
+                    color: checked === 'zalo' ? 'blue' : 'black',
+                  }}>
+                  ZaloPay
+                </Text>
               </View>
             </>
           ) : null}
@@ -434,7 +430,12 @@ navigation.navigate('ConfirmationScreen', { orderDetails });
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Tổng cộng</Text>
-          <Text style={styles.totalPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}</Text>
+          <Text style={styles.totalPrice}>
+            {new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
+            }).format(totalPrice)}
+          </Text>
         </View>
         <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
           <Text style={styles.confirmButtonText}>Thanh toán</Text>
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
   },
   titleLabel: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.blue,
     paddingTop: '2%',
   },
@@ -486,8 +487,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 17,
     paddingHorizontal: 20,
-    backgroundColor: COLORS.gray,
- 
+    backgroundColor: COLORS.white,
   },
   totalContainer: {
     flexDirection: 'column',

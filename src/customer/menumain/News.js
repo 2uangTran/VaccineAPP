@@ -46,13 +46,16 @@ const Newss = ({id, title, imageUrl, description}) => {
             <Image source={{uri: imageUrl}} style={styles.image} />
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
+              <Text style={styles.description}>
+                <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
-        <Text style={styles.description}>
+        {/* <Text style={styles.description}>
           <Text style={styles.boldText}>Nội dung: </Text>
           {description}
-        </Text>
+        </Text> */}
       </View>
     </SafeAreaView>
   );
@@ -85,9 +88,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 23,
-    marginTop: -47,
+    fontSize: 16,
+    marginTop: -15,
     color: COLORS.black,
+    fontWeight: 'bold',
   },
   description: {
     fontSize: 17,
@@ -132,8 +136,8 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   boldText: {
-    fontWeight: 'bold',
-    color: COLORS.black,
+    color: COLORS.gray,
+    marginTop: 15,
   },
 });
 
