@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert, NativeModules, NativeEventEmitter } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { Picker } from '@react-native-picker/picker';
 import COLORS from '../../theme/constants';
@@ -7,10 +8,22 @@ import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from '../../context';
 import firestore from '@react-native-firebase/firestore';
 import { RadioButton } from 'react-native-paper';
-import { NativeModules, NativeEventEmitter } from 'react-native';
+import CryptoJS from 'crypto-js';
 
 const { PayZaloBridge } = NativeModules;
-const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
+
+const payZaloBridgeEmitter = new NativeEventEmitter();
+
+const subscription = payZaloBridgeEmitter.addListener(
+  'EventPayZalo',
+  async (data) => {
+    if (data.returnCode == 1) {
+      handleZaloPayCallback('success');
+    } else {
+      handleZaloPayCallback('failed');
+    }
+  }
+);
 
 const Pay = ({ route }) => {
   const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
@@ -24,6 +37,8 @@ const Pay = ({ route }) => {
   const [payVisible, setPayVisible] = useState(true);
   const navigation = useNavigation();
   const [checked, setChecked] = useState('');
+  const [token, setToken] = useState('');
+  const [returncode, setReturnCode] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
@@ -35,23 +50,7 @@ const Pay = ({ route }) => {
     address: ''
   });
   const [paymentSelected, setPaymentSelected] = useState(false);
-
-  useEffect(() => {
-    const subscription = payZaloBridgeEmitter.addListener(
-      'EventPayZalo',
-      (data) => {
-        if(data.returnCode == 1){
-          alert('Giao dịch thành công!');
-        } else{
-          alert('Giao dịch thất bại!');
-        }
-      }
-    );
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+  const [zaloPaymentStatus, setZaloPaymentStatus] = useState('idle');
 
   const formatDate = (date) => {
     const d = new Date(date);
@@ -75,7 +74,34 @@ const Pay = ({ route }) => {
       Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
       return;
     }
-  
+
+    if (checked === 'zalo' && !token) {
+      Alert.alert('Thông báo', 'Vui lòng chờ token ZaloPay được tạo trước khi thanh toán');
+      return;
+    }
+
+    if (checked === 'zalo' && zaloPaymentStatus === 'processing') {
+      Alert.alert('Thông báo', 'Đang xử lý thanh toán ZaloPay. Vui lòng đợi...');
+      return;
+    }
+
+    if (checked === 'zalo') {
+      payOrder();
+    } else {
+      createBill();
+    }
+  };
+
+  const handleZaloPayCallback = (result) => {
+    if (result === 'success') {
+      setZaloPaymentStatus('success');
+    } else {
+      setZaloPaymentStatus('failed');
+      alert('Pay error!');
+    }
+  };
+
+  const createBill = async () => {
     const orderId = generateOrderId();
     const orderDetails = {
       orderId,
@@ -87,23 +113,25 @@ const Pay = ({ route }) => {
       paymentStatus: 0,
       vaccinationDate: formatDate(selectedDate),
       paymentMethod: checked,
-      createdAt: formatDate(new Date()), 
+      createdAt: formatDate(new Date()),
       ...formData
     };
-  
+
     try {
       await firestore().collection('bills').doc(orderId).set(orderDetails);
       for (const vaccine of orderDetails.vaccine) {
         const cartSnapshot = await firestore().collection('Cart').get();
         const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
-  
+
         if (matchingDocs.length > 0) {
           for (const doc of matchingDocs) {
             await firestore().collection('Cart').doc(doc.id).delete();
           }
         }
       }
-      navigation.navigate('ConfirmationScreen', { orderDetails });
+
+
+navigation.navigate('ConfirmationScreen', { orderDetails });
     } catch (error) {
       console.error('Error creating order:', error);
     }
@@ -191,25 +219,80 @@ const Pay = ({ route }) => {
     setPayVisible(!payVisible);
   };
 
-   const handlePaymentSelection = (value) => {
-    setChecked(value);
-    setPaymentSelected(true);
+  const handlePaymentSelection = async (value) => {
     if (value === 'zalo') {
-      // Gọi phương thức payOrder từ NativeModule
-      PayZaloBridge.payOrder(zptranstoken)
-        .then(transactionId => {
-          // Thực hiện xử lý khi thanh toán thành công
-          alert('Giao dịch thành công! Mã giao dịch: ' + transactionId);
-        })
-        .catch(error => {
-          // Xử lý khi có lỗi xảy ra trong quá trình thanh toán
-          alert('Giao dịch thất bại!');
-          console.error('Error during payment:', error);
-        });
+      try {
+        await createOrder(totalPrice);
+        setChecked(value);
+        setPaymentSelected(true);
+      } catch (error) {
+        console.error('Error creating ZaloPay token:', error);
+        // Handle error appropriately, e.g., show an error message to the user
+      }
+    } else {
+      setChecked(value);
+      setPaymentSelected(true);
     }
   };
 
+  function getCurrentDateYYMMDD() {
+    var todayDate = new Date().toISOString().slice(2, 10);
+    return todayDate.split('-').join('');
+  }
 
+  async function createOrder(totalPrice) {
+    let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime();
+
+    let appid = 2553;
+    let amount = parseInt(totalPrice);
+    let appuser = "ZaloPay";
+    let apptime = (new Date()).getTime();
+    let embeddata = "{}";
+    let item = "[]";
+    let description = "Merchant description for order #" + apptransid;
+    let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item;
+    let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL").toString();
+
+    var order = {
+      'app_id': appid,
+      'app_user': appuser,
+      'app_time': apptime,
+      'amount': amount,
+      'app_trans_id': apptransid,
+      'embed_data': embeddata,
+      'item': item,
+      'description': description,
+      'mac': mac
+    };
+
+    let formBody = [];
+    for (let i in order) {
+      var encodedKey = encodeURIComponent(i);
+      var encodedValue = encodeURIComponent(order[i]);
+      formBody.push(encodedKey + "=" + encodedValue);
+    }
+    formBody = formBody.join("&");
+
+    await fetch('https://sb-openapi.zalopay.vn/v2/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: formBody
+    }).then(response => response.json())
+      .then(resJson => {
+        setToken(resJson.zp_trans_token);
+        setReturnCode(resJson.return_code);
+      })
+      .catch((error) => {
+        console.log("Error: ", error);
+      });
+  }
+
+  const payOrder = async () => {
+    var payZP = NativeModules.PayZaloBridge;
+    payZP.payOrder(token);
+  };
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -334,22 +417,7 @@ const Pay = ({ route }) => {
                 />
                 <Text style={{ fontSize: 20, color: checked === 'Thanh toán tại trung tâm' ? 'black' : 'grey' }}>Thanh toán tại trung tâm</Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <RadioButton
-                  value="credit_card"
-                  status={checked === 'credit_card' ? 'checked' : 'unchecked'}
-                  onPress={() => handlePaymentSelection('credit_card')}
-                />
-                <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <RadioButton
-                  value="paypal"
-                  status={checked === 'paypal' ? 'checked' : 'unchecked'}
-                  onPress={() => handlePaymentSelection('paypal')}
-                />
-                <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
-              </View>
+
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <RadioButton
                   value="zalo"
@@ -360,6 +428,7 @@ const Pay = ({ route }) => {
               </View>
             </>
           ) : null}
+         
         </View>
       </ScrollView>
       <View style={styles.footer}>

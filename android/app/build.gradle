@@ -105,10 +105,16 @@ android {
     }
 }
 
+// repositories {
+//     flatDir {
+//         dirs 'libs'
+//     }
+// }
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation fileTree(dir: 'libs', include: ['*.aar'])
-    implementation project(":zpdk-release-v3.1")
+    implementation project(path: ":zpdk-release-v3.1")
     implementation("com.facebook.react:react-android")
 
     if (hermesEnabled.toBoolean()) {

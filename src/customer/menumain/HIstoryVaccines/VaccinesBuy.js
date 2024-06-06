@@ -21,7 +21,7 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
         const item = { title, totalPrice, orderId, vaccinationDate, createdAt, userId, vaccine };
 
         try {
-          
+      
         } catch (error) {
             console.error('Error initiating payment:', error);
         }
