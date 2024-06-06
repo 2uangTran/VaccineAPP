@@ -48,10 +48,11 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
       if (!cartSnapshot.empty) {
         showMessage({
           message: 'Thông báo',
-          description: 'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
+          description:
+            'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
           type: 'warning',
-          floating: true, 
-          autoHide: true, 
+          floating: true,
+          autoHide: true,
           duration: 5000,
         });
         return;
@@ -68,8 +69,8 @@ const Vaccines = ({id, title, price, imageUrl, origin, description, usage}) => {
         message: 'Thông báo',
         description: 'Vắc xin đã được thêm vào giỏ hàng',
         type: 'success',
-        floating: true, 
-        autoHide: true, 
+        floating: true,
+        autoHide: true,
         duration: 3000,
       });
     } catch (error) {
@@ -161,9 +162,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 23,
+    fontSize: 16,
     marginTop: -47,
     color: COLORS.black,
+    fontWeight: 'bold',
   },
   description: {
     fontSize: 17,

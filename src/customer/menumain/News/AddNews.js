@@ -148,7 +148,11 @@ const AddNews = () => {
           ) : null}
         </View>
         <View style={styles.inputContainer}>
-          <Button title="Thêm tin tức" onPress={addNews} />
+          <Button
+            style={{backgroundColor: COLORS.blue}}
+            title="Thêm tin tức"
+            onPress={addNews}
+          />
         </View>
       </View>
     </ScrollView>

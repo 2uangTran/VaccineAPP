@@ -157,20 +157,22 @@ const Register = ({navigation}) => {
       }
     }
   };
-
+  const navigateToLogin = () => {
+    navigation.navigate('Login');
+  };
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#e8ecf4'}}>
       <View style={styles.container}>
         <KeyboardAwareScrollView>
           <View style={styles.header}>
-            <Text style={styles.title}>Let's Get Started!</Text>
+            <Text style={styles.title}>Đăng ký tài khoản!</Text>
             <Text style={styles.subtitle}>
-              Fill in the fields below to get started with your new account.
+              Điền vào các trường bên dưới để bắt đầu với tài khoản mới của bạn.
             </Text>
           </View>
           <View style={styles.form}>
             <View style={styles.input}>
-              <Text style={styles.inputLabel}>Full Name</Text>
+              <Text style={styles.inputLabel}>Tên đầy đủ</Text>
               <TextInput
                 clearButtonMode="while-editing"
                 onChangeText={setFullName}
@@ -181,7 +183,7 @@ const Register = ({navigation}) => {
               />
             </View>
             <View style={styles.input}>
-              <Text style={styles.inputLabel}>Email Address</Text>
+              <Text style={styles.inputLabel}>Địa chỉ Email</Text>
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -195,7 +197,7 @@ const Register = ({navigation}) => {
               />
             </View>
             <View style={styles.input}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={styles.inputLabel}>Mật khẩu</Text>
               <TextInput
                 autoCorrect={false}
                 clearButtonMode="while-editing"
@@ -208,7 +210,7 @@ const Register = ({navigation}) => {
               />
             </View>
             <View style={styles.input}>
-              <Text style={styles.inputLabel}>Confirm Password</Text>
+              <Text style={styles.inputLabel}>Xác nhận mật khẩu</Text>
               <TextInput
                 autoCorrect={false}
                 clearButtonMode="while-editing"
@@ -223,20 +225,16 @@ const Register = ({navigation}) => {
             <View style={styles.formAction}>
               <TouchableOpacity onPress={onSubmit}>
                 <View style={styles.btn}>
-                  <Text style={styles.btnText}>Get Started</Text>
+                  <Text style={styles.btnText}>Đăng ký</Text>
                 </View>
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAwareScrollView>
-        <TouchableOpacity
-          onPress={() => {
-            // handle link
-          }}
-          style={{marginTop: 'auto'}}>
+        <TouchableOpacity onPress={navigateToLogin} style={{marginTop: 'auto'}}>
           <Text style={styles.formFooter}>
-            Already have an account?{' '}
-            <Text style={{textDecorationLine: 'underline'}}>Sign in</Text>
+            Bạn đã có tài khoản?{' '}
+            <Text style={{textDecorationLine: 'underline'}}>Đăng nhập</Text>
           </Text>
         </TouchableOpacity>
       </View>

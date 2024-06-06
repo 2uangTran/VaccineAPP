@@ -1,13 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import COLORS from '../../theme/constants';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
-const ConfirmCart = ({ route }) => {
+const ConfirmCart = ({route}) => {
   const navigation = useNavigation();
-  const { userInfo, center, selectedDateTimestamp, vaccine } = route.params;
+  const {userInfo, center, selectedDateTimestamp, vaccine} = route.params;
 
-  const formatPrice = (price) => {
+  const formatPrice = price => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
@@ -26,18 +32,18 @@ const ConfirmCart = ({ route }) => {
 
   const handlePay = () => {
     const totalPrice = calculateTotalPrice();
-    navigation.navigate('Pay', { 
-       userInfo: userInfo, 
-      center: center, 
+    navigation.navigate('Pay', {
+      userInfo: userInfo,
+      center: center,
       vaccine: vaccine,
       totalPrice: totalPrice,
-      selectedDate: selectedDate.getTime(), 
+      selectedDate: selectedDate.getTime(),
     });
   };
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     const day = date.getDate();
-    const month = date.getMonth() + 1; 
+    const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
     const paddedDay = day < 10 ? `0${day}` : day;
@@ -50,7 +56,13 @@ const ConfirmCart = ({ route }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.header}>Thông tin người được tiêm</Text>
-        <View style={{ borderWidth: 1, borderRadius: 5, padding: 5 }}>
+        <View
+          style={{
+            borderWidth: 1,
+            borderRadius: 5,
+            padding: 5,
+            borderColor: COLORS.gray,
+          }}>
           <View style={styles.section}>
             <Text style={styles.label}>Họ và tên:</Text>
             <Text style={styles.info}>{userInfo.fullName}</Text>
@@ -69,11 +81,20 @@ const ConfirmCart = ({ route }) => {
           </View>
           <View style={styles.section}>
             <Text style={styles.label}>Địa chỉ:</Text>
-            <Text style={styles.info}>{`${userInfo.address}, ${userInfo.ward}, ${userInfo.district}, ${userInfo.province}`}</Text>
+            <Text
+              style={
+                styles.info
+              }>{`${userInfo.address}, ${userInfo.ward}, ${userInfo.district}, ${userInfo.province}`}</Text>
           </View>
         </View>
         <Text style={styles.header}>Thông tin về việc tiêm</Text>
-        <View style={{ borderWidth: 1, borderRadius: 5, padding: 5 }}>
+        <View
+          style={{
+            borderWidth: 1,
+            borderRadius: 5,
+            padding: 5,
+            borderColor: COLORS.gray,
+          }}>
           <View style={styles.section}>
             <Text style={styles.label}>Trung tâm tiêm:</Text>
             <Text style={styles.info}>{center}</Text>
@@ -84,7 +105,13 @@ const ConfirmCart = ({ route }) => {
           </View>
         </View>
         <Text style={styles.header}>Thông tin vắc xin đã chọn</Text>
-        <View style={{ borderWidth: 1, borderRadius: 5, padding: 5 }}>
+        <View
+          style={{
+            borderWidth: 1,
+            borderRadius: 5,
+            padding: 5,
+            borderColor: COLORS.gray,
+          }}>
           {vaccine.map((item, index) => (
             <View style={styles.itemContainer} key={index}>
               <Text style={styles.title}>{item.title}</Text>
@@ -93,21 +120,35 @@ const ConfirmCart = ({ route }) => {
           ))}
         </View>
         <Text style={styles.header}>Thông tin thanh toán</Text>
-        <View style={{ borderWidth: 1, borderRadius: 5, padding: 5 }}>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={{ fontSize: 17, width: '50%' }}>Tổng tiền ({vaccine.length} sp)</Text>
-            <Text style={styles.totalprices}>{formatPrice(calculateTotalPrice())}</Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderRadius: 5,
+            padding: 5,
+            borderColor: COLORS.gray,
+          }}>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{fontSize: 17, width: '50%'}}>
+              Tổng tiền ({vaccine.length} sản phẩm)
+            </Text>
+            <Text style={styles.totalprices}>
+              {formatPrice(calculateTotalPrice())}
+            </Text>
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={{ fontSize: 17 }}>Thanh toán</Text>
-            <Text style={styles.price}>{formatPrice(calculateTotalPrice())}</Text>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{fontSize: 17}}>Thanh toán</Text>
+            <Text style={styles.price}>
+              {formatPrice(calculateTotalPrice())}
+            </Text>
           </View>
         </View>
       </ScrollView>
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Tổng cộng</Text>
-          <Text style={styles.totalPrice}>{formatPrice(calculateTotalPrice())}</Text>
+          <Text style={styles.totalPrice}>
+            {formatPrice(calculateTotalPrice())}
+          </Text>
         </View>
         <TouchableOpacity style={styles.confirmButton} onPress={handlePay}>
           <Text style={styles.confirmButtonText}>Thanh toán</Text>

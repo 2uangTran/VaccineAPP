@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   whiteButton: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: COLORS.black,
+    borderColor: COLORS.gray,
     paddingHorizontal: '1%',
     paddingVertical: '1%',
     borderRadius: 5,

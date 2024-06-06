@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import React, {useState, useEffect} from 'react';
+import {
+  SafeAreaView,
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import {Appbar} from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth'; 
+import auth from '@react-native-firebase/auth';
 import COLORS from '../../theme/constants';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const Info = () => {
   const navigation = useNavigation();
@@ -16,20 +23,23 @@ const Info = () => {
       try {
         const currentUser = auth().currentUser;
         if (currentUser) {
-          const userEmail = currentUser.email; 
-          const userDoc = await firestore().collection('USERS').where('email', '==', userEmail).get();
+          const userEmail = currentUser.email;
+          const userDoc = await firestore()
+            .collection('USERS')
+            .where('email', '==', userEmail)
+            .get();
           if (!userDoc.empty) {
             userDoc.forEach(doc => {
               setUserInfo(doc.data());
             });
           } else {
-            console.log("User document not found");
+            console.log('User document not found');
           }
         } else {
-          console.log("No user is currently signed in");
+          console.log('No user is currently signed in');
         }
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        console.error('Error fetching user info:', error);
       } finally {
         setLoading(false);
       }
@@ -39,11 +49,11 @@ const Info = () => {
   }, []);
 
   const Victim = () => {
-    navigation.navigate('InfoVictim')
+    navigation.navigate('InfoVictim');
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {loading ? (
           <Text>Loading...</Text>
@@ -53,7 +63,11 @@ const Info = () => {
             <InfoItem label="Số điện thoại" value={userInfo.phoneNumber} />
             <InfoItem label="Ngày sinh" value={userInfo.birthDate} />
             <InfoItem label="Giới tính" value={userInfo.gender} />
-            <InfoItem label="Địa chỉ" value={`${userInfo.address}, ${userInfo.ward}, ${userInfo.district}, ${userInfo.province}`} numberOfLines={2} />
+            <InfoItem
+              label="Địa chỉ"
+              value={`${userInfo.address}, ${userInfo.ward}, ${userInfo.district}, ${userInfo.province}`}
+              numberOfLines={2}
+            />
           </View>
         ) : (
           <Text>Thông tin người dùng không khả dụng</Text>
@@ -66,10 +80,15 @@ const Info = () => {
   );
 };
 
-const InfoItem = ({ label, value, numberOfLines = 1 }) => (
+const InfoItem = ({label, value, numberOfLines = 1}) => (
   <View style={styles.infoBlock}>
     <Text style={styles.infoLabel}>{label}</Text>
-    <Text numberOfLines={numberOfLines} ellipsizeMode="tail" style={styles.infoText}>{value}</Text>
+    <Text
+      numberOfLines={numberOfLines}
+      ellipsizeMode="tail"
+      style={styles.infoText}>
+      {value}
+    </Text>
     <View style={styles.separator} />
   </View>
 );
@@ -81,7 +100,7 @@ const styles = StyleSheet.create({
   infoBox: {
     borderColor: COLORS.gray,
     padding: 5,
-    marginBottom: 50, 
+    marginBottom: 50,
   },
   infoBlock: {
     marginBottom: 16,
@@ -115,8 +134,8 @@ const styles = StyleSheet.create({
   },
   ButtonTextChoose: {
     color: COLORS.white,
-    fontSize: 17,
-  }
+    fontSize: 18,
+  },
 });
 
 export default Info;

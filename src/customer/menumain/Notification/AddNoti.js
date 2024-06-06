@@ -27,7 +27,7 @@ const AddNoti = () => {
 
   async function addNoti() {
     if (noti.trim() === '') {
-      setNotisError('Chưa nhập vắc xin');
+      setNotisError('Chưa nhập thông báo');
       return;
     } else {
       setNotisError('');

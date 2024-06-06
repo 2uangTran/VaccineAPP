@@ -173,7 +173,7 @@ const RouterCustomer = () => {
           name="News"
           component={News}
           options={{
-            title: 'Tin tức',
+            title: 'Tin tức vắc xin',
             headerRight: () => <CustomHeaderRightNews />,
           }}
         />
@@ -181,7 +181,7 @@ const RouterCustomer = () => {
           name="DetailNews"
           component={DetailNews}
           options={{
-            title: 'Chi tiết sản phẩm',
+            title: 'Chi tiết Tin tức',
             headerRight: () => <CustomHeaderRightUpdate />,
           }}
         />

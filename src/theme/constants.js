@@ -9,10 +9,9 @@ export default {
   navy: '#000080',
   red: '#FF0000',
   grey: '#808080',
-  gray: '#EEEEEE',
+  gray: '#686D76',
   orange: '#f3711b',
   green: '#50b946',
-  orange1:'#FFFF99',
-  orange2:'#EEAD0E',
-
+  orange1: '#FFFF99',
+  orange2: '#EEAD0E',
 };
