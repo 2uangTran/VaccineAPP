@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert, NativeModules, NativeEventEmitter } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import COLORS from '../../theme/constants';
-import {useNavigation} from '@react-navigation/native';
-import {useMyContextController} from '../../context';
+import { useNavigation } from '@react-navigation/native';
+import { useMyContextController } from '../../context';
 import firestore from '@react-native-firebase/firestore';
 import { RadioButton } from 'react-native-paper';
-import { NativeModules, NativeEventEmitter } from 'react-native';
+import CryptoJS from 'crypto-js';
 
 const { PayZaloBridge } = NativeModules;
-const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
 
-const Pay = ({route}) => {
-  const {userInfo, center, vaccine, totalPrice, selectedDate} = route.params;
+const payZaloBridgeEmitter = new NativeEventEmitter();
+
+const subscription = payZaloBridgeEmitter.addListener(
+  'EventPayZalo',
+  async (data) => {
+    if (data.returnCode == 1) {
+      handleZaloPayCallback('success');
+    } else {
+      handleZaloPayCallback('failed');
+    }
+  }
+);
+
+const Pay = ({ route }) => {
+  const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
   const [controller] = useMyContextController();
   const user = controller.userLogin;
   const [loading, setLoading] = useState(true);
@@ -34,28 +46,12 @@ const Pay = ({route}) => {
     province: '',
     district: '',
     ward: '',
-    address: '',
+    address: ''
   });
   const [paymentSelected, setPaymentSelected] = useState(false);
+  const [zaloPaymentStatus, setZaloPaymentStatus] = useState('idle');
 
-  useEffect(() => {
-    const subscription = payZaloBridgeEmitter.addListener(
-      'EventPayZalo',
-      (data) => {
-        if(data.returnCode == 1){
-          alert('Giao dịch thành công!');
-        } else{
-          alert('Giao dịch thất bại!');
-        }
-      }
-    );
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
-  const formatDate = date => {
+  const formatDate = (date) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -64,13 +60,10 @@ const Pay = ({route}) => {
   };
 
   const generateOrderId = () => {
-    const characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 8; i++) {
-      result += characters.charAt(
-        Math.floor(Math.random() * characters.length),
-      );
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return result;
   };
@@ -80,7 +73,34 @@ const Pay = ({route}) => {
       Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
       return;
     }
-  
+
+    if (checked === 'zalo' && !token) {
+      Alert.alert('Thông báo', 'Vui lòng chờ token ZaloPay được tạo trước khi thanh toán');
+      return;
+    }
+
+    if (checked === 'zalo' && zaloPaymentStatus === 'processing') {
+      Alert.alert('Thông báo', 'Đang xử lý thanh toán ZaloPay. Vui lòng đợi...');
+      return;
+    }
+
+    if (checked === 'zalo') {
+      payOrder();
+    } else {
+      createBill();
+    }
+  };
+
+  const handleZaloPayCallback = (result) => {
+    if (result === 'success') {
+      setZaloPaymentStatus('success');
+    } else {
+      setZaloPaymentStatus('failed');
+      alert('Pay error!');
+    }
+  };
+
+  const createBill = async () => {
     const orderId = generateOrderId();
     const orderDetails = {
       orderId,
@@ -92,7 +112,7 @@ const Pay = ({route}) => {
       paymentStatus: 0,
       vaccinationDate: formatDate(selectedDate),
       paymentMethod: checked,
-      createdAt: formatDate(new Date()), 
+      createdAt: formatDate(new Date()),
       ...formData
     };
 
@@ -101,131 +121,176 @@ const Pay = ({route}) => {
       for (const vaccine of orderDetails.vaccine) {
         const cartSnapshot = await firestore().collection('Cart').get();
         const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
-  
+
         if (matchingDocs.length > 0) {
           for (const doc of matchingDocs) {
             await firestore().collection('Cart').doc(doc.id).delete();
           }
         }
       }
-      navigation.navigate('ConfirmationScreen', { orderDetails });
-    } catch (error) {
-      console.error('Error creating order:', error);
+
+navigation.navigate('ConfirmationScreen', { orderDetails });
+} catch (error) {
+  console.error('Error creating order:', error);
+}
+};
+
+useEffect(() => {
+const fetchUserData = async () => {
+  try {
+    const currentUserEmail = user?.email;
+    const userDoc = await firestore().collection('USERS').doc(currentUserEmail).get();
+    const userData = userDoc.data();
+    setFormData(userData);
+    if (userData.province) {
+      await fetchDistricts(userData.province);
     }
-  };
+    if (userData.province && userData.district) {
+      await fetchWards(userData.province, userData.district);
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  }
+};
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const currentUserEmail = user?.email;
-        const userDoc = await firestore()
-          .collection('USERS')
-          .doc(currentUserEmail)
-          .get();
-        const userData = userDoc.data();
-        setFormData(userData);
-        if (userData.province) {
-          await fetchDistricts(userData.province);
-        }
-        if (userData.province && userData.district) {
-          await fetchWards(userData.province, userData.district);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
+const fetchProvinces = async () => {
+  try {
+    const areaSnapshot = await firestore().collection('area').get();
+    const provincesData = areaSnapshot.docs.map(doc => doc.id);
+    setProvinces(provincesData);
+  } catch (error) {
+    console.error('Error fetching provinces:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    const fetchProvinces = async () => {
-      try {
-        const areaSnapshot = await firestore().collection('area').get();
-        const provincesData = areaSnapshot.docs.map(doc => doc.id);
-        setProvinces(provincesData);
-      } catch (error) {
-        console.error('Error fetching provinces:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+const fetchDistricts = async (province) => {
+  try {
+    const citySnapshot = await firestore().collection('area').doc(province).collection('cities').get();
+    if (!citySnapshot.empty) {
+      const districtData = citySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setDistricts(districtData);
+    } else {
+      console.log('No cities data found for the province:', province);
+      setDistricts([]);
+    }
+    setWards([]);
+  } catch (error) {
+    console.error('Error fetching districts:', error);
+  }
+};
 
-    const fetchDistricts = async province => {
-      try {
-        const citySnapshot = await firestore()
-          .collection('area')
-          .doc(province)
-          .collection('cities')
-          .get();
-        if (!citySnapshot.empty) {
-          const districtData = citySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setDistricts(districtData);
-        } else {
-          console.log('No cities data found for the province:', province);
-          setDistricts([]);
-        }
-        setWards([]);
-      } catch (error) {
-        console.error('Error fetching districts:', error);
-      }
-    };
+const fetchWards = async (province, district) => {
+  try {
+    const areaSnapshot = await firestore().collection('area').doc(province).collection('cities').doc(district).get();
+    if (areaSnapshot.exists) {
+      const wardsData = areaSnapshot.data().wards;
+      setWards(wardsData);
+    } else {
+      console.log('No wards data found');
+    }
+  } catch (error) {
+    console.error('Error fetching wards:', error);
+  }
+};
 
-    const fetchWards = async (province, district) => {
-      try {
-        const areaSnapshot = await firestore()
-          .collection('area')
-          .doc(province)
-          .collection('cities')
-          .doc(district)
-          .get();
-        if (areaSnapshot.exists) {
-          const wardsData = areaSnapshot.data().wards;
-          setWards(wardsData);
-        } else {
-          console.log('No wards data found');
-        }
-      } catch (error) {
-        console.error('Error fetching wards:', error);
-      }
-    };
+fetchUserData();
+fetchProvinces();
+}, []);
 
-    fetchUserData();
-    fetchProvinces();
-  }, []);
+const handleInputChange = (key, value) => {
+setFormData(prevState => ({
+  ...prevState,
+  [key]: value
+}));
+};
 
-  const handleInputChange = (key, value) => {
-    setFormData(prevState => ({
-      ...prevState,
-      [key]: value,
-    }));
-  };
+const toggleDetails = () => {
+setDetailsVisible(!detailsVisible);
+};
 
-  const toggleDetails = () => {
-    setDetailsVisible(!detailsVisible);
-  };
+const togglePays = () => {
+setPayVisible(!payVisible);
+};
 
-  const togglePays = () => {
-    setPayVisible(!payVisible);
-  };
-
-   const handlePaymentSelection = (value) => {
+const handlePaymentSelection = async (value) => {
+if (value === 'zalo') {
+  try {
+    await createOrder(totalPrice);
     setChecked(value);
     setPaymentSelected(true);
-    if (value === 'zalo') {
-      // Gọi phương thức payOrder từ NativeModule
-      PayZaloBridge.payOrder(zptranstoken)
-        .then(transactionId => {
-          // Thực hiện xử lý khi thanh toán thành công
-          alert('Giao dịch thành công! Mã giao dịch: ' + transactionId);
-        })
-        .catch(error => {
-          // Xử lý khi có lỗi xảy ra trong quá trình thanh toán
-          alert('Giao dịch thất bại!');
-          console.error('Error during payment:', error);
-        });
-    }
-  };
+  } catch (error) {
+    console.error('Error creating ZaloPay token:', error);
+    // Handle error appropriately, e.g., show an error message to the user
+  }
+} else {
+  setChecked(value);
+  setPaymentSelected(true);
+}
+};
 
+function getCurrentDateYYMMDD() {
+var todayDate = new Date().toISOString().slice(2, 10);
+return todayDate.split('-').join('');
+}
+
+async function createOrder(totalPrice) {
+let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime();
+
+let appid = 2553;
+let amount = parseInt(totalPrice);
+let appuser = "ZaloPay";
+let apptime = (new Date()).getTime();
+let embeddata = "{}";
+let item = "[]";
+let description = "Merchant description for order #" + apptransid;
+let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item;
+let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL").toString();
+
+var order = {
+  'app_id': appid,
+  'app_user': appuser,
+  'app_time': apptime,
+  'amount': amount,
+  'app_trans_id': apptransid,
+  'embed_data': embeddata,
+  'item': item,
+  'description': description,
+  'mac': mac
+};
+
+let formBody = [];
+for (let i in order) {
+  var encodedKey = encodeURIComponent(i);
+  var encodedValue = encodeURIComponent(order[i]);
+  formBody.push(encodedKey + "=" + encodedValue);
+}
+formBody = formBody.join("&");
+
+await fetch('https://sb-openapi.zalopay.vn/v2/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+  },
+  body: formBody
+}).then(response => response.json())
+  .then(resJson => {
+    setToken(resJson.zp_trans_token);
+    setReturnCode(resJson.return_code);
+  })
+  .catch((error) => {
+    console.log("Error: ", error);
+  });
+}
+
+const payOrder = async () => {
+var payZP = NativeModules.PayZaloBridge;
+payZP.payOrder(token);
+};
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
