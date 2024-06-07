@@ -69,7 +69,9 @@ const DetailNews = ({route}) => {
           <View style={styles.detailsContainer}>
             <Text style={styles.title}>{vaccineData.title}</Text>
             <Text style={styles.tag}>Còn hàng</Text>
-
+            <Text style={styles.description}>
+              <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
+            </Text>
             <Text style={styles.desText}>{vaccineData.description}</Text>
 
             <View style={styles.buttonContainer}>
