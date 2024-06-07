@@ -22,6 +22,7 @@ const HistoryBuy = () => {
           const billsSnapshot = await firestore()
             .collection('bills')
             .where('email', '==', userEmail)
+            .orderBy('createdAt','desc')
             .get();
           
           const billsList = [];
@@ -39,7 +40,7 @@ const HistoryBuy = () => {
               email: doc.data().email,
               vaccine: doc.data().vaccine,
             };
-            billsList.unshift(billItem); 
+            billsList.push(billItem); 
           });
     
           setBills(billsList);
