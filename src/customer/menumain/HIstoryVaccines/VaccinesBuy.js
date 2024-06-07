@@ -1,13 +1,38 @@
-import React from 'react';
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import COLORS from '../../../theme/constants';
-import { Linking } from 'react-native';
-import axios from 'axios';
+import firestore from '@react-native-firebase/firestore';
 
 const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, paymentStatus, vaccine }) => {
     const navigation = useNavigation();
+    const isFocused = useIsFocused();
+    const [updatedPaymentStatus, setUpdatedPaymentStatus] = useState(paymentStatus);
+
+    useEffect(() => {
+        if (isFocused) {
+         
+            fetchUpdatedData();
+        }
+    }, [isFocused]);
+
+    useEffect(() => {
+        
+        checkAndDeleteIfExpired();
+    }, [paymentStatus]);
+
+    const fetchUpdatedData = async () => {
+        try {
+            const billDoc = await firestore().collection('bills').doc(orderId).get();
+            if (billDoc.exists) {
+                const updatedPaymentStatus = billDoc.data().paymentStatus;
+                setUpdatedPaymentStatus(updatedPaymentStatus);
+            }
+        } catch (error) {
+            console.error('Error fetching updated data:', error);
+        }
+    };
 
     const formatPrice = price => {
         return new Intl.NumberFormat('vi-VN', {
@@ -21,19 +46,40 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
         const item = { title, totalPrice, orderId, vaccinationDate, createdAt, userId, vaccine };
 
         try {
-      
+            await firestore().collection('bills').doc(orderId).update({
+                paymentStatus: 3, 
+            });
+            
+            setUpdatedPaymentStatus(3);
         } catch (error) {
-            console.error('Error initiating payment:', error);
+            console.error('Error cancelling order:', error);
+        }
+    };
+
+    const handleDetailPress = () => {
+        navigation.navigate('DetailBuy', { orderId });
+    };
+
+    const checkAndDeleteIfExpired = async () => {
+        try {
+            const createdAtDate = new Date(createdAt); 
+            const currentDate = new Date(); 
+            const difference = currentDate - createdAtDate;
+            const differenceInDays = Math.floor(difference / (1000 * 3600 * 24));
+
+            if (differenceInDays > 5 && updatedPaymentStatus === 3) {
+            
+                await firestore().collection('bills').doc(orderId).delete();
+            }
+        } catch (error) {
+            console.error('Error checking and deleting expired item:', error);
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.cardContainer}>
-                <TouchableOpacity
-                    onPress={() => {
-                        navigation.navigate('DetailVaccines', { title });
-                    }}>
+                <TouchableOpacity onPress={handleDetailPress}>
                     <View style={styles.row}>
                         <View style={styles.column}>
                             <Text style={styles.dateText}>{createdAt}</Text>
@@ -41,13 +87,13 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
                                 <Text style={{ fontWeight: 'bold', color: COLORS.black }}>{orderId}</Text>
                             </Text>
                         </View>
-                        {paymentStatus === 0 && (
+                        {updatedPaymentStatus === 0 && (
                             <Text style={[styles.paymentStatusText, styles.awaitingPayment]}>Chờ thanh toán</Text>
                         )}
-                        {paymentStatus === 1 && (
+                        {updatedPaymentStatus === 1 && (
                             <Text style={[styles.paymentStatusText, styles.paid]}>Đã thanh toán</Text>
                         )}
-                        {paymentStatus === 2 && (
+                        {updatedPaymentStatus === 3 && (
                             <Text style={[styles.paymentStatusText, styles.cancelled]}>Đã hủy</Text>
                         )}
                     </View>
@@ -77,15 +123,21 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
                             <Text>Hạn thanh toán</Text>
                         </View>
                         <View style={styles.titleContainerRight}>
-                            <Text>{vaccinationDate}</Text>
+                            {updatedPaymentStatus === 3 ? (
+                                <Text style={{ color: COLORS.red }}>Đã hủy</Text>
+                            ) : (
+                                <Text>{vaccinationDate}</Text>
+                            )}
                         </View>
                     </View>
-                    <TouchableOpacity
-                        onPress={handleAddToCartWrapper}
-                        style={styles.buttonAdd}
-                    >
-                        <Text style={styles.buttonLabel}>Thanh toán</Text>
-                    </TouchableOpacity>
+                    {updatedPaymentStatus !== 3 && (
+                        <TouchableOpacity
+                            onPress={handleAddToCartWrapper}
+                            style={styles.buttonAdd}
+                        >
+                            <Text style={styles.buttonLabel}>Thanh toán</Text>
+                        </TouchableOpacity>
+                    )}
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -104,6 +156,7 @@ const styles = StyleSheet.create({
     cardContainer: {
         borderWidth: 1,
         borderColor: 'black',
+       
         borderRadius: 10,
         backgroundColor: '#fff',
         padding: 20,
@@ -148,45 +201,46 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center'
-      },
-      row: {
-          flexDirection: 'row',
-          paddingBottom: '10%',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-      },
-      column: {
-          flexDirection: 'column',
-          width: '50%'
-      },
-      dateText: {
-  
-      },
-      bookingCodeText: {
-          width: '100%'
-      },
-      paymentStatusText: {
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          borderRadius: 10,
-          overflow: 'hidden',
-          fontSize: 14,
-      },
-      awaitingPayment: {
-          color: COLORS.orange2,
-          backgroundColor: COLORS.orange1,
-          fontSize: 16,
-          fontWeight: 'bold'
-      },
-      paid: {
-          marginLeft: 10,
-          color: COLORS.green,
-      },
-      cancelled: {
-          marginLeft: 10,
-          color: COLORS.gray,
-      },
-  });
-  
-  export default VaccinesBuy;
-  
+    },
+    row: {
+        flexDirection: 'row',
+        paddingBottom: '10%',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    column: {
+        flexDirection: 'column',
+        width: '50%'
+    },
+    dateText: {
+
+    },
+    bookingCodeText: {
+        width: '100%'
+    },
+    paymentStatusText: {
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+        overflow: 'hidden',
+        fontSize: 14,
+    },
+    awaitingPayment: {
+        color: COLORS.orange2,
+        backgroundColor: COLORS.orange1,
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    paid: {
+        marginLeft: 10,
+        color: COLORS.green,
+    },
+    cancelled: {
+        color: COLORS.white,
+        backgroundColor: COLORS.red,
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+});
+
+export default VaccinesBuy;

@@ -18,6 +18,11 @@ const ConfirmationScreen = ({route}) => {
   const fullName = orderDetails.fullname;
   const [name, dob] = fullName.split('-');
 
+  const handleDetailPress = () => {
+    navigation.navigate('DetailBuy', { orderId: orderDetails.orderId, readOnly: true });
+  };
+  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <Appbar.Header style={styles.appbar}>
@@ -78,7 +83,7 @@ const ConfirmationScreen = ({route}) => {
           </View>
         </View>
         <TouchableOpacity>
-          <Text style={styles.detailLink}>Xem chi tiết đơn hàng</Text>
+          <Text style={styles.detailLink} onPress={handleDetailPress}>Xem chi tiết đơn hàng</Text>
         </TouchableOpacity>
         <View style={styles.noteContainer}>
           <Text style={styles.noteText}>

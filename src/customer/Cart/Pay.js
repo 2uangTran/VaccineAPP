@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert, NativeModules, NativeEventEmitter } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Alert, NativeModules, DeviceEventEmitter } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { Picker } from '@react-native-picker/picker';
 import COLORS from '../../theme/constants';
@@ -11,18 +11,16 @@ import CryptoJS from 'crypto-js';
 
 const { PayZaloBridge } = NativeModules;
 
-const payZaloBridgeEmitter = new NativeEventEmitter();
-
-const subscription = payZaloBridgeEmitter.addListener(
-  'EventPayZalo',
-  async (data) => {
-    if (data.returnCode == 1) {
-      handleZaloPayCallback('success');
-    } else {
-      handleZaloPayCallback('failed');
-    }
+DeviceEventEmitter.addListener('EventPayZalo', async (data) => {
+  console.log('ZaloPay payment result:', data);
+  if (data.returnCode == 1) {
+    handleZaloPayCallback('success');
+  } else {
+    handleZaloPayCallback('failed');
   }
-);
+});
+
+
 
 const Pay = ({ route }) => {
   const { userInfo, center, vaccine, totalPrice, selectedDate } = route.params;
@@ -89,11 +87,13 @@ const Pay = ({ route }) => {
     } else {
       createBill();
     }
+  
   };
 
   const handleZaloPayCallback = (result) => {
     if (result === 'success') {
       setZaloPaymentStatus('success');
+      createBill(); 
     } else {
       setZaloPaymentStatus('failed');
       alert('Pay error!');
@@ -109,31 +109,30 @@ const Pay = ({ route }) => {
       userInfo,
       center,
       vaccine,
-      paymentStatus: 0,
+      paymentStatus: zaloPaymentStatus === 'success' ? 1 : 0, 
       vaccinationDate: formatDate(selectedDate),
-      paymentMethod: checked,
+      paymentMethod: checked === 'zalo' ? 'zalo' : checked, 
       createdAt: formatDate(new Date()),
       ...formData
     };
-
+  
     try {
       await firestore().collection('bills').doc(orderId).set(orderDetails);
       for (const vaccine of orderDetails.vaccine) {
         const cartSnapshot = await firestore().collection('Cart').get();
         const matchingDocs = cartSnapshot.docs.filter(doc => doc.data().id === vaccine.id);
-
+  
         if (matchingDocs.length > 0) {
           for (const doc of matchingDocs) {
             await firestore().collection('Cart').doc(doc.id).delete();
           }
         }
       }
-
-navigation.navigate('ConfirmationScreen', { orderDetails });
-} catch (error) {
-  console.error('Error creating order:', error);
-}
-};
+      navigation.navigate('ConfirmationScreen', { orderDetails });
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
+  };
 
 useEffect(() => {
 const fetchUserData = async () => {
@@ -225,7 +224,7 @@ if (value === 'zalo') {
     setPaymentSelected(true);
   } catch (error) {
     console.error('Error creating ZaloPay token:', error);
-    // Handle error appropriately, e.g., show an error message to the user
+    
   }
 } else {
   setChecked(value);
@@ -238,59 +237,76 @@ var todayDate = new Date().toISOString().slice(2, 10);
 return todayDate.split('-').join('');
 }
 
-async function createOrder(totalPrice) {
-let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime();
+async function createOrder(money) {
+  let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime()
 
-let appid = 2553;
-let amount = parseInt(totalPrice);
-let appuser = "ZaloPay";
-let apptime = (new Date()).getTime();
-let embeddata = "{}";
-let item = "[]";
-let description = "Merchant description for order #" + apptransid;
-let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item;
-let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL").toString();
+  let appid = 2553
+  let amount = parseInt(money)
+  let appuser = "ZaloPayDemo"
+  let apptime = (new Date).getTime()
+  let embeddata = "{}"
+  let item = "[]"
+  let description = "Merchant description for order #" + apptransid
+  let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item
+  let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL")
+  console.log('====================================');
+  console.log("hmacInput: " + hmacInput);
+  console.log("mac: " + mac)
+  console.log('====================================');
+  var order = {
+    'app_id': appid,
+    'app_user': appuser,
+    'app_time': apptime,
+    'amount': amount,
+    'app_trans_id': apptransid,
+    'embed_data': embeddata,
+    'item': item,
+    'description': description,
+    'mac': mac
+  }
 
-var order = {
-  'app_id': appid,
-  'app_user': appuser,
-  'app_time': apptime,
-  'amount': amount,
-  'app_trans_id': apptransid,
-  'embed_data': embeddata,
-  'item': item,
-  'description': description,
-  'mac': mac
-};
+  console.log(order)
 
-let formBody = [];
-for (let i in order) {
-  var encodedKey = encodeURIComponent(i);
-  var encodedValue = encodeURIComponent(order[i]);
-  formBody.push(encodedKey + "=" + encodedValue);
-}
-formBody = formBody.join("&");
-
-await fetch('https://sb-openapi.zalopay.vn/v2/create', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-  },
-  body: formBody
-}).then(response => response.json())
-  .then(resJson => {
-    setToken(resJson.zp_trans_token);
-    setReturnCode(resJson.return_code);
-  })
-  .catch((error) => {
-    console.log("Error: ", error);
-  });
+  let formBody = []
+  for (let i in order) {
+    var encodedKey = encodeURIComponent(i);
+    var encodedValue = encodeURIComponent(order[i]);
+    formBody.push(encodedKey + "=" + encodedValue);
+  }
+  formBody = formBody.join("&");
+  await fetch('https://sb-openapi.zalopay.vn/v2/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+    },
+    body: formBody
+  }).then(response => response.json())
+    .then(resJson => {
+      setToken(resJson.zp_trans_token)
+      setReturnCode(resJson.return_code)
+    })
+    .catch((error) => {
+      console.log("error ", error)
+    })
 }
 
 const payOrder = async () => {
-var payZP = NativeModules.PayZaloBridge;
-payZP.payOrder(token);
+  var payZP = NativeModules.PayZaloBridge;
+  console.log('Token:', token); 
+  payZP.payOrder(token);
+  console.log('Thanh toán đã được gọi');
+
+  DeviceEventEmitter.addListener('EventPayZalo', async (data) => {
+    console.log('ZaloPay payment result:', data);
+    
+    if (data.returnCode == 1) {
+      await createBill();
+    } else {
+      console.error('ZaloPay payment failed:', data);
+    }
+  });
 };
+
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
@@ -454,22 +470,7 @@ payZP.payOrder(token);
                   Thanh toán tại trung tâm
                 </Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <RadioButton
-                  value="credit_card"
-                  status={checked === 'credit_card' ? 'checked' : 'unchecked'}
-                  onPress={() => handlePaymentSelection('credit_card')}
-                />
-                <Text style={{ fontSize: 20, color: checked === 'credit_card' ? 'black' : 'grey' }}> Thẻ tín dụng</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <RadioButton
-                  value="paypal"
-                  status={checked === 'paypal' ? 'checked' : 'unchecked'}
-                  onPress={() => handlePaymentSelection('paypal')}
-                />
-                <Text style={{ fontSize: 20, color: checked === 'paypal' ? 'black' : 'grey' }}> PayPal</Text>
-              </View>
+             
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <RadioButton
                   value="zalo"

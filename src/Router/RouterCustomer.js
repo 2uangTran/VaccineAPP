@@ -43,6 +43,7 @@ import Notification from '../customer/menumain/Notification';
 import CustomHeaderRightNotification from './CustomHeaderRightNotification';
 import ConfirmationScreen from '../customer/Cart/ConfirmationScreen';
 import HistoryBuy from '../customer/menumain/HIstoryVaccines/HistoryBuy';
+import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
 
 
 
@@ -292,7 +293,13 @@ const RouterCustomer = () => {
             title: 'Lịch sử đăng ký mũi tiêm',
           }}
         />
-        
+        <Stack.Screen
+          name="DetailBuy"
+          component={DetailBuy}
+          options={{
+            title: 'Thông tin chi tiết',
+          }}
+        />
       </Stack.Navigator>
     </MyContextControllerProvider>
   );
