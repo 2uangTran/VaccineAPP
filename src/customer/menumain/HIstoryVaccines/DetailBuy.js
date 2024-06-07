@@ -51,10 +51,22 @@ const DetailBuy = ({ route }) => {
       </View>
       <View style={styles.infoSection}>
         <Text style={styles.sectionTitle}>Thông tin người mua</Text>
-        <Text style={styles.infoText}>Họ và tên: {bill.fullName}</Text>
-        <Text style={styles.infoText}>Số điện thoại: {bill.phoneNumber}</Text>
-        <Text style={styles.infoText}>Email: {bill.email}</Text>
-        <Text style={styles.infoText}>Địa chỉ: {`${bill.address}, ${bill.ward}\n${bill.district}, ${bill.province}`}</Text>
+        <View style={styles.column}>
+          <Text style={styles.infoText}>Họ và tên: </Text>
+          <Text>{bill.fullName}</Text>
+        </View>
+        <View style={styles.column}>
+        <Text style={styles.infoText}>Số điện thoại: </Text>
+        <Text>{bill.phoneNumber}</Text>
+        </View>
+        <View style={styles.column}>
+        <Text style={styles.infoText}>Email: </Text>
+        <Text>{bill.email}</Text>
+        </View>
+        <View style={styles.column}>
+        <Text style={styles.infoText}>Địa chỉ: </Text>
+        <Text>{`${bill.address}, ${bill.ward}\n${bill.district}, ${bill.province}`}</Text>
+        </View>
       </View>
       <View style={styles.paymentInfo}>
         <Text style={styles.sectionTitle}>Thông tin thanh toán</Text>
@@ -86,6 +98,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  column:{
+    flexDirection:'column',
   },
   header: {
     backgroundColor: '#FFCC00',
