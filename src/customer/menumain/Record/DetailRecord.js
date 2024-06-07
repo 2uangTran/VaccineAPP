@@ -17,19 +17,18 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import CustomHeaderRightNews from '../../../Router/CustomHeaderRightNews';
 
-const DetailNews = ({route}) => {
-  const {id, title, description} = route.params;
-  const [newData, setNewData] = useState(null);
-
+const DetailRecord = ({route}) => {
+  const {id, title, center} = route.params;
+  const [recordData, setRecordData] = useState(null);
   useEffect(() => {
-    const documentRef = firestore().collection('News').doc(id);
+    const documentRef = firestore().collection('Record').doc(id);
 
     documentRef
       .get()
       .then(doc => {
         if (doc.exists) {
           const data = doc.data();
-          setNewData(data);
+          setRecordData(data);
         } else {
           console.log('Không có dữ liệu cho ID này!');
         }
@@ -48,31 +47,27 @@ const DetailNews = ({route}) => {
           route={{
             params: {
               id,
-              title: newData?.title,
-              price: newData?.price,
-              imageUrl: newData?.imageUrl,
-              description: newData?.description,
-              origin: newData?.origin,
-              usage: newData?.usage,
+              title: recordData?.title,
+              imageUrl: recordData?.imageUrl,
             },
           }}
         />
       ),
     });
-  }, [navigation, newData]);
+  }, [navigation, recordData]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {newData ? (
+      {recordData ? (
         <>
-          <Image source={{uri: newData.imageUrl}} style={styles.image} />
+          <Image source={{uri: recordData.imageUrl}} style={styles.image} />
           <View style={styles.detailsContainer}>
-            <Text style={styles.title}>{newData.title}</Text>
+            <Text style={styles.title}>{recordData.title}</Text>
             <Text style={styles.tag}>Còn hàng</Text>
             <Text style={styles.description}>
               <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
             </Text>
-            <Text style={styles.desText}>{newData.description}</Text>
+            <Text style={styles.desText}>{recordData.description}</Text>
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -179,4 +174,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DetailNews;
+export default DetailRecord;
