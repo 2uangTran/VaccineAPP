@@ -5,14 +5,14 @@ import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
 import {useMyContextController} from '../../context';
 import {FlatList} from 'react-native-gesture-handler';
-import Newss from './News';
+import Record from './Record';
 
-const ListNews = () => {
+const ListRecord = () => {
   const [loading, setLoading] = useState(true);
-  const [news, setNews] = useState([]);
+  const [record, setRecord] = useState([]);
   const [controller, dispatch] = useMyContextController();
   const {userLogin} = controller;
-  const ref = firestore().collection('News');
+  const ref = firestore().collection('Record');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -20,17 +20,17 @@ const ListNews = () => {
       const list = [];
 
       querySnapshot.forEach(doc => {
-        const {title, imageUrl, description, date} = doc.data();
+        const {title, imageUrl, center, date} = doc.data();
         list.push({
           id: doc.id,
           title,
           imageUrl,
-          description,
+          center,
           date: date ? new Date(date) : null,
         });
       });
 
-      setNews(list);
+      setRecord(list);
 
       if (loading) {
         setLoading(false);
@@ -44,9 +44,9 @@ const ListNews = () => {
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
         <FlatList
-          data={news}
+          data={record}
           keyExtractor={item => item.id}
-          renderItem={({item}) => <Newss {...item} />}
+          renderItem={({item}) => <Record {...item} />}
           numColumns={1}
           contentContainerStyle={styles.list}
         />
@@ -140,4 +140,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ListNews;
+export default ListRecord;

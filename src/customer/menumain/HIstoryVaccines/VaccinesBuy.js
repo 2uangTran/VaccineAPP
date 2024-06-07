@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: COLORS.gray,
     borderRadius: 10,
     backgroundColor: '#fff',
     padding: 20,
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   dateText: {},
   bookingCodeText: {
     width: '100%',
+    color: COLORS.gray,
   },
   paymentStatusText: {
     paddingVertical: 5,

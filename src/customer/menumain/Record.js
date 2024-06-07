@@ -11,7 +11,7 @@ import {useNavigation} from '@react-navigation/native';
 import COLORS from '../../theme/constants';
 import {useMyContextController} from '../../context';
 
-const Newss = ({id, title, imageUrl, description}) => {
+const Record = ({id, title, imageUrl, center}) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
   const [controller] = useMyContextController();
@@ -27,11 +27,11 @@ const Newss = ({id, title, imageUrl, description}) => {
       <View style={styles.cardContainer}>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('DetailNews', {
+            navigation.navigate('DetailRecord', {
               id,
               title,
               imageUrl,
-              description,
+              center,
             });
           }}>
           <View style={styles.rowContainer}>
@@ -129,4 +129,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Newss;
+export default Record;

@@ -257,7 +257,9 @@ const Main = () => {
               ))}
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}>
+              <TouchableOpacity
+                style={styles.squareButton}
+                onPress={() => navigation.navigate('Record')}>
                 <MaterialCommunityIcons name="clock" size={24} color="white" />
               </TouchableOpacity>
               {splitDescription('Nhật ký tiêm chủng').map((part, index) => (

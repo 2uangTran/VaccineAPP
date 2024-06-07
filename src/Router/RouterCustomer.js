@@ -43,8 +43,11 @@ import Notification from '../customer/menumain/Notification';
 import CustomHeaderRightNotification from './CustomHeaderRightNotification';
 import ConfirmationScreen from '../customer/Cart/ConfirmationScreen';
 import HistoryBuy from '../customer/menumain/HIstoryVaccines/HistoryBuy';
-
-
+import Record from '../customer/menumain/Record';
+import CustomHeaderRightRecord from '../Router/CustomHeaderRightRecord';
+import AddNewRecord from '../customer/menumain/Record/AddNewRecord';
+import CustomHeaderRightAddRecord from '../Router/CustomHeaderRightAddRecord';
+import DetailRecord from '../customer/menumain/Record/DetailRecord';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -156,6 +159,21 @@ const RouterCustomer = () => {
           }}
         />
         <Stack.Screen
+          name="Record"
+          component={Record}
+          options={{
+            title: 'Nhật ký tiêm chủng',
+            headerRight: () => <CustomHeaderRightRecord />,
+          }}
+        />
+        <Stack.Screen
+          name="AddNewRecord"
+          component={AddNewRecord}
+          options={{
+            title: 'Tạo bài mới',
+          }}
+        />
+        <Stack.Screen
           name="ListVaccin"
           component={ListVaccin}
           options={{
@@ -185,6 +203,13 @@ const RouterCustomer = () => {
           options={{
             title: 'Chi tiết Tin tức',
             headerRight: () => <CustomHeaderRightNews />,
+          }}
+        />
+        <Stack.Screen
+          name="DetailRecord"
+          component={DetailRecord}
+          options={{
+            title: 'Chi tiết Tin tức',
           }}
         />
         <Stack.Screen
@@ -292,7 +317,6 @@ const RouterCustomer = () => {
             title: 'Lịch sử đăng ký mũi tiêm',
           }}
         />
-        
       </Stack.Navigator>
     </MyContextControllerProvider>
   );
