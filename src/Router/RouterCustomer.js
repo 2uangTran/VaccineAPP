@@ -44,10 +44,10 @@ import CustomHeaderRightNotification from './CustomHeaderRightNotification';
 import ConfirmationScreen from '../customer/Cart/ConfirmationScreen';
 import HistoryBuy from '../customer/menumain/HIstoryVaccines/HistoryBuy';
 import Record from '../customer/menumain/Record';
-import CustomHeaderRightRecord from '../Router/CustomHeaderRightRecord';
 import AddNewRecord from '../customer/menumain/Record/AddNewRecord';
-import CustomHeaderRightAddRecord from '../Router/CustomHeaderRightAddRecord';
 import DetailRecord from '../customer/menumain/Record/DetailRecord';
+import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
+
 import ListRecord from '../customer/menumain/ListRecord';
 
 const Stack = createStackNavigator();
@@ -314,6 +314,13 @@ const RouterCustomer = () => {
         <Stack.Screen
           name="HistoryBuy"
           component={HistoryBuy}
+          options={{
+            title: 'Lịch sử đăng ký mũi tiêm',
+          }}
+        />
+        <Stack.Screen
+          name="DetailBuy"
+          component={DetailBuy}
           options={{
             title: 'Lịch sử đăng ký mũi tiêm',
           }}

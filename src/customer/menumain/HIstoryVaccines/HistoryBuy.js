@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth'; 
@@ -7,11 +7,11 @@ import COLORS from '../../../theme/constants';
 import LottieView from 'lottie-react-native';
 import loadingAnimation from '../../../theme/Loading/loadingcricle.json';
 
-
 const HistoryBuy = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [noData, setNoData] = useState(false);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -24,10 +24,11 @@ const HistoryBuy = () => {
             .where('email', '==', userEmail)
             .get();
           
-          const billsList = billsSnapshot.docs.map(doc => {
+          const billsList = [];
+          billsSnapshot.forEach(doc => {
             const vaccine = doc.data().vaccine;
             const title = vaccine && vaccine.length > 0 ? vaccine[0].title : "Unknown Vaccine";
-            return {
+            const billItem = {
               vaccinationDate: doc.data().vaccinationDate,
               createdAt: doc.data().createdAt,
               orderId: doc.data().orderId,
@@ -38,27 +39,9 @@ const HistoryBuy = () => {
               email: doc.data().email,
               vaccine: doc.data().vaccine,
             };
+            billsList.unshift(billItem); 
           });
-  
-          billsList.sort((a, b) => {
-            const dateA = new Date(
-              parseInt(a.createdAt.split('/')[2]), 
-              parseInt(a.createdAt.split('/')[1]) - 1, 
-              parseInt(a.createdAt.split('/')[0]) 
-            );
-            const dateB = new Date(
-              parseInt(b.createdAt.split('/')[2]), 
-              parseInt(b.createdAt.split('/')[1]) - 1, 
-              parseInt(b.createdAt.split('/')[0]) 
-            );
-  
-            if (dateA.getTime() === dateB.getTime()) {
-              return b.id.localeCompare(a.id); 
-            }
-  
-            return dateB - dateA;
-          });
-  
+    
           setBills(billsList);
           setNoData(billsList.length === 0);
         }
@@ -68,10 +51,17 @@ const HistoryBuy = () => {
         setLoading(false);
       }
     };
-  
+    
     fetchBills();
   }, []);
-  
+
+  const keyExtractor = (item, index) => item.id + index;
+
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index: 0, animated: true });
+    }
+  }, [bills]);
 
   if (loading) {
     return (
@@ -97,8 +87,9 @@ const HistoryBuy = () => {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
+        ref={flatListRef}
         data={bills}
-        keyExtractor={item => item.id}
+        keyExtractor={keyExtractor}
         renderItem={({ item }) => (
           <VaccinesBuy
             orderId={item.orderId}

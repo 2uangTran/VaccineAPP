@@ -135,6 +135,8 @@ const styles = StyleSheet.create({
   ButtonTextChoose: {
     color: COLORS.white,
     fontSize: 18,
+    width:'100%',
+    textAlign:'center'
   },
 });
 

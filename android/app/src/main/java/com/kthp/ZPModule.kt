@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import android.util.Log
 
 
 import vn.zalopay.sdk.ZaloPaySDK
@@ -23,6 +24,8 @@ class ZPModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModu
             params.putString("appTransID", appTransID)
             params.putString("returnCode", PAYMENTSUCCESS)
             sendEvent("EventPayZalo", params)
+
+             Log.d("ZaloPay", "Payment succeeded - Transaction ID: $transactionId, App Trans ID: $appTransID")
         }
 
         override fun onPaymentCanceled(transToken: String, appTransID: String) {

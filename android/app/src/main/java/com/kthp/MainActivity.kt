@@ -21,7 +21,7 @@ class MainActivity : ReactActivity(), DefaultHardwareBackBtnHandler {
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
                 // Initialize ZaloPaySDK with appID and environment
-                ZaloPaySDK.init(2554, Environment.SANDBOX)
+                ZaloPaySDK.init(2553, Environment.SANDBOX)
             }
 
             override fun onBackPressed(): Boolean {
