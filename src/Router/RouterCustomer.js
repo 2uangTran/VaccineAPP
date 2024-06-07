@@ -44,6 +44,8 @@ import CustomHeaderRightNotification from './CustomHeaderRightNotification';
 import ConfirmationScreen from '../customer/Cart/ConfirmationScreen';
 import HistoryBuy from '../customer/menumain/HIstoryVaccines/HistoryBuy';
 
+
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const CustomerTabNavigator = () => {
@@ -290,6 +292,7 @@ const RouterCustomer = () => {
             title: 'Lịch sử đăng ký mũi tiêm',
           }}
         />
+        
       </Stack.Navigator>
     </MyContextControllerProvider>
   );
