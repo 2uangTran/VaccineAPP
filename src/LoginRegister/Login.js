@@ -26,6 +26,7 @@ const Login = ({navigation}) => {
 
   const onSubmit = () => {
     login(dispatch, email, password);
+    console.log('ok');
   };
   const navigateToRegister = () => {
     navigation.navigate('Register');

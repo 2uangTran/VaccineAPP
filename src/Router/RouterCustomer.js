@@ -48,6 +48,7 @@ import CustomHeaderRightRecord from '../Router/CustomHeaderRightRecord';
 import AddNewRecord from '../customer/menumain/Record/AddNewRecord';
 import CustomHeaderRightAddRecord from '../Router/CustomHeaderRightAddRecord';
 import DetailRecord from '../customer/menumain/Record/DetailRecord';
+import ListRecord from '../customer/menumain/ListRecord';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -159,8 +160,8 @@ const RouterCustomer = () => {
           }}
         />
         <Stack.Screen
-          name="Record"
-          component={Record}
+          name="ListRecord"
+          component={ListRecord}
           options={{
             title: 'Nhật ký tiêm chủng',
             headerRight: () => <CustomHeaderRightRecord />,

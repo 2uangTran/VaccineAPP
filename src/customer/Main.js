@@ -144,7 +144,7 @@ const Main = () => {
                 color="white"
               />
             )}
-            onPress={() => navigation.navigate('Notification')}
+            onPress={() => navigation.navigate('ListNotification')}
           />
 
           {getCurrentTimeMessage()}
@@ -259,7 +259,7 @@ const Main = () => {
             <View style={styles.buttonWrapper}>
               <TouchableOpacity
                 style={styles.squareButton}
-                onPress={() => navigation.navigate('Record')}>
+                onPress={() => navigation.navigate('ListRecord')}>
                 <MaterialCommunityIcons name="clock" size={24} color="white" />
               </TouchableOpacity>
               {splitDescription('Nhật ký tiêm chủng').map((part, index) => (

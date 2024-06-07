@@ -38,9 +38,7 @@ const Record = ({id, title, imageUrl, center}) => {
             <Image source={{uri: imageUrl}} style={styles.image} />
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
-              <Text style={styles.description}>
-                <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
-              </Text>
+              <Text style={styles.description}></Text>
             </View>
           </View>
         </TouchableOpacity>

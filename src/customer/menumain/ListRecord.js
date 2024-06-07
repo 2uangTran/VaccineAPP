@@ -39,7 +39,6 @@ const ListRecord = () => {
 
     return () => unsubscribe();
   }, [loading]);
-
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
