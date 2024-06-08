@@ -44,14 +44,14 @@ const AddNewRecord = () => {
     } else {
       setRecordError('');
     }
-
+  
     let imageUrl = '';
     if (imageUri) {
       const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
       const uploadUri =
         Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
       const task = storage().ref(filename).putFile(uploadUri);
-
+  
       try {
         await task;
         imageUrl = await storage().ref(filename).getDownloadURL();
@@ -59,28 +59,34 @@ const AddNewRecord = () => {
         console.error(e);
       }
     }
-
-    console.log('imageUrl:', imageUrl); // Log giá trị của imageUrl để kiểm tra xem có giá trị null không
-
+  
+    console.log('imageUrl:', imageUrl); 
+  
     const currentDate = new Date();
     const day = currentDate.getDate();
     const month = currentDate.getMonth() + 1;
     const year = currentDate.getFullYear();
-
+  
     const formattedDate = `${day}/${month}/${year}`;
-
+  
+    
+    const currentUser = auth().currentUser;
+    const userIdentifier = currentUser ? currentUser.uid : ''; 
+  
     const newRecord = {
       title: record,
       imageUrl,
       center,
-      date: formattedDate, // Lưu trữ ngày tháng dưới dạng chuỗi
+      date: formattedDate, 
+      userIdentifier, 
     };
-
+  
     ref.add(newRecord);
     setRecord('');
     setImageUri(null);
     resetCenter();
   }
+  
 
   const resetCenter = () => {
     setCenter('');
