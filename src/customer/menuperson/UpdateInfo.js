@@ -39,6 +39,7 @@ const UpdateInfo = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [genderChanged, setGenderChanged] = useState(false);
 
+  
   const [formData, setFormData] = useState({
     phoneNumber: '',
     fullName: '',
@@ -62,6 +63,11 @@ const UpdateInfo = () => {
   };
   const uploadImage = async imageUri => {
     try {
+      // Check if the image URI is already a valid URL
+      if (imageUri.startsWith('http')) {
+        return imageUri; // Return the URL directly
+      }
+  
       const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
       const uploadUri =
         Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
@@ -76,6 +82,7 @@ const UpdateInfo = () => {
       return null;
     }
   };
+  
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
@@ -189,6 +196,25 @@ const UpdateInfo = () => {
     }
   }, [wards]);
 
+
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = date => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      birthDate: format(date, 'dd/MM/yyyy'),
+    }));
+    hideDatePicker();
+  };
+  
+
   const handleInputChange = (key, value) => {
     setFormData(prevFormData => {
       const updatedFormData = {...prevFormData, [key]: value};
@@ -201,74 +227,67 @@ const UpdateInfo = () => {
         fetchWards(value);
         updatedFormData.ward = '';
       }
-      if (key === 'gender' && prevFormData.gender !== value) {
+      if (key === 'gender') {
         setGenderChanged(true);
+      }
+      if (key === 'birthDate') {
+        showDatePicker();
       }
       return updatedFormData;
     });
   };
-
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
-
-  const handleConfirm = date => {
-    setFormData({...formData, birthDate: format(date, 'dd/MM/yyyy')});
-    hideDatePicker;
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      if (!genderChanged && !formData.gender) {
-        setFormData(prevFormData => ({
-          ...prevFormData,
-          gender: 'Nam',
-        }));
-      }
-
-      let imageUrl = formData.avatarUrl;
-
-      if (imageUri) {
-        imageUrl = await uploadImage(imageUri);
-        if (!imageUrl) {
-          console.error('Failed to upload image.');
-          return;
-        }
-      }
-
-      const currentUserEmail = auth().currentUser.email;
-      const userData = {...formData};
-      delete userData.avatarUrl;
-      if (imageUrl) {
-        userData.avatarUrl = imageUrl;
-      }
-      await firestore()
-        .collection('USERS')
-        .doc(currentUserEmail)
-        .update(userData);
-      console.log('User data updated successfully');
-      showMessage({
-        message: 'Thông báo',
-        description: 'Cập nhật thông tin thành công',
-        type: 'success',
-        floating: true,
-        autoHide: true,
-        duration: 3000,
-      });
-
-      navigation.navigate('Main');
-    } catch (error) {
-      console.error('Error updating user data:', error);
-    } finally {
-      setIsSaving(false);
-      setGenderChanged(false);
+  
+// Trích dẫn từ phần handleSave
+const handleSave = async () => {
+  setIsSaving(true);
+  try {
+    if (!genderChanged && !formData.gender) {
+     
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        gender: 'Nam',
+      }));
     }
-  };
+
+    let imageUrl = user.avatarUrl; 
+
+    if (imageUri) {
+      imageUrl = await uploadImage(imageUri);
+      if (!imageUrl) {
+        console.error('Failed to upload image.');
+        return;
+      }
+    }
+
+    const currentUserEmail = auth().currentUser.email;
+    const userData = {...formData};
+    delete userData.avatarUrl;
+    if (imageUrl) {
+      userData.avatarUrl = imageUrl;
+    }
+
+   
+    await firestore().collection('USERS').doc(currentUserEmail).update(userData);
+    console.log('User data updated successfully');
+    showMessage({
+      message: 'Thông báo',
+      description: 'Cập nhật thông tin thành công',
+      type: 'success',
+      floating: true,
+      autoHide: true,
+      duration: 3000,
+    });
+
+    navigation.navigate('Main');
+  } catch (error) {
+    console.error('Error updating user data:', error);
+  } finally {
+    setIsSaving(false);
+    setGenderChanged(false);
+  }
+};
+
+  
 
   return (
     <KeyboardAvoidingView
@@ -343,14 +362,15 @@ const UpdateInfo = () => {
           <Text style={styles.redText}>* </Text>
         </Text>
         <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={formData.gender}
-            style={styles.picker}
-            onValueChange={value => handleInputChange('gender', value)}>
-            <Picker.Item label="Nam" value="Nam" />
-            <Picker.Item label="Nữ" value="Nữ" />
-          </Picker>
-        </View>
+        <Picker
+          selectedValue={formData.gender}
+          style={styles.picker}
+          onValueChange={value => handleInputChange('gender', value)}>
+          <Picker.Item label="Nam" value="Nam" />
+          <Picker.Item label="Nữ" value="Nữ" />
+        </Picker>
+      </View>
+
 
         <Text style={{marginBottom: 5}}>
           <Text style={styles.label}>Quốc tịch </Text>

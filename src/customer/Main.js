@@ -41,7 +41,6 @@ const Main = () => {
       user.district &&
       user.ward &&
       user.address &&
-      user.email &&
       user.occupation
     ) {
       return true;
@@ -175,6 +174,7 @@ const Main = () => {
               style={{height: 150, width: '93%', borderRadius: 10}}
             />
           </View>
+          
         </View>
 
         <Modal
