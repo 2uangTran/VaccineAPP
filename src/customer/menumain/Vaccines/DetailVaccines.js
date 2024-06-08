@@ -7,11 +7,13 @@ import auth from "@react-native-firebase/auth";
 import CustomHeaderRightUpdate from '../../../Router/CustomHeaderRightUpdate';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-
+import { useMyContextController } from '../../../context';
 
 const DetailVaccines = ({ route }) => {
   const { id, title, price, imageUrl, description, origin, usage } = route.params;
   const [vaccineData, setVaccineData] = useState(null);
+  const [controller] = useMyContextController();
+  const { userLogin } = controller;
 
   useEffect(() => {
     const documentRef = firestore().collection('vaccines').doc(id);
@@ -59,6 +61,8 @@ const DetailVaccines = ({ route }) => {
     });
   }, [navigation, vaccineData]);
 
+  const isAdmin = userLogin?.role === 'admin';
+
   const handleAddToCartWrapper = async () => {
     const item = { id, title, price, imageUrl, description, userId: auth().currentUser.uid };
 
@@ -74,8 +78,8 @@ const DetailVaccines = ({ route }) => {
           message: 'Thông báo',
           description: 'Bạn đã thêm vaccine này rồi. Vui lòng kiểm tra trong giỏ hàng.',
           type: 'warning',
-          floating: true, 
-          autoHide: true, 
+          floating: true,
+          autoHide: true,
           duration: 3000,
         });
         return;
@@ -87,14 +91,61 @@ const DetailVaccines = ({ route }) => {
         message: 'Thông báo',
         description: 'Vắc xin đã được thêm vào giỏ hàng',
         type: 'success',
-        floating: true, 
-        autoHide: true, 
+        floating: true,
+        autoHide: true,
         duration: 3000,
       });
     } catch (error) {
       console.error('Error adding product to cart:', error);
     }
   };
+
+  const handleDeleteVaccine = async () => {
+    try {
+      // Xóa vắc xin
+      await firestore().collection('vaccines').doc(id).delete();
+  
+      // Lấy danh sách các tài liệu trong giỏ hàng có id của vắc xin bị xóa
+      const cartSnapshot = await firestore()
+        .collection('Cart')
+        .where('id', '==', id)
+        .get();
+  
+      if (!cartSnapshot.empty) {
+        cartSnapshot.forEach(async (doc) => {
+         
+          const userId = doc.data().userId;
+  
+         
+          await firestore().collection('Cart').doc(doc.id).delete();
+          console.log('Document in cart deleted:', doc.id);
+  
+          
+          const notiContent = {
+            imageUrl: 'https://firebasestorage.googleapis.com/v0/b/kthp-bb423.appspot.com/o/Thongbao.jpg?alt=media&token=1e9883c9-c632-43da-9409-34c4e09a3ba7',
+            title: "Sản phẩm vừa bị xóa khỏi danh sách vắc xin",
+            description: `Chúng tôi có 1 sản phẩm vừa bị xóa khỏi danh mục vì trong giỏ hàng của bạn có 1 sản phẩm mà chúng tôi vừa xóa. Chúng tôi rất xin lỗi vì sự bất tiện này.`,
+            userId: userId, 
+          };
+  
+       
+          await firestore().collection('Notification').add(notiContent);
+        });
+      }
+      navigation.goBack();
+      showMessage({
+        message: 'Thông báo',
+        description: 'Vắc xin đã được xóa thành công',
+        type: 'success',
+        floating: true,
+        autoHide: true,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error deleting vaccine:', error);
+    }
+  };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -110,20 +161,29 @@ const DetailVaccines = ({ route }) => {
               <Text style={styles.info}><Text style={styles.boldText}>Cách sử dụng:</Text> {vaccineData.usage}</Text>
             )}
             <Text style={styles.price}>{formatPrice(vaccineData.price)}</Text>
-  
+
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.addButton} onPress={handleAddToCartWrapper}>
-              <AntDesign
-                name="shoppingcart"
-                size={20}
-                color={COLORS.white}
-                style={{ marginRight: 10,paddingStart:17 }}
-              />
-                <Text style={styles.buttonTextAdd}>Thêm vào giỏ</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.buyButton}>
-                <Text style={styles.buttonTextBuy}>Mua ngay</Text>
-              </TouchableOpacity>
+              {!isAdmin && (
+                <TouchableOpacity style={styles.addButton} onPress={handleAddToCartWrapper}>
+                  <AntDesign
+                    name="shoppingcart"
+                    size={20}
+                    color={COLORS.white}
+                    style={{ marginRight: 10, paddingStart: 17 }}
+                  />
+                  <Text style={styles.buttonTextAdd}>Thêm vào giỏ</Text>
+                </TouchableOpacity>
+              )}
+              {!isAdmin && (
+                <TouchableOpacity style={styles.buyButton}>
+                  <Text style={styles.buttonTextBuy}>Mua ngay</Text>
+                </TouchableOpacity>
+              )}
+                            {isAdmin && (
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteVaccine}>
+                  <Text style={styles.buttonTextDelete}>Xóa vắc xin</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </>
@@ -192,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 10,
     alignItems: 'center',
-    flexDirection:'row',
+    flexDirection: 'row',
   },
   buyButton: {
     flex: 1,
@@ -207,9 +267,24 @@ const styles = StyleSheet.create({
   },
   buttonTextAdd: {
     color: COLORS.white,
-    width:'80%',
-    alignItems:'center'
+    width: '80%',
+    alignItems: 'center'
+  },
+  buttonTextDelete: {
+    color: COLORS.white,
+    width: '80%',
+    textAlign: 'center'
+
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: COLORS.red,
+    borderWidth: 1,
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
   },
 });
 
 export default DetailVaccines;
+

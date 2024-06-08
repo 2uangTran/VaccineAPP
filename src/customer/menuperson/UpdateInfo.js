@@ -63,9 +63,9 @@ const UpdateInfo = () => {
   };
   const uploadImage = async imageUri => {
     try {
-      // Check if the image URI is already a valid URL
+     
       if (imageUri.startsWith('http')) {
-        return imageUri; // Return the URL directly
+        return imageUri; 
       }
   
       const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);

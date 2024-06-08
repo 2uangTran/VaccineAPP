@@ -13,7 +13,8 @@ const Personal = () => {
   const { userLogin } = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
-
+  const [isLoading, setIsLoading] = useState(false);
+  
   useEffect(() => {
     return ref.onSnapshot(querySnapshot => {
       if (loading) {
@@ -28,6 +29,7 @@ const Personal = () => {
 
   const handleLogout = () => {
     logout(dispatch, navigation); 
+    setIsLoading(false); 
   };
 
   

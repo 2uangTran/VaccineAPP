@@ -11,28 +11,32 @@ import {FlatList} from 'react-native-gesture-handler';
 import {Button} from 'react-native-elements';
 import Newss from './News';
 import Notification from './Notification';
+import auth from '@react-native-firebase/auth';
 
 const ListNotification = () => {
   const [loading, setLoading] = useState(true);
   const [noti, setNoti] = useState([]);
-  const [controller, dispatch] = useMyContextController();
-  const {userLogin} = controller;
+  const [controller] = useMyContextController();
+  const { userLogin } = controller;
   const ref = firestore().collection('Notification');
   const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
+      const useruId = auth().currentUser?.uid; 
 
       querySnapshot.forEach(doc => {
-        const {title, imageUrl, description, date} = doc.data();
-        list.push({
-          id: doc.id,
-          title,
-          imageUrl,
-          description,
-          date: date ? new Date(date) : null,
-        });
+        const { title, imageUrl, description, date, userId } = doc.data();
+        if (userId === useruId) { 
+          list.push({
+            id: doc.id,
+            title,
+            imageUrl,
+            description,
+            date: date ? new Date(date) : null,
+          });
+        }
       });
       setNoti(list);
 
