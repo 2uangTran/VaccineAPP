@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  Button,
   Image,
 } from 'react-native';
 import {Appbar} from 'react-native-paper';
@@ -18,20 +17,17 @@ import COLORS from '../theme/constants';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import UpdateInfo from '../customer/menuperson/UpdateInfo';
-import Notification from './menumain/Notification';
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
-  const [controller, dispatch] = useMyContextController();
+  const [controller] = useMyContextController();
   const {userLogin} = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
-  const [userInfoComplete, setUserInfoComplete] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const checkUserInfoComplete = user => {
-    if (
+    return (
       user.phoneNumber &&
       user.fullName &&
       user.birthDate &&
@@ -42,16 +38,12 @@ const Main = () => {
       user.ward &&
       user.address &&
       user.occupation
-    ) {
-      return true;
-    }
-    return false;
+    );
   };
 
   useEffect(() => {
     if (userLogin) {
       const isUserInfoComplete = checkUserInfoComplete(userLogin);
-      setUserInfoComplete(isUserInfoComplete);
       if (!isUserInfoComplete) {
         setModalVisible(true);
       }
@@ -72,16 +64,9 @@ const Main = () => {
   };
 
   const handleUpdateInfo = () => {
+    setModalVisible(false);
     navigation.navigate('UpdateInfo');
   };
-
-  useState(() => {
-    return ref.onSnapshot(querySnapshot => {
-      if (loading) {
-        setLoading(false);
-      }
-    });
-  });
 
   if (loading) {
     return null;

@@ -108,7 +108,7 @@ const UpdateInfo = () => {
         phoneNumber: user.phoneNumber || '',
         fullName: user.fullName || '',
         birthDate: user.birthDate || '',
-        gender: user.gender || '',
+        gender: user.gender || 'Nam',
         nationality: user.nationality || 'Việt Nam',
         ethnicity: user.ethnicity || '',
         province: user.province || '',
@@ -236,6 +236,7 @@ const UpdateInfo = () => {
       return updatedFormData;
     });
   };
+  
   
 // Trích dẫn từ phần handleSave
 const handleSave = async () => {
