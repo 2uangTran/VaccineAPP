@@ -49,6 +49,8 @@ import DetailRecord from '../customer/menumain/Record/DetailRecord';
 import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
 
 import ListRecord from '../customer/menumain/ListRecord';
+import PaymentWeb from '../customer/Cart/PaymentWeb';
+import CustomHeaderRightRecord from './CustomHeaderRightRecord';
 import CustomHeaderRightRecord from './CustomHeaderRightRecord';
 
 const Stack = createStackNavigator();
@@ -326,6 +328,7 @@ const RouterCustomer = () => {
             title: 'Lịch sử đăng ký mũi tiêm',
           }}
         />
+        <Stack.Screen name="PaymentWeb" component={PaymentWeb} />
       </Stack.Navigator>
     </MyContextControllerProvider>
   );

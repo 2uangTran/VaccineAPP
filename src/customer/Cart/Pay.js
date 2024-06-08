@@ -9,16 +9,16 @@ import firestore from '@react-native-firebase/firestore';
 import { RadioButton } from 'react-native-paper';
 import CryptoJS from 'crypto-js';
 
-const { PayZaloBridge } = NativeModules;
+// const { PayZaloBridge } = NativeModules;
 
-DeviceEventEmitter.addListener('EventPayZalo', async (data) => {
-  console.log('ZaloPay payment result:', data);
-  if (data.returnCode == 1) {
-    handleZaloPayCallback('success');
-  } else {
-    handleZaloPayCallback('failed');
-  }
-});
+// DeviceEventEmitter.addListener('EventPayZalo', async (data) => {
+//   console.log('ZaloPay payment result:', data);
+//   if (data.returnCode == 1) {
+//     handleZaloPayCallback('success');
+//   } else {
+//     handleZaloPayCallback('failed');
+//   }
+// });
 
 
 
@@ -71,17 +71,6 @@ const Pay = ({ route }) => {
       Alert.alert('Thông báo', 'Vui lòng chọn phương thức thanh toán');
       return;
     }
-
-    if (checked === 'zalo' && !token) {
-      Alert.alert('Thông báo', 'Vui lòng chờ token ZaloPay được tạo trước khi thanh toán');
-      return;
-    }
-
-    if (checked === 'zalo' && zaloPaymentStatus === 'processing') {
-      Alert.alert('Thông báo', 'Đang xử lý thanh toán ZaloPay. Vui lòng đợi...');
-      return;
-    }
-
     if (checked === 'zalo') {
       payOrder();
     } else {
@@ -90,15 +79,6 @@ const Pay = ({ route }) => {
   
   };
 
-  const handleZaloPayCallback = (result) => {
-    if (result === 'success') {
-      setZaloPaymentStatus('success');
-      createBill(); 
-    } else {
-      setZaloPaymentStatus('failed');
-      alert('Pay error!');
-    }
-  };
 
   const createBill = async () => {
     const orderId = generateOrderId();
@@ -112,7 +92,7 @@ const Pay = ({ route }) => {
       paymentStatus: zaloPaymentStatus === 'success' ? 1 : 0, 
       vaccinationDate: formatDate(selectedDate),
       paymentMethod: checked === 'zalo' ? 'zalo' : checked, 
-      createdAt: formatDate(new Date()),
+      createdAt: Date.now(),
       ...formData
     };
   
@@ -141,7 +121,7 @@ const fetchUserData = async () => {
     const userDoc = await firestore().collection('USERS').doc(currentUserEmail).get();
     const userData = userDoc.data();
     setFormData(userData);
-    if (userData.province) {
+    if (userData.provincez) {
       await fetchDistricts(userData.province);
     }
     if (userData.province && userData.district) {
@@ -219,7 +199,7 @@ setPayVisible(!payVisible);
 const handlePaymentSelection = async (value) => {
 if (value === 'zalo') {
   try {
-    await createOrder(totalPrice);
+    // await createOrder(totalPrice);
     setChecked(value);
     setPaymentSelected(true);
   } catch (error) {
@@ -237,74 +217,120 @@ var todayDate = new Date().toISOString().slice(2, 10);
 return todayDate.split('-').join('');
 }
 
-async function createOrder(money) {
-  let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime()
+// async function createOrder(money) {
+//   let apptransid = getCurrentDateYYMMDD() + '_' + new Date().getTime()
 
-  let appid = 2553
-  let amount = parseInt(money)
-  let appuser = "ZaloPayDemo"
-  let apptime = (new Date).getTime()
-  let embeddata = "{}"
-  let item = "[]"
-  let description = "Merchant description for order #" + apptransid
-  let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item
-  let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL")
-  console.log('====================================');
-  console.log("hmacInput: " + hmacInput);
-  console.log("mac: " + mac)
-  console.log('====================================');
-  var order = {
-    'app_id': appid,
-    'app_user': appuser,
-    'app_time': apptime,
-    'amount': amount,
-    'app_trans_id': apptransid,
-    'embed_data': embeddata,
-    'item': item,
-    'description': description,
-    'mac': mac
-  }
+//   let appid = 2553
+//   let amount = parseInt(money)
+//   let appuser = "ZaloPayDemo"
+//   let apptime = (new Date).getTime()
+//   let embeddata = "{}"
+//   let item = "[]"
+//   let description = "Merchant description for order #" + apptransid
+//   let hmacInput = appid + "|" + apptransid + "|" + appuser + "|" + amount + "|" + apptime + "|" + embeddata + "|" + item
+//   let mac = CryptoJS.HmacSHA256(hmacInput, "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL")
+//   console.log('====================================');
+//   console.log("hmacInput: " + hmacInput);
+//   console.log("mac: " + mac)
+//   console.log('====================================');
+//   var order = {
+//     'app_id': appid,
+//     'app_user': appuser,
+//     'app_time': apptime,
+//     'amount': amount,
+//     'app_trans_id': apptransid,
+//     'embed_data': embeddata,
+//     'item': item,
+//     'description': description,
+//     'mac': mac
+//   }
 
-  console.log(order)
+//   console.log(order)
 
-  let formBody = []
-  for (let i in order) {
-    var encodedKey = encodeURIComponent(i);
-    var encodedValue = encodeURIComponent(order[i]);
-    formBody.push(encodedKey + "=" + encodedValue);
-  }
-  formBody = formBody.join("&");
-  await fetch('https://sb-openapi.zalopay.vn/v2/create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-    },
-    body: formBody
-  }).then(response => response.json())
-    .then(resJson => {
-      setToken(resJson.zp_trans_token)
-      setReturnCode(resJson.return_code)
-    })
-    .catch((error) => {
-      console.log("error ", error)
-    })
-}
+//   let formBody = []
+//   for (let i in order) {
+//     var encodedKey = encodeURIComponent(i);
+//     var encodedValue = encodeURIComponent(order[i]);
+//     formBody.push(encodedKey + "=" + encodedValue);
+//   }
+//   formBody = formBody.join("&");
+//   await fetch('https://sb-openapi.zalopay.vn/v2/create', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+//     },
+//     body: formBody
+//   }).then(response => response.json())
+//     .then(resJson => {
+//       setToken(resJson.zp_trans_token)
+//       setReturnCode(resJson.return_code)
+//     })
+//     .catch((error) => {
+//       console.log("error ", error)
+//     })
+// }
+
+const orderDetails = {
+  orderId : generateOrderId(),
+  fullname: `${formData.fullName}-${formData.birthDate}`,
+  totalPrice,
+  userInfo,
+  center,
+  vaccine,
+  vaccinationDate: formatDate(selectedDate),
+  paymentStatus:1,
+  paymentMethod: "zalo", 
+  createdAt: formatDate(new Date()),
+  ...formData
+};
+
 
 const payOrder = async () => {
-  var payZP = NativeModules.PayZaloBridge;
-  console.log('Token:', token); 
-  payZP.payOrder(token);
-  console.log('Thanh toán đã được gọi');
+  // var payZP = NativeModules.PayZaloBridge;
+  // console.log('Token:', token); 
+  // payZP.payOrder(token);
+  // console.log('Thanh toán đã được gọi');
 
-  DeviceEventEmitter.addListener('EventPayZalo', async (data) => {
-    console.log('ZaloPay payment result:', data);
+  // DeviceEventEmitter.addListener('EventPayZalo', async (data) => {
+  //   console.log('ZaloPay payment result:', data);
     
-    if (data.returnCode == 1) {
-      await createBill();
+  //   if (data.returnCode == 1) {
+  //     await createBill();
+  //   } else {
+  //     console.error('ZaloPay payment failed:', data);
+  //   }
+  // });
+
+  const payment = 'https://server-api-payment.vercel.app/payment';
+  
+  try {
+    const response = await fetch(payment, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content: "Thanh toán đặt mua vắc xin",
+        price: totalPrice
+      }), 
+    });
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const data = await response.json();
+      if (data && data.order_url) {
+        navigation.navigate('PaymentWeb', { orderUrl: data.order_url, ...orderDetails });
+        console.log(data);
+      } else {
+        console.error('No order URL found in response');
+      }
     } else {
-      console.error('ZaloPay payment failed:', data);
+      const text = await response.text();
+      console.error('Unexpected response content:', text);
     }
-  });
+  } catch (error) {
+    console.error('Error fetching payment URL:', error);
+  }
 };
 
 

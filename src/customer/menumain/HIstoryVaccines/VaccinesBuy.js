@@ -40,6 +40,14 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
             currency: 'VND',
         }).format(price);
     };
+    
+    const formatDate = (date) => {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
 
     const handleAddToCartWrapper = async () => {
         const userId = auth().currentUser.uid;
@@ -86,7 +94,7 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
                 <TouchableOpacity onPress={handleDetailPress}>
                     <View style={styles.row}>
                         <View style={styles.column}>
-                            <Text style={styles.dateText}>{createdAt}</Text>
+                            <Text style={styles.dateText}>{formatDate(createdAt)}</Text>
                             <Text style={styles.bookingCodeText}>Mã booking:
                                 <Text style={{ fontWeight: 'bold', color: COLORS.black }}>{orderId}</Text>
                             </Text>
@@ -134,7 +142,7 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
                             )}
                         </View>
                     </View>
-                    {updatedPaymentStatus !== 3 && (
+                    {updatedPaymentStatus !== 3 && updatedPaymentStatus !== 1 && (
                         <TouchableOpacity
                             onPress={handleAddToCartWrapper}
                             style={styles.buttonAdd}
@@ -236,8 +244,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     paid: {
-        marginLeft: 10,
-        color: COLORS.green,
+        color: COLORS.white,
+        backgroundColor: COLORS.green,
+        fontSize: 16,
+        fontWeight: 'bold'
     },
     cancelled: {
         color: COLORS.white,

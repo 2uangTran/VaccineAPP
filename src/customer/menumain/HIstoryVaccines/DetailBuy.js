@@ -78,7 +78,7 @@ const DetailBuy = ({ route }) => {
         <Text style={styles.infoText}>Hạn thanh toán: {bill.vaccinationDate}</Text>
       </View>
       
-      {!route.params.readOnly && bill.paymentStatus !== 3 && (
+      {!route.params.readOnly && bill.paymentStatus !== 3 &&  bill.paymentStatus !== 1 &&(
     <View style={styles.footer}>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancelRegistration}>
         <Text style={styles.buttonText}>Hủy đăng ký</Text>
