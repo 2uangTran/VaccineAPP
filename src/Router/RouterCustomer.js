@@ -50,8 +50,6 @@ import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
 
 import ListRecord from '../customer/menumain/ListRecord';
 import PaymentWeb from '../customer/Cart/PaymentWeb';
-import CustomHeaderRightRecord from './CustomHeaderRightRecord';
-import CustomHeaderRightRecord from './CustomHeaderRightRecord';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
