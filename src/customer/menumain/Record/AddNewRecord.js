@@ -29,7 +29,6 @@ const AddNewRecord = () => {
   const [recordError, setRecordError] = useState('');
   const [loading, setLoading] = useState(true);
   const [imageUri, setImageUri] = useState(null);
-  const [description, setDescription] = useState('');
   const ref = firestore().collection('Record');
   const [records, setRecordList] = useState([]);
   const [isCenterModalVisible, setIsCenterModalVisible] = useState(false);
@@ -74,7 +73,7 @@ const AddNewRecord = () => {
       title: record,
       imageUrl,
       center,
-      date: formattedDate,
+      date: formattedDate, // Lưu trữ ngày tháng dưới dạng chuỗi
     };
 
     ref.add(newRecord);

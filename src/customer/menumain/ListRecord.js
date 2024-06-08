@@ -1,11 +1,18 @@
-import {View, SafeAreaView, StyleSheet} from 'react-native';
 import React, {useState, useEffect} from 'react';
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
 import {useMyContextController} from '../../context';
 import {FlatList} from 'react-native-gesture-handler';
 import Record from './Record';
+import {Icon} from 'react-native-elements';
 
 const ListRecord = () => {
   const [loading, setLoading] = useState(true);
@@ -39,8 +46,34 @@ const ListRecord = () => {
 
     return () => unsubscribe();
   }, [loading]);
+
+  const onPressHandler = () => {
+    if (userLogin) {
+      navigation.navigate('AddNewRecord');
+    }
+  };
+
   return (
     <SafeAreaView style={{flex: 1}}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.addButton} onPress={onPressHandler}>
+          <Icon
+            name="user-circle-o"
+            type="font-awesome"
+            size={24}
+            color={COLORS.gray}
+            style={styles.addIcon}
+          />
+          <Text style={styles.addText}>Thêm nhật ký của bạn...</Text>
+          <Icon
+            name="image"
+            type="font-awesome"
+            size={24}
+            color={COLORS.gray}
+            style={styles.addIcon}
+          />
+        </TouchableOpacity>
+      </View>
       <View style={styles.container}>
         <FlatList
           data={record}
@@ -59,83 +92,33 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  appbar: {
-    backgroundColor: COLORS.blue,
-    justifyContent: 'center',
+  headerContainer: {
+    backgroundColor: '#EEF7FF',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
-  searchContainer: {
-    width: '100%',
+  addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.navy,
+    backgroundColor: COLORS.white,
     borderColor: COLORS.white,
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    borderRadius: 10,
+    padding: 10,
+    marginHorizontal: 10,
   },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
+  addText: {
     flex: 1,
-    height: 40,
-    color: COLORS.white,
+    fontSize: 16,
+    color: COLORS.gray,
+    textAlign: 'left',
+  },
+  addIcon: {
+    marginHorizontal: 5,
   },
   list: {
     paddingHorizontal: 10,
     paddingVertical: 10,
-  },
-  touchable: {
-    width: '100%',
-    marginBottom: 10,
-  },
-
-  rowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 23,
-    fontWeight: 'bold',
-  },
-  description: {
-    fontSize: 17,
-    marginTop: 5,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'left',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  button: {
-    width: '50%',
-    borderRadius: 5,
-    borderColor: COLORS.blue,
-  },
-  buttonContent: {
-    backgroundColor: COLORS.white,
-  },
-  buttonLabel: {
-    color: COLORS.blue,
-  },
-  menuAnchor: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    padding: 5,
   },
 });
 

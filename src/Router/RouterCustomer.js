@@ -49,6 +49,7 @@ import DetailRecord from '../customer/menumain/Record/DetailRecord';
 import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
 
 import ListRecord from '../customer/menumain/ListRecord';
+import CustomHeaderRightRecord from './CustomHeaderRightRecord';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -164,7 +165,7 @@ const RouterCustomer = () => {
           component={ListRecord}
           options={{
             title: 'Nhật ký tiêm chủng',
-            headerRight: () => <CustomHeaderRightRecord />,
+            // headerRight: () => <CustomHeaderRightRecord />,
           }}
         />
         <Stack.Screen
