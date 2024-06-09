@@ -50,6 +50,7 @@ import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
 
 import ListRecord from '../customer/menumain/ListRecord';
 import PaymentWeb from '../customer/Cart/PaymentWeb';
+import Payment from '../customer/menumain/HIstoryVaccines/Payment';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -294,14 +295,14 @@ const RouterCustomer = () => {
         <Stack.Screen
           name="ListNotification"
           component={ListNotification}
-          options={{title: 'Danh sách Thông báo'}}
+          options={{title: 'Danh sách Thông báo',headerRight: () => <CustomHeaderRightNotification />,}}
         />
         <Stack.Screen
           name="Notification"
           component={Notification}
           options={{
             title: 'Thông báo',
-            headerRight: () => <CustomHeaderRightNotification />,
+            
           }}
         />
         <Stack.Screen
@@ -327,6 +328,7 @@ const RouterCustomer = () => {
           }}
         />
         <Stack.Screen name="PaymentWeb" component={PaymentWeb} />
+        <Stack.Screen name="Payment" component={Payment} />
       </Stack.Navigator>
     </MyContextControllerProvider>
   );

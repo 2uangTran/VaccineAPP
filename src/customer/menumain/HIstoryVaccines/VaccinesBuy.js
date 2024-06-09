@@ -47,20 +47,13 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
         return `${day}/${month}/${year}`;
-      };
+    };
 
     const handleAddToCartWrapper = async () => {
-        const userId = auth().currentUser.uid;
-        const item = { title, totalPrice, orderId, vaccinationDate, createdAt, userId, vaccine };
-
         try {
-            await firestore().collection('bills').doc(orderId).update({
-                paymentStatus: 3, // Update payment status to 3 (cancelled)
-            });
-            // Update the payment status locally
-            setUpdatedPaymentStatus(3);
+            await payOrder();
         } catch (error) {
-            console.error('Error cancelling order:', error);
+            console.error('Error initiating payment:', error);
         }
     };
 
@@ -70,21 +63,49 @@ const VaccinesBuy = ({ orderId, totalPrice, vaccinationDate, createdAt, title, p
 
     const checkAndDeleteIfExpired = async () => {
         try {
-            const createdAtDate = new Date(createdAt); // Convert createdAt to Date object
-            const currentDate = new Date(); // Current Date
+            const createdAtDate = new Date(createdAt); 
+            const currentDate = new Date(); 
 
-            // Calculate the difference in milliseconds
             const difference = currentDate - createdAtDate;
-            // Calculate the difference in days
             const differenceInDays = Math.floor(difference / (1000 * 3600 * 24));
 
-            // Check if difference is more than 5 days and paymentStatus is 3 (cancelled)
             if (differenceInDays > 5 && updatedPaymentStatus === 3) {
-                // Delete the item from firestore
                 await firestore().collection('bills').doc(orderId).delete();
             }
         } catch (error) {
             console.error('Error checking and deleting expired item:', error);
+        }
+    };
+
+    const payOrder = async () => {
+        const paymentUrl = 'https://server-api-payment.vercel.app/payment';
+        
+        try {
+            const response = await fetch(paymentUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: "Thanh toán đặt mua vắc xin",
+                    price: totalPrice
+                }), 
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data && data.order_url) {
+                    navigation.navigate('Payment', { orderUrl: data.order_url, orderId, totalPrice, vaccinationDate, createdAt, title, paymentStatus, vaccine });
+                } else {
+                    console.error('No order URL found in response');
+                }
+            } else {
+                const text = await response.text();
+                console.error('Unexpected response content:', text);
+            }
+        } catch (error) {
+            console.error('Error fetching payment URL:', error);
         }
     };
 

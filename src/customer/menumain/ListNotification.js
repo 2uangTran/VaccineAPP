@@ -24,11 +24,12 @@ const ListNotification = () => {
   useEffect(() => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
-      const useruId = auth().currentUser?.uid; 
-
+      const useruId = auth().currentUser?.uid;
+  
       querySnapshot.forEach(doc => {
         const { title, imageUrl, description, date, userId } = doc.data();
-        if (userId === useruId) { 
+        // Kiểm tra nếu thông báo được gửi riêng cho user hoặc không có userId
+        if (!userId || userId === useruId) { 
           list.push({
             id: doc.id,
             title,
@@ -39,14 +40,15 @@ const ListNotification = () => {
         }
       });
       setNoti(list);
-
+  
       if (loading) {
         setLoading(false);
       }
     });
-
+  
     return () => unsubscribe();
   }, [loading]);
+  
 
   return (
     <SafeAreaView style={{flex: 1}}>
