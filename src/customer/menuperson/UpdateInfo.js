@@ -467,6 +467,7 @@ const handleSave = async () => {
         <TextInput
           style={styles.input}
           value={formData.email}
+          editable={false}
           onChangeText={value => handleInputChange('email', value)}
         />
 

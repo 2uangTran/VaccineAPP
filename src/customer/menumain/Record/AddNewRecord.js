@@ -13,6 +13,8 @@ import {
   SafeAreaView,
   Modal,
 } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
 import {Icon} from 'react-native-elements';
 import {launchImageLibrary} from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
@@ -21,6 +23,8 @@ import COLORS from '../../../theme/constants';
 import Centers from '../../vaccinform/Centers';
 import {Appbar} from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
+import loadingAnimation from '../../../theme/Loading/loadingcricle.json';
+import LottieView from 'lottie-react-native';
 
 const {height} = Dimensions.get('window');
 
@@ -36,8 +40,11 @@ const AddNewRecord = () => {
   const [center, setCenter] = useState('');
   const slideAnim = useRef(new Animated.Value(height)).current;
   const [userInfo, setUserInfo] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const navigation = useNavigation();
 
   async function addRecord() {
+    setIsSaving(true);
     if (record.trim() === '') {
       setRecordError('Chưa nhập nội dung');
       return;
@@ -85,6 +92,8 @@ const AddNewRecord = () => {
     setRecord('');
     setImageUri(null);
     resetCenter();
+
+    navigation.goBack();
   }
   
 
@@ -288,6 +297,22 @@ const AddNewRecord = () => {
           </Animated.View>
         </View>
       </Modal>
+
+      {isSaving && (
+        <View style={styles.loadingContainer}>
+          <LottieView
+            style={{
+              width: 200,
+              height: 200,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            source={loadingAnimation}
+            autoPlay
+            loop
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -428,6 +453,12 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     marginTop: 5,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
