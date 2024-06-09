@@ -201,7 +201,8 @@ const Main = () => {
         <View style={styles.buttonContainer}>
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton}>
+              <TouchableOpacity style={styles.squareButton} 
+              onPress={() => navigation.navigate('Vaccine')}>
                 <FontAwesome6 name="syringe" size={24} color="white" />
               </TouchableOpacity>
               {splitDescription('Đặt mua vắc xin').map((part, index) => (

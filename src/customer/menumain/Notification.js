@@ -4,16 +4,17 @@ import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from '../../context';
 import COLORS from '../../theme/constants';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { format } from 'date-fns'; 
 
-const Notification = ({ id, title, imageUrl, description }) => {
+const Notification = ({ id, title, imageUrl, description, date }) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
   const [controller] = useMyContextController();
   const { userLogin } = controller;
 
-  
 
-  
+  const formattedDate = format(new Date(date), 'dd/MM/yyyy');
+
   const handleNavigateToDetail = () => {
     navigation.navigate('DetailNoti', { id, title, imageUrl, description });
   };
@@ -26,6 +27,7 @@ const Notification = ({ id, title, imageUrl, description }) => {
             <Image source={{ uri: imageUrl }} style={styles.image} />
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
+              <Text style={styles.date}>{formattedDate}</Text>
             </View>
           </View>
         </View>
@@ -59,8 +61,16 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
+    flexDirection: 'column',
   },
   title: {
+    fontSize: 16,
+    marginTop: -15,
+    color: COLORS.black,
+    fontWeight: 'bold',
+    padding: 10,
+  },
+  date: {
     fontSize: 16,
     marginTop: -15,
     color: COLORS.black,

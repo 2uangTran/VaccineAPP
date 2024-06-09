@@ -68,13 +68,13 @@ const DetailNews = ({route}) => {
           <Image source={{uri: newData.imageUrl}} style={styles.image} />
           <View style={styles.detailsContainer}>
             <Text style={styles.title}>{newData.title}</Text>
-            <Text style={styles.tag}>Còn hàng</Text>
+            {/* <Text style={styles.tag}>Còn hàng</Text> */}
             <Text style={styles.description}>
               <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
             </Text>
             <Text style={styles.desText}>{newData.description}</Text>
 
-            <View style={styles.buttonContainer}>
+            {/* <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => navigation.navigate('ListVaccin')}>
@@ -86,7 +86,7 @@ const DetailNews = ({route}) => {
                 />
                 <Text style={styles.buttonTextAdd}>Đăng ký tiêm ngay</Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
         </>
       ) : (
@@ -118,16 +118,16 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     textTransform: 'uppercase',
   },
-  tag: {
-    backgroundColor: COLORS.green,
-    color: COLORS.white,
-    fontWeight: 'bold',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-  },
+  // tag: {
+  //   backgroundColor: COLORS.green,
+  //   color: COLORS.white,
+  //   fontWeight: 'bold',
+  //   paddingVertical: 5,
+  //   paddingHorizontal: 10,
+  //   borderRadius: 5,
+  //   alignSelf: 'flex-start',
+  //   marginBottom: 10,
+  // },
   info: {
     fontSize: 16,
     color: COLORS.black,
@@ -149,34 +149,34 @@ const styles = StyleSheet.create({
     color: COLORS.blue,
     marginVertical: 20,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  addButton: {
-    flex: 1,
-    backgroundColor: COLORS.blue,
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  buyButton: {
-    flex: 1,
-    borderColor: COLORS.blue,
-    borderWidth: 1,
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  buttonTextBuy: {
-    color: COLORS.blue,
-  },
-  buttonTextAdd: {
-    color: COLORS.white,
-    alignItems: 'center',
-  },
+  // buttonContainer: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  // },
+  // addButton: {
+  //   flex: 1,
+  //   backgroundColor: COLORS.blue,
+  //   padding: 15,
+  //   borderRadius: 5,
+  //   alignItems: 'center',
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  // },
+  // buyButton: {
+  //   flex: 1,
+  //   borderColor: COLORS.blue,
+  //   borderWidth: 1,
+  //   padding: 15,
+  //   borderRadius: 5,
+  //   alignItems: 'center',
+  // },
+  // buttonTextBuy: {
+  //   color: COLORS.blue,
+  // },
+  // buttonTextAdd: {
+  //   color: COLORS.white,
+  //   alignItems: 'center',
+  // },
 });
 
 export default DetailNews;

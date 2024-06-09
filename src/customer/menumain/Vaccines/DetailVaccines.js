@@ -126,7 +126,7 @@ const DetailVaccines = ({ route }) => {
             title: "Sản phẩm vừa bị xóa khỏi danh sách vắc xin",
             description: `Chúng tôi có 1 sản phẩm vừa bị xóa khỏi danh mục vì trong giỏ hàng của bạn có 1 sản phẩm mà chúng tôi vừa xóa. Chúng tôi rất xin lỗi vì sự bất tiện này.`,
             userId: userId, 
-            
+            date: new Date().toISOString(),
           };
   
        

@@ -15,17 +15,24 @@ const DetailNoti = ({ route }) => {
           setNotification(documentSnapshot.data());
         }
       });
-
+  
     return () => unsubscribe();
   }, [id]);
+  
+  console.log('Notification:', notification);
+  
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cardContainer}>
-        <Image
-          source={notification?.imageUrl ? { uri: notification.imageUrl } : null}
-          style={styles.image}
-        />
+      {notification && notification.imageUrl && (
+          <Image
+            source={{ uri: notification.imageUrl }}
+            style={styles.image}
+          />
+        )}
+
+
         <View style={styles.detailsContainer}>
           <Text style={styles.title}>{notification?.title}</Text>
           <Text style={styles.description}>{notification?.description}</Text>
@@ -40,8 +47,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
     padding: 20,
-    alignItems: 'center', // Center horizontally
-    justifyContent: 'center', // Center vertically
+    alignItems: 'center', 
+    justifyContent: 'center', 
   },
   cardContainer: {
     borderWidth: 1,
@@ -54,7 +61,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 3,
-    alignItems: 'center', // Center horizontally within the card
+    alignItems: 'center',
   },
   image: {
     width: 100,
@@ -64,19 +71,19 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: 10,
-    alignItems: 'center', // Center horizontally within the details container
+    alignItems: 'center', 
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
     color: 'black',
-    textAlign: 'center', // Center text horizontally
+    textAlign: 'center', 
   },
   description: {
     fontSize: 18,
     color: '#666',
-    textAlign: 'center', // Center text horizontally
+    textAlign: 'center', 
   },
 });
 
