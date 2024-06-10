@@ -26,7 +26,7 @@ const ListNews = () => {
           title,
           imageUrl,
           description,
-          date: date ? new Date(date) : null,
+          date: date ? date : null,
         });
       });
 

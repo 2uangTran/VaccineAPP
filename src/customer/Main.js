@@ -18,8 +18,6 @@ import COLORS from '../theme/constants';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import UpdateInfo from '../customer/menuperson/UpdateInfo';
-import Notification from './menumain/Notification';
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
@@ -29,7 +27,34 @@ const Main = () => {
   const ref = firestore().collection('USERS');
   const [userInfoComplete, setUserInfoComplete] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [news, setNews] = useState([]);
 
+  const refnews = firestore().collection('News');
+
+  useEffect(() => {
+    const unsubscribe = refnews.onSnapshot(querySnapshot => {
+      const list = [];
+
+      querySnapshot.forEach(doc => {
+        const {title, imageUrl, description, date} = doc.data();
+        list.push({
+          id: doc.id,
+          title,
+          imageUrl,
+          description,
+          date: date ? date : null,
+        });
+      });
+
+      setNews(list);
+
+      if (loading) {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [loading]);
   const checkUserInfoComplete = user => {
     if (
       user.phoneNumber &&
@@ -132,7 +157,7 @@ const Main = () => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <ScrollView style={{flex: 1}}>
       <View style={styles.container}>
         <Appbar.Header style={styles.appbar}>
           <Appbar.Action
@@ -174,7 +199,6 @@ const Main = () => {
               style={{height: 150, width: '93%', borderRadius: 10}}
             />
           </View>
-          
         </View>
 
         <Modal
@@ -201,8 +225,9 @@ const Main = () => {
         <View style={styles.buttonContainer}>
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.squareButton} 
-              onPress={() => navigation.navigate('Vaccine')}>
+              <TouchableOpacity
+                style={styles.squareButton}
+                onPress={() => navigation.navigate('Vaccine')}>
                 <FontAwesome6 name="syringe" size={24} color="white" />
               </TouchableOpacity>
               {splitDescription('Đặt mua vắc xin').map((part, index) => (
@@ -330,8 +355,31 @@ const Main = () => {
             </TouchableOpacity>
           </ScrollView>
         </View>
+        {news.map(item => (
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('DetailNews', {
+                id: item.id,
+                title: item.title,
+                imageUrl: item.imageUrl,
+                description: item.description,
+              });
+            }}
+            style={{paddingHorizontal: 15, marginTop: 10}}
+            key={item.id}>
+            <View style={styles.rowContainer}>
+              <Image source={{uri: item.imageUrl}} style={styles.imagenews} />
+              <View style={styles.titleContainerNews}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.description}>
+                  <Text style={styles.boldText}>Tin tức - {item.date}</Text>
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 
@@ -340,12 +388,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  description: {
+    fontSize: 17,
+    marginTop: 5,
+  },
+  boldText: {
+    color: COLORS.gray,
+    marginTop: 15,
+  },
   appbar: {
     backgroundColor: COLORS.blue,
-
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 14,
+    marginTop: -15,
+    color: COLORS.black,
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
@@ -377,6 +438,19 @@ const styles = StyleSheet.create({
     padding: 6,
     alignItems: 'center',
     width: '33%',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imagenews: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  titleContainerNews: {
+    flex: 1,
   },
   buttonTextmodal: {
     color: COLORS.blue,
@@ -415,7 +489,7 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     alignItems: 'center',
-    width: 80,
+    width: 90,
   },
   squareButton: {
     width: 60,

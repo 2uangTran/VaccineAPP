@@ -1,37 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { Appbar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
+import {Appbar} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
-import { useMyContextController } from '../../context';
+import {useMyContextController} from '../../context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { FlatList } from 'react-native-gesture-handler';
+import {FlatList} from 'react-native-gesture-handler';
 import Vaccines from './Vaccines';
-import LottieView from 'lottie-react-native'; 
+import LottieView from 'lottie-react-native';
 
 const ListVaccin = () => {
+  const [search, setSearch] = useState('');
+  const [results, setResults] = useState(null);
+  const [results2, setResults2] = useState(null);
   const [loading, setLoading] = useState(true);
   const [vaccines, setVaccines] = useState([]);
   const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const ref = firestore().collection('vaccines');
   const navigation = useNavigation();
 
   const handleButtonPress = () => {
-    setLoading(true); 
-   
+    setLoading(true);
+
     setTimeout(() => {
-      setLoading(false); 
-    }, 2000); 
+      setLoading(false);
+    }, 2000);
   };
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('vaccines')
+      .onSnapshot(snapshot => {
+        setResults(snapshot.docs.map(doc => doc.data()));
+      });
+
+    return () => unsubscribe();
+  }, []);
+  useEffect(() => {
+    const filteredResults = results?.filter(result =>
+      result.title.toLowerCase().includes(search.toLowerCase()),
+    );
+    setResults2(filteredResults);
+  }, [search, results]);
 
   useEffect(() => {
     const unsubscribe = ref.onSnapshot(querySnapshot => {
       const list = [];
 
       querySnapshot.forEach(doc => {
-        const { title, price, imageUrl, description, date } = doc.data();
+        const {title, price, imageUrl, description, date} = doc.data();
         list.push({
           id: doc.id,
           title,
@@ -60,7 +85,7 @@ const ListVaccin = () => {
   }, [loading]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
         <Appbar.Header style={styles.appbar}>
           <View style={styles.searchContainer}>
@@ -71,19 +96,24 @@ const ListVaccin = () => {
               style={styles.searchIcon}
             />
             <TextInput
+              value={search}
+              onChangeText={setSearch}
               style={styles.searchInput}
               placeholder="Tìm theo tên gói, tên vắc xin,..."
               placeholderTextColor={COLORS.white}
             />
           </View>
         </Appbar.Header>
-        <FlatList
-          data={vaccines}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <Vaccines {...item} />}
-          numColumns={1}
-          contentContainerStyle={styles.list}
-        />
+        {results2 && (
+          <FlatList
+            key={results2?.id}
+            data={results2}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => <Vaccines {...item} />}
+            numColumns={1}
+            contentContainerStyle={styles.list}
+          />
+        )}
         <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
           <Text style={styles.buttonLabel}>Press Me!</Text>
         </TouchableOpacity>

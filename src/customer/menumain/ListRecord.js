@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   SafeAreaView,
@@ -6,20 +6,20 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import COLORS from '../../theme/constants';
-import { useMyContextController } from '../../context';
-import { FlatList } from 'react-native-gesture-handler';
+import {useMyContextController} from '../../context';
+import {FlatList} from 'react-native-gesture-handler';
 import Record from './Record';
-import { Icon } from 'react-native-elements';
+import {Icon} from 'react-native-elements';
 import auth from '@react-native-firebase/auth';
 
 const ListRecord = () => {
   const [loading, setLoading] = useState(true);
   const [record, setRecord] = useState([]);
   const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const ref = firestore().collection('Record');
   const navigation = useNavigation();
 
@@ -29,14 +29,14 @@ const ListRecord = () => {
       const userId = auth().currentUser?.uid;
 
       querySnapshot.forEach(doc => {
-        const { title, imageUrl, center, date, userIdentifier } = doc.data();
+        const {title, imageUrl, center, date, userIdentifier} = doc.data();
         if (userIdentifier === userId) {
           list.push({
             id: doc.id,
             title,
             imageUrl,
             center,
-            date: date ? new Date(date) : null,
+            date: date ? date : null,
           });
         }
       });
@@ -55,7 +55,7 @@ const ListRecord = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.addButton} onPress={onPressHandler}>
           <Icon
@@ -79,7 +79,7 @@ const ListRecord = () => {
         <FlatList
           data={record}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <Record {...item} />}
+          renderItem={({item}) => <Record {...item} />}
           numColumns={1}
           contentContainerStyle={styles.list}
         />

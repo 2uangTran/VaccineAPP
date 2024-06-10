@@ -14,7 +14,7 @@ import {
   Modal,
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {Icon} from 'react-native-elements';
 import {launchImageLibrary} from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
@@ -51,14 +51,14 @@ const AddNewRecord = () => {
     } else {
       setRecordError('');
     }
-  
+
     let imageUrl = '';
     if (imageUri) {
       const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
       const uploadUri =
         Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
       const task = storage().ref(filename).putFile(uploadUri);
-  
+
       try {
         await task;
         imageUrl = await storage().ref(filename).getDownloadURL();
@@ -66,28 +66,27 @@ const AddNewRecord = () => {
         console.error(e);
       }
     }
-  
-    console.log('imageUrl:', imageUrl); 
-  
+
+    console.log('imageUrl:', imageUrl);
+
     const currentDate = new Date();
     const day = currentDate.getDate();
     const month = currentDate.getMonth() + 1;
     const year = currentDate.getFullYear();
-  
+
     const formattedDate = `${day}/${month}/${year}`;
-  
-    
+
     const currentUser = auth().currentUser;
-    const userIdentifier = currentUser ? currentUser.uid : ''; 
-  
+    const userIdentifier = currentUser ? currentUser.uid : '';
+
     const newRecord = {
       title: record,
       imageUrl,
       center,
-      date: formattedDate, 
-      userIdentifier, 
+      date: formattedDate,
+      userIdentifier,
     };
-  
+
     ref.add(newRecord);
     setRecord('');
     setImageUri(null);
@@ -95,7 +94,6 @@ const AddNewRecord = () => {
 
     navigation.goBack();
   }
-  
 
   const resetCenter = () => {
     setCenter('');
@@ -348,7 +346,7 @@ const styles = StyleSheet.create({
 
   atText: {
     fontSize: 18,
-    color: COLORS.gray, // Đổi màu cho từ "tại"
+    color: COLORS.gray,
     fontWeight: 'bold',
     textTransform: 'none',
     fontFamily: 'Montserrat',

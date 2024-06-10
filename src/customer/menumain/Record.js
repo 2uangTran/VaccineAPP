@@ -14,8 +14,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {Icon} from 'react-native-elements';
 
-const Record = ({id, title, imageUrl, center}) => {
-  const [visible, setVisible] = useState(false);
+const Record = ({id, title, imageUrl, center, date}) => {
   const navigation = useNavigation();
   const [controller] = useMyContextController();
   const {userLogin} = controller;
@@ -67,8 +66,12 @@ const Record = ({id, title, imageUrl, center}) => {
             style={styles.userImage}
           />
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{userInfo?.fullName}</Text>
-            <Text style={styles.centerText}>{center}</Text>
+            <Text style={styles.infoText}>
+              {userInfo?.fullName}{' '}
+              {center ? <Text style={styles.atText}>tại </Text> : null}
+              {center}
+            </Text>
+            <Text style={styles.centerText}>{date}</Text>
           </View>
         </View>
         <TouchableOpacity
@@ -94,6 +97,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     marginBottom: 10,
   },
+  atText: {
+    fontSize: 14,
+    color: COLORS.gray, // Đổi màu cho từ "tại"
+    fontWeight: 'bold',
+    textTransform: 'none',
+    fontFamily: 'Montserrat',
+  },
   cardContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -101,6 +111,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 10,
     marginHorizontal: 10,
+  },
+  infoText: {
+    fontSize: 14,
+    color: COLORS.black,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    fontFamily: 'Montserrat',
   },
   headerContainer: {
     flexDirection: 'row',

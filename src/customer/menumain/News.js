@@ -11,7 +11,7 @@ import {useNavigation} from '@react-navigation/native';
 import COLORS from '../../theme/constants';
 import {useMyContextController} from '../../context';
 
-const Newss = ({id, title, imageUrl, description}) => {
+const Newss = ({id, title, imageUrl, description, date}) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
   const [controller] = useMyContextController();
@@ -39,7 +39,7 @@ const Newss = ({id, title, imageUrl, description}) => {
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.description}>
-                <Text style={styles.boldText}>Tin tức - 06/06/2024</Text>
+                <Text style={styles.boldText}>Tin tức - {date}</Text>
               </Text>
             </View>
           </View>
@@ -76,10 +76,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     marginTop: -15,
     color: COLORS.black,
     fontWeight: 'bold',
+    textAlign: 'justify',
   },
   description: {
     fontSize: 17,
