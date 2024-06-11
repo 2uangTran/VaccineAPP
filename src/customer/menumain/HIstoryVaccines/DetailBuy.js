@@ -53,19 +53,19 @@ const DetailBuy = ({ route }) => {
         <Text style={styles.sectionTitle}>Thông tin người mua</Text>
         <View style={styles.column}>
           <Text style={styles.infoText}>Họ và tên: </Text>
-          <Text>{bill.fullName}</Text>
+          <Text style={styles.text}>{bill.fullName}</Text>
         </View>
         <View style={styles.column}>
         <Text style={styles.infoText}>Số điện thoại: </Text>
-        <Text>{bill.phoneNumber}</Text>
+        <Text style={styles.text}>{bill.phoneNumber}</Text>
         </View>
         <View style={styles.column}>
         <Text style={styles.infoText}>Email: </Text>
-        <Text>{bill.email}</Text>
+        <Text style={styles.text}>{bill.email}</Text>
         </View>
         <View style={styles.column}>
         <Text style={styles.infoText}>Địa chỉ: </Text>
-        <Text>{`${bill.address}, ${bill.ward}\n${bill.district}, ${bill.province}`}</Text>
+        <Text style={styles.text}>{`${bill.address}, ${bill.ward}\n${bill.district}, ${bill.province}`}</Text>
         </View>
       </View>
       <View style={styles.paymentInfo}>
@@ -178,6 +178,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  text:{
+    fontSize:18,
+    fontWeight:'bold',
+    color:'black'
+  }
 });
 
 export default DetailBuy;

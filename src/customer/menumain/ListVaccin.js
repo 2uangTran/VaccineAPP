@@ -35,15 +35,17 @@ const ListVaccin = () => {
       setLoading(false);
     }, 2000);
   };
+
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('vaccines')
       .onSnapshot(snapshot => {
-        setResults(snapshot.docs.map(doc => doc.data()));
+        setResults(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})));
       });
 
     return () => unsubscribe();
   }, []);
+
   useEffect(() => {
     const filteredResults = results?.filter(result =>
       result.title.toLowerCase().includes(search.toLowerCase()),
@@ -106,7 +108,6 @@ const ListVaccin = () => {
         </Appbar.Header>
         {results2 && (
           <FlatList
-            key={results2?.id}
             data={results2}
             keyExtractor={item => item.id}
             renderItem={({item}) => <Vaccines {...item} />}
