@@ -53,7 +53,7 @@ const Register = ({navigation}) => {
               <TextInput
                 clearButtonMode="while-editing"
                 onChangeText={setFullName}
-                placeholder="John Doe"
+                placeholder="Full name"
                 placeholderTextColor="#6b7280"
                 style={styles.inputControl}
                 value={fullName}

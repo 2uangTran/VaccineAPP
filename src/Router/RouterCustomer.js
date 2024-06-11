@@ -47,10 +47,10 @@ import Record from '../customer/menumain/Record';
 import AddNewRecord from '../customer/menumain/Record/AddNewRecord';
 import DetailRecord from '../customer/menumain/Record/DetailRecord';
 import DetailBuy from '../customer/menumain/HIstoryVaccines/DetailBuy';
-
 import ListRecord from '../customer/menumain/ListRecord';
 import PaymentWeb from '../customer/Cart/PaymentWeb';
 import Payment from '../customer/menumain/HIstoryVaccines/Payment';
+import SplashScreen from '../LoginRegister/SplashScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -63,11 +63,11 @@ const CustomerTabNavigator = () => {
         headerTitleAlign: 'center',
         tabBarStyle: {
           display: 'flex',
-          height: 80,
+          height: 65,
           paddingBottom: 10,
         },
         tabBarLabelStyle: {
-          fontSize: 15,
+          fontSize: 12,
         },
         tabBarIconStyle: {
           marginBottom: 5,
@@ -78,7 +78,7 @@ const CustomerTabNavigator = () => {
         component={Main}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Feather name="home" color={color} size={34} />
+            <Feather name="home" color={color} size={30} />
           ),
           tabBarLabel: 'Trang chủ',
         }}
@@ -91,7 +91,7 @@ const CustomerTabNavigator = () => {
             <MaterialCommunityIcons
               name="calendar-month-outline"
               color={color}
-              size={34}
+              size={30}
             />
           ),
           tabBarLabel: 'Lịch hẹn',
@@ -103,7 +103,7 @@ const CustomerTabNavigator = () => {
         component={Vaccine}
         options={{
           tabBarIcon: ({color, size}) => (
-            <FontAwesome6 name="shield-heart" color={color} size={34} />
+            <FontAwesome6 name="shield-heart" color={color} size={30} />
           ),
           tabBarLabel: 'Vắc xin',
         }}
@@ -114,9 +114,9 @@ const CustomerTabNavigator = () => {
         component={VaccinationRecord}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Ionicons name="heart-circle-outline" color={color} size={34} />
+            <Ionicons name="heart-circle-outline" color={color} size={35} />
           ),
-          tabBarLabel: 'Hồ sơ tc',
+          tabBarLabel: 'Hồ sơ',
         }}
       />
       <Tab.Screen
@@ -124,7 +124,7 @@ const CustomerTabNavigator = () => {
         component={Personal}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Ionicons name="person-circle-outline" color={color} size={34} />
+            <Ionicons name="person-circle-outline" color={color} size={30} />
           ),
           tabBarLabel: 'Cá nhân',
         }}
@@ -151,6 +151,11 @@ const RouterCustomer = () => {
         <Stack.Screen
           name="Login"
           component={Login}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen name="Register" component={Register} />
@@ -295,14 +300,16 @@ const RouterCustomer = () => {
         <Stack.Screen
           name="ListNotification"
           component={ListNotification}
-          options={{title: 'Danh sách Thông báo',headerRight: () => <CustomHeaderRightNotification />,}}
+          options={{
+            title: 'Danh sách Thông báo',
+            headerRight: () => <CustomHeaderRightNotification />,
+          }}
         />
         <Stack.Screen
           name="Notification"
           component={Notification}
           options={{
             title: 'Thông báo',
-            
           }}
         />
         <Stack.Screen
