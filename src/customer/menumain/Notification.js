@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useMyContextController } from '../../context';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useMyContextController} from '../../context';
 import COLORS from '../../theme/constants';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import { format } from 'date-fns'; 
+import {format} from 'date-fns';
 
-const Notification = ({ id, title, imageUrl, description, date }) => {
+const Notification = ({id, title, imageUrl, description, date}) => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
   const [controller] = useMyContextController();
-  const { userLogin } = controller;
-
+  const {userLogin} = controller;
 
   const formattedDate = format(new Date(date), 'dd/MM/yyyy');
 
   const handleNavigateToDetail = () => {
-    navigation.navigate('DetailNoti', { id, title, imageUrl, description });
+    navigation.navigate('DetailNoti', {id, title, imageUrl, description});
   };
 
   return (
@@ -24,7 +29,7 @@ const Notification = ({ id, title, imageUrl, description, date }) => {
       <TouchableOpacity onPress={handleNavigateToDetail}>
         <View style={styles.cardContainer}>
           <View style={styles.rowContainer}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <Image source={{uri: imageUrl}} style={styles.image} />
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.date}>{formattedDate}</Text>

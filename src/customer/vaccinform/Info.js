@@ -53,7 +53,7 @@ const Info = () => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {loading ? (
           <Text>Loading...</Text>
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
   ButtonTextChoose: {
     color: COLORS.white,
     fontSize: 18,
-    width:'100%',
-    textAlign:'center'
+    width: '100%',
+    textAlign: 'center',
   },
 });
 

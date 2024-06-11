@@ -1,20 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import {Appbar} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../theme/constants';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
-import { useMyContextController, logout } from '../../src/context';
+import {useMyContextController, logout} from '../../src/context';
 
 const Personal = () => {
   const [loading, setLoading] = useState(true);
   const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
+  const {userLogin} = controller;
   const navigation = useNavigation();
   const ref = firestore().collection('USERS');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   useEffect(() => {
     return ref.onSnapshot(querySnapshot => {
       if (loading) {
@@ -28,62 +36,107 @@ const Personal = () => {
   }
 
   const handleLogout = () => {
-    logout(dispatch, navigation); 
-    setIsLoading(false); 
+    logout(dispatch, navigation);
+    setIsLoading(false);
   };
 
-  
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <View style={styles.container}>
         <Appbar.Header style={styles.appbar}>
           <View style={styles.userInfo}>
-            <Appbar.Action 
-              icon={() => <MaterialCommunityIcons name="bell-outline" size={24} color="white" />} 
-              onPress={() => {}} 
-              style={{justifyContent:'flex-start'}}
+            <Appbar.Action
+              icon={() => (
+                <MaterialCommunityIcons
+                  name="bell-outline"
+                  size={24}
+                  color="white"
+                />
+              )}
+              onPress={() => {}}
+              style={{justifyContent: 'flex-start'}}
             />
             <View>
               {userLogin && userLogin.avatarUrl ? (
-                <Image source={{ uri: userLogin.avatarUrl }} style={styles.userImage} />
+                <Image
+                  source={{uri: userLogin.avatarUrl}}
+                  style={styles.userImage}
+                />
               ) : (
-                <Image source={require('../theme/image/images.png')} style={styles.userImage} />
+                <Image
+                  source={require('../theme/image/images.png')}
+                  style={styles.userImage}
+                />
               )}
             </View>
 
             <View style={styles.userInfoText}>
-              <Text style={styles.userName}>{userLogin ? userLogin.fullName : 'Guest'}</Text>
+              <Text style={styles.userName}>
+                {userLogin ? userLogin.fullName : 'Guest'}
+              </Text>
               <Text style={styles.userDetails}>
-                {userLogin ? userLogin.phoneNumber : 'N/A'} - {userLogin ? userLogin.gender : 'N/A'} - {userLogin ? userLogin.birthDate : 'N/A'}
+                {userLogin ? userLogin.phoneNumber : 'N/A'} -{' '}
+                {userLogin ? userLogin.gender : 'N/A'} -{' '}
+                {userLogin ? userLogin.birthDate : 'N/A'}
               </Text>
             </View>
           </View>
         </Appbar.Header>
         <ScrollView style={styles.menuContainer}>
           <View style={styles.menuItem}>
-            <MaterialCommunityIcons name="account-edit" size={24} color={COLORS.blue} onPress={() => navigation.navigate('UpdateInfo')}/>
-            <Text style={styles.menuItemText} onPress={() => navigation.navigate('UpdateInfo')}>Chỉnh sửa tài khoản</Text>
+            <MaterialCommunityIcons
+              name="account-edit"
+              size={24}
+              color={COLORS.blue}
+              onPress={() => navigation.navigate('UpdateInfo')}
+            />
+            <Text
+              style={styles.menuItemText}
+              onPress={() => navigation.navigate('UpdateInfo')}>
+              Chỉnh sửa tài khoản
+            </Text>
           </View>
           <View style={styles.menuItem}>
-            <MaterialCommunityIcons name="clipboard-list" size={24} color={COLORS.blue} />
+            <MaterialCommunityIcons
+              name="clipboard-list"
+              size={24}
+              color={COLORS.blue}
+            />
             <Text style={styles.menuItemText}>Quản lý hồ sơ tiêm chủng</Text>
           </View>
           <View style={styles.menuItem}>
-            <MaterialCommunityIcons name="gift-outline" size={24} color={COLORS.blue} />
+            <MaterialCommunityIcons
+              name="gift-outline"
+              size={24}
+              color={COLORS.blue}
+            />
             <Text style={styles.menuItemText}>Ưu đãi của tôi</Text>
           </View>
           <View style={styles.menuItem}>
-            <MaterialCommunityIcons name="account-search" size={24} color={COLORS.blue} />
+            <MaterialCommunityIcons
+              name="account-search"
+              size={24}
+              color={COLORS.blue}
+            />
             <Text style={styles.menuItemText}>Tra cứu điểm thưởng</Text>
           </View>
           <View style={styles.menuItem}>
-            <MaterialCommunityIcons name="lock-reset" size={24} color={COLORS.blue} />
+            <MaterialCommunityIcons
+              name="lock-reset"
+              size={24}
+              color={COLORS.blue}
+            />
             <Text style={styles.menuItemText}>Đổi mật khẩu</Text>
           </View>
           <View style={styles.menuItem}>
-            <TouchableOpacity style={{flexDirection:'row'}} onPress={handleLogout}> 
-              <MaterialCommunityIcons name="logout" size={24} color={COLORS.blue} />
+            <TouchableOpacity
+              style={{flexDirection: 'row'}}
+              onPress={handleLogout}>
+              <MaterialCommunityIcons
+                name="logout"
+                size={24}
+                color={COLORS.blue}
+              />
               <Text style={styles.menuItemText}>Đăng xuất</Text>
             </TouchableOpacity>
           </View>
@@ -116,23 +169,23 @@ const styles = StyleSheet.create({
   },
   appbar: {
     backgroundColor: COLORS.blue,
-    height: '24%', 
+    height: '24%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%', 
+    width: '100%',
   },
   userInfo: {
-    marginTop:120,
+    marginTop: 120,
     flexDirection: 'column',
-    justifyContent:'center',
+    justifyContent: 'center',
     flex: 1,
-    height: 150, 
+    height: 150,
   },
   userInfoText: {
     alignItems: 'center',
-    marginStart:0,
-    width:'100%',
+    marginStart: 0,
+    width: '100%',
   },
   userName: {
     color: COLORS.white,
@@ -144,12 +197,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 14,
     textAlign: 'center',
-    justifyContent:'center',
-    width:'100%',
+    justifyContent: 'center',
+    width: '100%',
   },
   menuContainer: {
     flex: 1,
-    width:'110%',
+    width: '110%',
   },
   menuItem: {
     flexDirection: 'row',
@@ -157,48 +210,48 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    borderWidth:0.4,
-    paddingLeft:25,
-    borderBlockColor:'#C0C0C0'
+    borderWidth: 0.4,
+    paddingLeft: 25,
+    borderBlockColor: '#C0C0C0',
   },
   menuItemText: {
     fontSize: 16,
     color: COLORS.black,
     marginLeft: 15,
-    width:'100%',
+    width: '100%',
   },
   contactHeader: {
     fontSize: 18,
     color: COLORS.black,
     marginVertical: 0,
     fontWeight: 'bold',
-    backgroundColor:'#DDDDDD',
-    flex:1,
-    padding:10,
+    backgroundColor: '#DDDDDD',
+    flex: 1,
+    padding: 10,
   },
   contactItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    borderWidth:0.4,
-    borderBlockColor:'#C0C0C0'
+    borderWidth: 0.4,
+    borderBlockColor: '#C0C0C0',
   },
   contactItemText: {
     fontSize: 16,
     color: COLORS.black,
-    width:'50%',
-    paddingLeft:25,
+    width: '50%',
+    paddingLeft: 25,
   },
   contactItemPhone: {
-    paddingRight:60,
+    paddingRight: 60,
     fontSize: 16,
     color: COLORS.blue,
   },
-  userImage:{
+  userImage: {
     width: 70,
     height: 70,
-    borderRadius:50,
-    alignSelf:'center',
+    borderRadius: 50,
+    alignSelf: 'center',
   },
 });
 

@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingHorizontal: 10,
     paddingRight: 20,
-    padding: 4,
+    padding: 6,
     width: '100%',
   },
   userInfoBox: {
@@ -152,12 +152,12 @@ const styles = StyleSheet.create({
   userInfoText: {
     color: COLORS.black,
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   userInfoTextName: {
     color: COLORS.black,
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 5,
     fontWeight: 'bold',
   },
   iconContainer: {

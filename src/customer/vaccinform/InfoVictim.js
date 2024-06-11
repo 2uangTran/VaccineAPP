@@ -198,7 +198,7 @@ const VaccineForm = () => {
             <>
               <Text
                 style={{
-                  fontSize: 23,
+                  fontSize: 20,
                   color: COLORS.black,
                   padding: 10,
                   borderWidth: 1,
