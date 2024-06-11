@@ -68,7 +68,7 @@ const Register = ({navigation}) => {
                 clearButtonMode="while-editing"
                 keyboardType="email-address"
                 onChangeText={setEmail}
-                placeholder="john@example.com"
+                placeholder="Email..."
                 placeholderTextColor="#6b7280"
                 style={styles.inputControl}
                 value={email}

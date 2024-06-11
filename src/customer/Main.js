@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   SafeAreaView,
   View,
@@ -9,6 +9,7 @@ import {
   Modal,
   Button,
   Image,
+  Animated,
 } from 'react-native';
 import {Appbar} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
@@ -18,6 +19,9 @@ import COLORS from '../theme/constants';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {FlatList} from 'react-native-gesture-handler';
+import Slide from './menumain/Banner/Slide';
+import Banner from './menumain/Banner/Banner';
 
 const Main = () => {
   const [loading, setLoading] = useState(true);
@@ -30,7 +34,17 @@ const Main = () => {
   const [news, setNews] = useState([]);
 
   const refnews = firestore().collection('News');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const SlideRef = useRef(null);
 
+  const viewableItemsChanged = useRef(({viewableItems}) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index);
+    }
+  }).current;
+
+  const viewConfig = useRef({viewAreaCoveragePercentThreshold: 50}).current;
   useEffect(() => {
     const unsubscribe = refnews.onSnapshot(querySnapshot => {
       const list = [];
@@ -189,14 +203,30 @@ const Main = () => {
               position: 'absolute',
               justifyContent: 'center',
               alignItems: 'center',
+              marginTop: 15,
               top: 0,
               bottom: 0,
               left: 0,
               right: 0,
             }}>
-            <Image
-              source={require('../theme/image/bn1.png')}
-              style={{height: 150, width: '93%', borderRadius: 10}}
+            <FlatList
+              data={Slide}
+              renderItem={({item}) => <Banner item={item} />}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              bounces={false}
+              keyExtractor={item => item.id}
+              onScroll={Animated.event(
+                [{nativeEvent: {contentOffset: {x: scrollX}}}],
+                {
+                  useNativeDriver: false,
+                },
+              )}
+              scrollEventThrottle={32}
+              onViewableItemsChanged={viewableItemsChanged}
+              viewabilityConfig={viewConfig}
+              ref={SlideRef}
             />
           </View>
         </View>
@@ -478,13 +508,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonContainer: {
-    padding: 10,
-    marginRight: 20,
+    marginRight: 15,
+    marginTop: -30,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 10,
     paddingLeft: 15,
   },
   buttonWrapper: {
@@ -511,9 +541,10 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   news: {
-    fontSize: 24,
+    fontSize: 20,
     color: COLORS.black,
     paddingLeft: 10,
+    marginTop: 15,
   },
   buttonScroll: {
     marginTop: 10,
@@ -523,14 +554,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.gray,
     paddingHorizontal: '1%',
-    paddingVertical: '1%',
+    paddingVertical: 10,
     borderRadius: 5,
     marginHorizontal: 5,
   },
 
   whiteButtonText: {
     color: COLORS.black,
-    fontSize: 17,
+    fontSize: 14,
   },
 });
 
