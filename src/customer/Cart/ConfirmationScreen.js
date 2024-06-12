@@ -19,9 +19,11 @@ const ConfirmationScreen = ({route}) => {
   const [name, dob] = fullName.split('-');
 
   const handleDetailPress = () => {
-    navigation.navigate('DetailBuy', { orderId: orderDetails.orderId, readOnly: true });
+    navigation.navigate('DetailBuy', {
+      orderId: orderDetails.orderId,
+      readOnly: true,
+    });
   };
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -83,7 +85,9 @@ const ConfirmationScreen = ({route}) => {
           </View>
         </View>
         <TouchableOpacity>
-          <Text style={styles.detailLink} onPress={handleDetailPress}>Xem chi tiết đơn hàng</Text>
+          <Text style={styles.detailLink} onPress={handleDetailPress}>
+            Xem chi tiết đơn hàng
+          </Text>
         </TouchableOpacity>
         <View style={styles.noteContainer}>
           <Text style={styles.noteText}>
@@ -130,7 +134,6 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     alignItems: 'center',
-    paddingTop: '2%',
   },
   image: {
     width: 150,
@@ -149,7 +152,7 @@ const styles = StyleSheet.create({
     fontSize: 23,
     color: COLORS.black,
     textAlign: 'center',
-    padding: 15,
+    padding: 5,
   },
   infoContainer: {
     flexDirection: 'row',

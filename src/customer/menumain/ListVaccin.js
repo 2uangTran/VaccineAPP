@@ -115,9 +115,6 @@ const ListVaccin = () => {
             contentContainerStyle={styles.list}
           />
         )}
-        <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
-          <Text style={styles.buttonLabel}>Press Me!</Text>
-        </TouchableOpacity>
         {loading && (
           <View style={styles.loadingContainer}>
             <LottieView
